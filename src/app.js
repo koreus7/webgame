@@ -10,7 +10,7 @@ const app = new PIXI.Application(options);
 
 document.body.appendChild(app.view);
 
-const basicText = new PIXI.Text('Hello World!');
+const basicText = new PIXI.Text('Hello World ABCD!');
 basicText.x = 50;
 basicText.y = 100;
 
