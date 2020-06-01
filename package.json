@@ -1,0 +1,25 @@
+{
+  "name": "webgame",
+  "version": "1.0.0",
+  "description": "Some code and stuff for a web game.",
+  "main": "dev-server.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/koreus7/webgame.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/koreus7/webgame/issues"
+  },
+  "homepage": "https://github.com/koreus7/webgame#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
