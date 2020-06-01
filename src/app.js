@@ -29,7 +29,15 @@ function onLoaded() {
         if(sound) {
             sound.play();
         } else {
-            sound = new Pizzicato.Sound('./assets/sound/kick.wav', function() {
+            sound = new Pizzicato.Sound({
+                source: 'file',
+                options: { 
+                    path: './assets/sound/kick.wav',
+                    attack: 0,
+                    release: 0,
+                    loop: false,
+                },
+            }, function() {
                 // Sound loaded!
                 sound.play();
             });
