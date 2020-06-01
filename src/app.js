@@ -55,7 +55,7 @@ function onLoaded() {
             };
         } else {
             sound = new Howl({
-                src: ['./assets/sound/swoosh1.wav']
+                src: ['./assets/sound/swoosh.wav']
             });
             // Clear listener after first call.
             sound.once('load', function(){
