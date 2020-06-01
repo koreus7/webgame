@@ -15,3 +15,10 @@ basicText.x = 50;
 basicText.y = 100;
 
 app.stage.addChild(basicText);
+
+app.view.addEventListener('click', function() {
+    const sound = new Pizzicato.Sound('./assets/sound/kick.wav', function() {
+        // Sound loaded!
+        sound.play();
+    });
+}, false);
