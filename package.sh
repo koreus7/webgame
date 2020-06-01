@@ -13,6 +13,9 @@ cp ../index-release.html ./index.html
 cp ../style.css ./style.css
 cd ..
 
-./binary/butler/butler push ./dist koreus737/testgame:web
+zip -r dist.zip dist
+
+./binary/butler/butler push dist.zip koreus737/testgame:web
 
 rm -rf dist
+rm -rf dist.zip

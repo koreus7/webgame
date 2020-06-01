@@ -11,13 +11,13 @@ const app = new PIXI.Application(options);
 document.body.appendChild(app.view);
 
 app.loader
-    .add('hero-sheet', '/assets/images/test-sprite.json')
+    .add('hero-sheet', './assets/images/test-sprite.json')
     .load(onLoaded);
 
 function onLoaded() {
 
     // Text
-    const text = new PIXI.Text(`Hello World! ${window.__DEV_MODE ? 'dev' : 'release'}`);
+    const text = new PIXI.Text(`Hello World! 123 ${window.__DEV_MODE ? 'dev' : 'release'}`);
     text.x = 50;
     text.y = 100;
 
