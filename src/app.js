@@ -15,12 +15,13 @@ app.loader
     .load(onLoaded);
 
 function onLoaded() {
-    // Text
-    const basicText = new PIXI.Text(`Hello World! ${window.__DEV_MODE ? 'dev' : 'release'}`);
-    basicText.x = 50;
-    basicText.y = 100;
 
-    app.stage.addChild(basicText);
+    // Text
+    const text = new PIXI.Text(`Hello World! ${window.__DEV_MODE ? 'dev' : 'release'}`);
+    text.x = 50;
+    text.y = 100;
+
+    app.stage.addChild(text);
 
     // Sound
     let sound = null;
@@ -28,7 +29,7 @@ function onLoaded() {
         if(sound) {
             sound.play();
         } else {
-            const sound = new Pizzicato.Sound('./assets/sound/kick.wav', function() {
+            sound = new Pizzicato.Sound('./assets/sound/kick.wav', function() {
                 // Sound loaded!
                 sound.play();
             });
