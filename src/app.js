@@ -23,34 +23,48 @@ function onLoaded() {
 
     app.stage.addChild(text);
 
+    // Sprites
+    const sheet = app.loader.resources["hero-sheet"].spritesheet;
+    const run = new PIXI.AnimatedSprite(sheet.animations["adventurer-run"]);
+    run.animationSpeed = 0.25;
+    run.play();
+    app.stage.addChild(run);
+    run.visible = true;
+
+    const attack = new PIXI.AnimatedSprite(sheet.animations["adventurer-attack1"]);
+    attack.animationSpeed = 0.25;
+    attack.play();
+    app.stage.addChild(attack);
+    attack.visible = false;
+
     // Sound
     let sound = null;
     app.view.addEventListener('click', function() {
         if(sound) {
             sound.play();
+            run.gotoAndStop(0);
+            run.visible = false;
+            attack.visible = true;
+            attack.loop = false;
+            attack.gotoAndStop(0);
+            attack.play();
+            attack.onComplete = () => {
+                attack.visible = false;
+                run.visible = true;
+                run.play();
+            };
         } else {
-            sound = new Pizzicato.Sound({
-                source: 'file',
-                options: { 
-                    path: './assets/sound/kick.wav',
-                    attack: 0,
-                    release: 0,
-                    loop: false,
-                },
-            }, function() {
-                // Sound loaded!
+            sound = new Howl({
+                src: ['./assets/sound/swoosh1.wav']
+            });
+            // Clear listener after first call.
+            sound.once('load', function(){
                 sound.play();
             });
         }
-
     }, false);
 
-    // Sprites
-    const sheet = app.loader.resources["hero-sheet"].spritesheet;
-    const sprite = new PIXI.AnimatedSprite(sheet.animations["adventurer-run"]);
-    sprite.animationSpeed = 0.25;
-    sprite.play();
-    app.stage.addChild(sprite);
+
 
     
 }
