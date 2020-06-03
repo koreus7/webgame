@@ -1,6 +1,8 @@
+import GUI from './gui.js';
+
 console.log("Hello PixiJS");
 
-const options = { 
+const options = {
     backgroundColor: 0xf0e2e2,
     width: 800,
     height: 600,
@@ -16,6 +18,9 @@ app.loader
 
 function onLoaded() {
 
+    const dat = window.dat || null;
+    GUI.init(dat);
+
     // Text
     const text = new PIXI.Text(`Hello World! 123 ${window.__DEV_MODE ? 'dev' : 'release'}`);
     text.x = 50;
@@ -27,13 +32,18 @@ function onLoaded() {
     const sheet = app.loader.resources["hero-sheet"].spritesheet;
     const run = new PIXI.AnimatedSprite(sheet.animations["adventurer-run"]);
     run.animationSpeed = 0.25;
+    const runFolder = GUI.addFolder("Run");
+    runFolder.add(run, 'animationSpeed').min(0).max(1).step(0.01);
+    runFolder.add(run, 'loop');
     run.play();
     app.stage.addChild(run);
     run.visible = true;
 
     const attack = new PIXI.AnimatedSprite(sheet.animations["adventurer-attack1"]);
     attack.animationSpeed = 0.25;
-    attack.play();
+    const attackFolder = GUI.addFolder("Attack");
+    attackFolder.add(attack, 'animationSpeed').min(0).max(1).step(0.01);
+    attackFolder.add(attack, 'loop');
     app.stage.addChild(attack);
     attack.visible = false;
 
@@ -66,5 +76,5 @@ function onLoaded() {
 
 
 
-    
+
 }

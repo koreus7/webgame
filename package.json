@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/koreus7/webgame#readme",
   "dependencies": {
+    "@types/dat.gui": "^0.7.5",
     "@types/howler": "^2.1.2",
     "express": "^4.17.1"
   }
