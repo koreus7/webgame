@@ -1,0 +1,16 @@
+Game Brief
+You are a chef on a ship, and you're running out of food. You need to kill and cook the crewmen of the ship to reach your destination.
+
+- Killing crew in certain roles affects the running of the ship
+  - Killing the captain hurts coordination between crewmen
+  - Killing oarsmen hurts ship speed
+  - Killing the helmsman means the ship can't turn
+  - Killing the fella in the crow's nest means the ship can't orient for navigation
+- Throw knives for range attack - limited ammo, if you throw a knife overboard you lose it
+  - Knife splashing overboard distracts crew - can use this to your advantage
+- Each level is a journey (e.g. England to Boston) - journey takes a certain length of time
+  - You can make different trade-offs throughout the level - can't kill the navigator early but can once "land ahoy"
+- Captain can come into the kitchen - have to hide the evidence
+- Shop between levels - buy better/more gear, vegetables, etc
+  - Feed captain favourite meal/ingredient to gain some kind of reward - buy the special ingredients from the Shop
+- Fatten certain crewmen up for extra """meat"""
