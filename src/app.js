@@ -1,80 +1,60 @@
 import GUI from './gui.js';
+import Player from './Player.js';
+import Ground from './Ground.js';
+import Controls from './Controls.js';
 
-console.log("Hello PixiJS");
+const PLAYER_TEXTURE = './assets/images/player.png';
+const GROUND_TEXTURE = './assets/images/ground.png';
 
-const options = {
-    backgroundColor: 0xf0e2e2,
-    width: 800,
-    height: 600,
-};
+const app = new PIXI.Application({
+  backgroundColor: 0xf0e2e2,
+  width: 800,
+  height: 600,
+});
 
-const app = new PIXI.Application(options);
+const engine = Matter.Engine.create();
+const world = engine.world;
+world.gravity.y = 1;
 
 document.body.appendChild(app.view);
 
 app.loader
-    .add('hero-sheet', './assets/images/test-sprite.json')
-    .load(onLoaded);
+    .add(PLAYER_TEXTURE)
+    .add(GROUND_TEXTURE)  
+    .load(setup);
 
-function onLoaded() {
-
+function setup() {
     const dat = window.dat || null;
     GUI.init(dat);
 
-    // Text
-    const text = new PIXI.Text(`Hello World! 123 ${window.__DEV_MODE ? 'dev' : 'release'}`);
-    text.x = 50;
-    text.y = 100;
+    const controls = new Controls();
+    controls.listen(window);
 
-    app.stage.addChild(text);
+    const player = new Player({
+      controls,
+      texture: app.loader.resources[PLAYER_TEXTURE].texture,
+      x: 100,
+      y: 25
+    });
 
-    // Sprites
-    const sheet = app.loader.resources["hero-sheet"].spritesheet;
-    const run = new PIXI.AnimatedSprite(sheet.animations["adventurer-run"]);
-    run.animationSpeed = 0.25;
-    const runFolder = GUI.addFolder("Run");
-    runFolder.add(run, 'animationSpeed').min(0).max(1).step(0.01);
-    runFolder.add(run, 'loop');
-    run.play();
-    app.stage.addChild(run);
-    run.visible = true;
+    const ground = new Ground({
+      texture: app.loader.resources[GROUND_TEXTURE].texture,
+      x: 0,
+      y: 100,
+    });
 
-    const attack = new PIXI.AnimatedSprite(sheet.animations["adventurer-attack1"]);
-    attack.animationSpeed = 0.25;
-    const attackFolder = GUI.addFolder("Attack");
-    attackFolder.add(attack, 'animationSpeed').min(0).max(1).step(0.01);
-    attackFolder.add(attack, 'loop');
-    app.stage.addChild(attack);
-    attack.visible = false;
+    app.stage.addChild(player.sprite);
+    app.stage.addChild(ground.sprite);
+    Matter.World.add(world, [player.body]);
+    Matter.World.add(world, [ground.body]);
 
-    // Sound
-    let sound = null;
-    app.view.addEventListener('click', function() {
-        if(sound) {
-            sound.play();
-            run.gotoAndStop(0);
-            run.visible = false;
-            attack.visible = true;
-            attack.loop = false;
-            attack.gotoAndStop(0);
-            attack.play();
-            attack.onComplete = () => {
-                attack.visible = false;
-                run.visible = true;
-                run.play();
-            };
-        } else {
-            sound = new Howl({
-                src: ['./assets/sound/swoosh.wav']
-            });
-            // Clear listener after first call.
-            sound.once('load', function(){
-                sound.play();
-            });
-        }
-    }, false);
+    setInterval(() => {
+      Matter.Engine.update(engine, 1000 / 60);
+      player.fixedUpdate();
+    }, 1000 / 60);
 
-
-
-
+    app.ticker.add(delta => {
+      player.update(delta);
+      ground.update(delta);
+    });
 }

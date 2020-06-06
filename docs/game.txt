@@ -14,3 +14,6 @@ You are a chef on a ship, and you're running out of food. You need to kill and c
 - Shop between levels - buy better/more gear, vegetables, etc
   - Feed captain favourite meal/ingredient to gain some kind of reward - buy the special ingredients from the Shop
 - Fatten certain crewmen up for extra """meat"""
+- Climb on the outside of the hull by exiting via a porthole
+  - Some way of limiting this mechanic
+- Climb on the rigging
