@@ -1,10 +1,10 @@
 import GUI from './gui.js';
-import Player from './Player.js';
-import Ground from './Ground.js';
-import Controls from './Controls.js';
 
 const PLAYER_TEXTURE = './assets/images/player.png';
 const GROUND_TEXTURE = './assets/images/ground.png';
+const MOVE_LEFT = 37;
+const MOVE_RIGHT = 39;
+const PLAYER_VELOCITY = 2;
 
 const app = new PIXI.Application({
   backgroundColor: 0xf0e2e2,
@@ -12,9 +12,28 @@ const app = new PIXI.Application({
   height: 600,
 });
 
-const engine = Matter.Engine.create();
-const world = engine.world;
-world.gravity.y = 1;
+const getBB = (obj) => {
+  return { left: obj.x, top: obj.y, right: obj.x + obj.width, bottom: obj.y + obj.height };
+}
+
+const isBetween = (v, start, end) => {
+  return v >= start || v < end;
+}
+
+const playerCollides = (player, walls) => {
+  for(let i = 0; i < walls.length; i++) {
+    const wall = walls[i];
+    if(
+      player.left < wall.right &&
+      player.right > wall.left &&
+      player.top < wall.bottom &&
+      player.bottom > wall.top) {
+        return wall;
+      }
+  }
+
+  return null;
+};
 
 document.body.appendChild(app.view);
 
@@ -27,34 +46,68 @@ function setup() {
     const dat = window.dat || null;
     GUI.init(dat);
 
-    const controls = new Controls();
-    controls.listen(window);
+    let moveLeft = 0;
+    let moveRight = 0;
 
-    const player = new Player({
-      controls,
-      texture: app.loader.resources[PLAYER_TEXTURE].texture,
-      x: 100,
-      y: 25
+    window.addEventListener('keydown', (event) => {
+      switch(event.keyCode) {
+        case MOVE_LEFT:
+          moveLeft = 1;
+          break;
+        case MOVE_RIGHT:
+          moveRight = 1;
+          break;
+      }
     });
 
-    const ground = new Ground({
-      texture: app.loader.resources[GROUND_TEXTURE].texture,
-      x: 0,
-      y: 100,
+    window.addEventListener('keyup', (event) => {
+      switch(event.keyCode) {
+        case MOVE_LEFT:
+          moveLeft = 0;
+          break;
+        case MOVE_RIGHT:
+          moveRight = 0;
+          break;
+      }
     });
 
-    app.stage.addChild(player.sprite);
-    app.stage.addChild(ground.sprite);
-    Matter.World.add(world, [player.body]);
-    Matter.World.add(world, [ground.body]);
+    const player = new PIXI.Sprite(app.loader.resources[PLAYER_TEXTURE].texture);
+    app.stage.addChild(player);
+    player.x = 100;
+    player.y = 25;
+    let pA = { x: 0, y: 1 };
+    let pV = { x: 0, y: 0 };
 
-    setInterval(() => {
-      Matter.Engine.update(engine, 1000 / 60);
-      player.fixedUpdate();
-    }, 1000 / 60);
+    const ground = new PIXI.Sprite(app.loader.resources[GROUND_TEXTURE].texture);
+    app.stage.addChild(ground);
+    ground.x = 0;
+    ground.y = 100;
+
+    const groundBBs = [getBB(ground)];
+    console.log('BB', groundBBs);
 
     app.ticker.add(delta => {
-      player.update(delta);
-      ground.update(delta);
+      pV.x = (moveRight - moveLeft) * 5;
+      pV.y += pA.y;
+      player.x += pV.x;
+      player.y += pV.y;
+
+      const playerBB = getBB(player);
+      const collided = playerCollides(playerBB, groundBBs);
+      if(collided) {
+        if(playerBB.bottom > collided.top) {
+          player.y = collided.top - player.height;
+          pV.y = 0;
+        } else if(playerBB.top < collided.bottom) {
+          player.y = collided.bottom;
+          pV.y = 0;
+        } else if(playerBB.right > collided.left) {
+          player.x = collided.left - player.width;
+          pV.x = 0;
+        } else if(playerBB.left < collided.right) {
+          player.x = collided.right;
+          pV.x = 0;
+        }
+      }
     });
 }
