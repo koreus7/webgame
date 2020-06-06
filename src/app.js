@@ -2,9 +2,12 @@ import GUI from './gui.js';
 
 const PLAYER_TEXTURE = './assets/images/player.png';
 const GROUND_TEXTURE = './assets/images/ground.png';
+const WALL_TEXTURE = './assets/images/wall.png';
 const MOVE_LEFT = 37;
 const MOVE_RIGHT = 39;
+const JUMP = 32;
 const PLAYER_VELOCITY = 2;
+const JUMP_VELOCITY = 10;
 
 const app = new PIXI.Application({
   backgroundColor: 0xf0e2e2,
@@ -21,6 +24,7 @@ const isBetween = (v, start, end) => {
 }
 
 const playerCollides = (player, walls) => {
+  const collided = [];
   for(let i = 0; i < walls.length; i++) {
     const wall = walls[i];
     if(
@@ -28,18 +32,19 @@ const playerCollides = (player, walls) => {
       player.right > wall.left &&
       player.top < wall.bottom &&
       player.bottom > wall.top) {
-        return wall;
+        collided.push(wall);
       }
   }
 
-  return null;
+  return collided
 };
 
 document.body.appendChild(app.view);
 
 app.loader
     .add(PLAYER_TEXTURE)
-    .add(GROUND_TEXTURE)  
+    .add(GROUND_TEXTURE)
+    .add(WALL_TEXTURE)
     .load(setup);
 
 function setup() {
@@ -48,6 +53,8 @@ function setup() {
 
     let moveLeft = 0;
     let moveRight = 0;
+    let jump = 0;
+    let isGrounded = false;
 
     window.addEventListener('keydown', (event) => {
       switch(event.keyCode) {
@@ -56,6 +63,9 @@ function setup() {
           break;
         case MOVE_RIGHT:
           moveRight = 1;
+          break;
+        case JUMP:
+          jump = 1;
           break;
       }
     });
@@ -68,12 +78,15 @@ function setup() {
         case MOVE_RIGHT:
           moveRight = 0;
           break;
+          case JUMP:
+            jump = 0;
+            break;
       }
     });
 
     const player = new PIXI.Sprite(app.loader.resources[PLAYER_TEXTURE].texture);
     app.stage.addChild(player);
-    player.x = 100;
+    player.x = 10;
     player.y = 25;
     let pA = { x: 0, y: 1 };
     let pV = { x: 0, y: 0 };
@@ -83,31 +96,48 @@ function setup() {
     ground.x = 0;
     ground.y = 100;
 
-    const groundBBs = [getBB(ground)];
-    console.log('BB', groundBBs);
+    const wall = new PIXI.Sprite(app.loader.resources[WALL_TEXTURE].texture);
+    app.stage.addChild(wall);
+    wall.x = 128 - 32;
+    wall.width = 32;
+    wall.height = 32
+    wall.y = 100 - 32;
+
+    const groundBBs = [getBB(ground), getBB(wall)];
 
     app.ticker.add(delta => {
       pV.x = (moveRight - moveLeft) * 5;
-      pV.y += pA.y;
+      
+      if(isGrounded && jump) {
+        pV.y = -JUMP_VELOCITY;
+      } else {
+        pV.y += pA.y;
+      }
+
+      const prevBB = getBB(player);
+
       player.x += pV.x;
       player.y += pV.y;
-
-      const playerBB = getBB(player);
-      const collided = playerCollides(playerBB, groundBBs);
-      if(collided) {
-        if(playerBB.bottom > collided.top) {
+      let playerBB = getBB(player);
+      isGrounded = false;
+      const collisions = playerCollides(playerBB, groundBBs);
+      for(const collided of collisions) {
+        if(playerBB.bottom > collided.top && prevBB.bottom <= collided.top) {
           player.y = collided.top - player.height;
           pV.y = 0;
-        } else if(playerBB.top < collided.bottom) {
+          isGrounded = true;
+        } else if(playerBB.top < collided.bottom && prevBB.top >= collided.bottom) {
           player.y = collided.bottom;
           pV.y = 0;
-        } else if(playerBB.right > collided.left) {
+          isGrounded = true;
+        } else if(playerBB.right > collided.left && prevBB.right <= collided.left) {
           player.x = collided.left - player.width;
           pV.x = 0;
-        } else if(playerBB.left < collided.right) {
+        } else if(playerBB.left < collided.right && prevBB.left >= collided.right) {
           player.x = collided.right;
           pV.x = 0;
         }
+        playerBB = getBB(player);
       }
     });
 }
