@@ -1,6 +1,16 @@
 import GUI from './gui.js';
 import { getBB, playerCollides, loadAssets, getTexture, getSheet, getAnim } from './lib.js';
-import assetList, { PLAYER_IDLE_TEXTURE, PLAYER_JUMP_TEXTURE, GROUND_TEXTURE, WALL_TEXTURE, CABIN_TEXTURE, PLAYER_RUN_SHEET } from './assets.js';
+import assetList, {
+  PLAYER_IDLE_TEXTURE,
+  PLAYER_JUMP_TEXTURE,
+  PLAYER_RUN_SHEET,
+  GROUND_TEXTURE,
+  WALL_TEXTURE,
+  CABIN_TEXTURE,
+  CANDLE_TEXTURE,
+  CANDLE_LIGHT_TEXTURE,
+  BARREL_TEXTURE
+} from './assets.js';
 
 const MOVE_LEFT = 37;
 const MOVE_RIGHT = 39;
@@ -77,6 +87,28 @@ function setup() {
     cabin.scale.set(2, 2);
     app.stage.addChild(cabin);
 
+    const candle = new PIXI.Sprite(app.loader.resources[CANDLE_TEXTURE].texture);
+    candle.scale.set(2, 2);
+    candle.x = 120;
+    candle.y = 43;
+    app.stage.addChild(candle);
+
+    const candleLightConfig = {
+      xOffset: -41,
+      yOffset: -45,
+      alpha: 0.3,
+    }
+
+    const barrel = new PIXI.Sprite(app.loader.resources[BARREL_TEXTURE].texture);
+    barrel.x = 321;
+    barrel.y = 83;
+    barrel.scale.set(2, 2);
+    app.stage.addChild(barrel);
+
+    const barrelGUI = GUI.addFolder('barrel');
+    barrelGUI.add(barrel, 'x').min(0).max(800);
+    barrelGUI.add(barrel, 'y').min(0).max(200);
+
     const runSheet = getSheet(app, PLAYER_RUN_SHEET);
 
     let player = new PIXI.AnimatedSprite([getTexture(app, PLAYER_IDLE_TEXTURE)]);
@@ -104,6 +136,19 @@ function setup() {
 
     const groundBBs = [getBB(ground), getBB(wall)];
 
+    const candleLight = new PIXI.Sprite(app.loader.resources[CANDLE_LIGHT_TEXTURE].texture);
+    candleLight.blendMode = PIXI.BLEND_MODES.LIGHTEN;
+    candleLight.scale.set(2, 2);
+    app.stage.addChild(candleLight);
+
+    const candleGUI = GUI.addFolder('candle');
+    candleGUI.add(candle, 'x').min(0).max(200);
+    candleGUI.add(candle, 'y').min(0).max(200);
+    candleGUI.add(candleLightConfig, 'xOffset').min(-64).max(64);
+    candleGUI.add(candleLightConfig, 'yOffset').min(-64).max(64);
+    candleGUI.add(candleLightConfig, 'alpha').min(0.01).max(1.0);
+
+
     app.ticker.add(delta => {
       const prevState = pState;
       const prevDir = pDir;
@@ -118,6 +163,10 @@ function setup() {
       } else {
         pV.y += pA.y;
       }
+
+      candleLight.x = candle.x + candleLightConfig.xOffset;
+      candleLight.y = candle.y + candleLightConfig.yOffset;
+      candleLight.alpha = candleLightConfig.alpha;
 
       const prevBB = getBB(player);
 
@@ -162,6 +211,7 @@ function setup() {
           console.log('STOP WALKING');
           pState = PS_IDLE;
           swapPlayerSprite(new PIXI.Sprite(getTexture(app, PLAYER_IDLE_TEXTURE)));
+          
         } else {
           console.log('NOW WALKING');
           pState = PS_WALKING;
