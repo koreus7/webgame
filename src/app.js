@@ -1,20 +1,18 @@
 import GUI from './gui.js';
 import { getBB, playerCollides, loadAssets, getTexture, getSheet, getAnim } from './lib.js';
+import Controls from './controls.js';
 import assetList, {
   PLAYER_IDLE_TEXTURE,
   PLAYER_JUMP_TEXTURE,
   PLAYER_RUN_SHEET,
   GROUND_TEXTURE,
-  WALL_TEXTURE,
   CABIN_TEXTURE,
   CANDLE_TEXTURE,
   CANDLE_LIGHT_TEXTURE,
-  BARREL_TEXTURE
+  BARREL_TEXTURE,
+  ENEMY_IDLE_TEXTURE
 } from './assets.js';
 
-const MOVE_LEFT = 37;
-const MOVE_RIGHT = 39;
-const JUMP = 32;
 const PLAYER_VELOCITY = 2;
 const JUMP_VELOCITY = 10;
 
@@ -59,45 +57,9 @@ function setup() {
     const dat = window.dat || null;
     GUI.init(dat);
 
-    let moveLeft = 0;
-    let moveRight = 0;
-    let pressingJump = 0;
+    const controls = new Controls();
+
     let isGrounded = false;
-
-    window.addEventListener('keydown', (event) => {
-      switch(event.keyCode) {
-        case MOVE_LEFT:
-          moveLeft = 1;
-          break;
-        case MOVE_RIGHT:
-          moveRight = 1;
-          break;
-        case JUMP:
-          pressingJump = 1;
-          break;
-      }
-    });
-
-    window.addEventListener('keyup', (event) => {
-      switch(event.keyCode) {
-        case MOVE_LEFT:
-          moveLeft = 0;
-          break;
-        case MOVE_RIGHT:
-          moveRight = 0;
-          break;
-          case JUMP:
-            pressingJump = 0;
-            break;
-      }
-    });
-
-    // const wall = new PIXI.Sprite(getTexture(app, WALL_TEXTURE));
-    // app.stage.addChild(wall);
-    // wall.x = 325;
-    // wall.width = 36;
-    // wall.height = 36
-    // wall.y = 100 - 12;
 
     const cabin = Sprite(CABIN_TEXTURE);
     cabin.x = cabin.width;
@@ -182,14 +144,14 @@ function setup() {
       const prevDir = pDir;
       const prevGrounded = isGrounded;
 
-      pDir = moveRight - moveLeft;
+      pDir = controls.getDirection();
       if(pDir) {
         pFacing = pDir;
       }
 
       pV.x = pDir * 5;
       
-      if(isGrounded && pressingJump) {
+      if(isGrounded && controls.jump) {
         pV.y = -JUMP_VELOCITY;
         pState = PS_JUMPING;
       } else {
