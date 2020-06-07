@@ -1,0 +1,95 @@
+{"frames": {
+
+"candle_animated1.png":
+{
+	"frame": {"x":0,"y":0,"w":13,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":13,"h":32},
+	"sourceSize": {"w":13,"h":32}
+},
+"candle_animated2.png":
+{
+	"frame": {"x":0,"y":32,"w":13,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":13,"h":32},
+	"sourceSize": {"w":13,"h":32}
+},
+"candle_animated3.png":
+{
+	"frame": {"x":0,"y":64,"w":13,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":13,"h":32},
+	"sourceSize": {"w":13,"h":32}
+},
+"candle_animated4.png":
+{
+	"frame": {"x":0,"y":96,"w":13,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":13,"h":32},
+	"sourceSize": {"w":13,"h":32}
+},
+"candle_animated5.png":
+{
+	"frame": {"x":0,"y":128,"w":13,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":13,"h":32},
+	"sourceSize": {"w":13,"h":32}
+},
+"candle_animated6.png":
+{
+	"frame": {"x":0,"y":160,"w":13,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":13,"h":32},
+	"sourceSize": {"w":13,"h":32}
+},
+"candle_animated7.png":
+{
+	"frame": {"x":0,"y":192,"w":13,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":13,"h":32},
+	"sourceSize": {"w":13,"h":32}
+},
+"candle_animated8.png":
+{
+	"frame": {"x":0,"y":224,"w":13,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":13,"h":32},
+	"sourceSize": {"w":13,"h":32}
+},
+"candle_animated9.png":
+{
+	"frame": {"x":0,"y":256,"w":13,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":13,"h":32},
+	"sourceSize": {"w":13,"h":32}
+},
+"candle_animated10.png":
+{
+	"frame": {"x":0,"y":288,"w":13,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":13,"h":32},
+	"sourceSize": {"w":13,"h":32}
+}},
+"animations": {
+	"candle_animated": ["candle_animated1.png","candle_animated2.png","candle_animated3.png","candle_animated4.png","candle_animated5.png","candle_animated6.png","candle_animated7.png","candle_animated8.png","candle_animated9.png","candle_animated10.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "candle-sheet.png",
+	"format": "RGBA8888",
+	"size": {"w":13,"h":320},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:169cf3614c2d58ac2423ddd887bad9bf:60b6d4335638c415516a0280d9cbd9a7:acdef4207985ae4843a090245ea281e4$"
+}
+}

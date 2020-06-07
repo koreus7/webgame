@@ -8,8 +8,10 @@ import assetList, {
   GROUND_TEXTURE,
   CABIN_TEXTURE,
   CANDLE_TEXTURE,
+  CANDLE_SHEET,
   CANDLE_LIGHT_TEXTURE,
   BARREL_TEXTURE,
+  OVEN_TEXTURE,
   ENEMY_IDLE_TEXTURE
 } from './assets.js';
 
@@ -66,7 +68,11 @@ function setup() {
     cabin.scale.set(2, 2);
     app.stage.addChild(cabin);
 
-    const candle = Sprite(CANDLE_TEXTURE, { x: 120, y: 43 });
+
+    const candleSheet = getSheet(app, CANDLE_SHEET);
+    const candle = AnimatedSprite(getAnim(candleSheet, 'candle_animated'), { x: 120, y: 43 });
+    candle.animationSpeed = 0.2;
+    candle.play();
     candle.scale.set(2, 2);
     app.stage.addChild(candle);
 
@@ -77,6 +83,13 @@ function setup() {
     const barrelGUI = GUI.addFolder('barrel');
     barrelGUI.add(barrel, 'x').min(0).max(800);
     barrelGUI.add(barrel, 'y').min(0).max(200);
+
+    const oven = Sprite(OVEN_TEXTURE, { x: 30, y: 41 });
+    oven.scale.set(2,2);
+    app.stage.addChild(oven);
+    const ovenGUI = GUI.addFolder('oven');
+    ovenGUI.add(oven, 'x').min(0).max(800);
+    ovenGUI.add(oven, 'y').min(0).max(200);
 
     const runSheet = getSheet(app, PLAYER_RUN_SHEET);
 
@@ -134,6 +147,7 @@ function setup() {
     const candleGUI = GUI.addFolder('candle');
     candleGUI.add(candle, 'x').min(0).max(200);
     candleGUI.add(candle, 'y').min(0).max(200);
+    candleGUI.add(candle, 'animationSpeed').min(0).max(1);
     candleGUI.add(candleLightConfig, 'xOffset').min(-64).max(64);
     candleGUI.add(candleLightConfig, 'yOffset').min(-64).max(64);
     candleGUI.add(candleLightConfig, 'alpha').min(0.01).max(1.0);
@@ -150,7 +164,7 @@ function setup() {
       }
 
       pV.x = pDir * 5;
-      
+
       if(isGrounded && controls.jump) {
         pV.y = -JUMP_VELOCITY;
         pState = PS_JUMPING;
@@ -191,7 +205,7 @@ function setup() {
       if(!isGrounded && prevState !== PS_JUMPING) {
         pState = PS_JUMPING;
         swapPlayerSprite(playerJump);
-        
+
       } else if(isGrounded && pState === PS_JUMPING) {
         if(pDir === 0) {
           pState = PS_IDLE;
