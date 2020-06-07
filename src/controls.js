@@ -1,12 +1,31 @@
-const MOVE_LEFT = 37;
-const MOVE_RIGHT = 39;
+const MOVE_LEFT = 65;
+const MOVE_RIGHT = 68;
 const JUMP = 32;
 
 export default class Controls {
-  constructor() {
+  constructor(canvas) {
     this.moveLeft = 0;
     this.moveRight = 0;
     this.jump = 0;
+    this.aiming = false;
+    this.mouse = null;
+
+    window.addEventListener('mousedown', (event) => {
+      const canvasBB = canvas.getBoundingClientRect();
+      this.aiming = true;
+    });
+
+    window.addEventListener('mousemove', (event) => {
+        const canvasBB = canvas.getBoundingClientRect();
+        this.mouse = {
+          x: event.clientX - canvasBB.left,
+          y: event.clientY - canvasBB.top,
+        }
+    });
+
+    window.addEventListener('mouseup', (event) => {
+      this.aiming = false;
+    });
 
     window.addEventListener('keydown', (event) => {
       switch(event.keyCode) {

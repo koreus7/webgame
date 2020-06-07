@@ -4,6 +4,9 @@ export const PLAYER_IDLE_TEXTURE = './assets/images/player/player-idle.png';
 export const PLAYER_JUMP_TEXTURE = './assets/images/player/player-jump.png';
 export const PLAYER_RUN_SHEET = './assets/images/player/player-run.json';
 
+// charge throw
+export const CHARGER_SHEET = './assets/images/charger.json';
+
 // environment
 export const GROUND_TEXTURE = './assets/images/ground.png';
 export const CABIN_TEXTURE = './assets/images/cabin.png';
@@ -18,6 +21,8 @@ export default [
   PLAYER_IDLE_TEXTURE,
   PLAYER_JUMP_TEXTURE,
   PLAYER_RUN_SHEET,
+
+  CHARGER_SHEET,
 
   GROUND_TEXTURE,
   CABIN_TEXTURE,

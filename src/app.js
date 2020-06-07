@@ -11,7 +11,8 @@ import assetList, {
   CANDLE_TEXTURE,
   CANDLE_LIGHT_TEXTURE,
   BARREL_TEXTURE,
-  ENEMY_IDLE_TEXTURE
+  ENEMY_IDLE_TEXTURE,
+  CHARGER_SHEET
 } from './assets.js';
 import { Sprite, AnimatedSprite } from './lib.js';
 import StateSprite from './Entity.js';
@@ -42,7 +43,7 @@ function setup() {
     const dat = window.dat || null;
     GUI.init(dat);
 
-    const controls = new Controls();
+    const controls = new Controls(app.view);
 
     const cabin = Sprite(CABIN_TEXTURE);
     cabin.x = cabin.width / 2;
@@ -103,7 +104,21 @@ function setup() {
     candleGUI.add(candleLightConfig, 'yOffset').min(-64).max(64);
     candleGUI.add(candleLightConfig, 'alpha').min(0.01).max(1.0);
 
+    const chargerSheet = getSheet(CHARGER_SHEET);
+    const charger = new PIXI.Container();
+    const chargerAnim = new PIXI.AnimatedSprite(getAnim(chargerSheet, 'charger'));
+    chargerAnim.animationSpeed = 0.1;
+    chargerAnim.scale.set(2);
+    chargerAnim.x = 10;
+    chargerAnim.y = 5;
+    chargerAnim.visible = false;
+    charger.addChild(chargerAnim);
+    app.stage.addChild(charger);
 
+    const draw = new PIXI.Graphics();
+    app.stage.addChild(draw);
+
+    let aiming = false;
     app.ticker.add(delta => {
       const player = playerEntity.state;
       const enemy = enemyEntity.state;
@@ -127,6 +142,29 @@ function setup() {
       }
 
       enemyEntity.velocity.y += 1;
+      
+
+    if(controls.mouse) {
+      if(controls.aiming && !aiming) {
+        chargerAnim.gotoAndPlay(0);
+        chargerAnim.loop = false;
+        chargerAnim.visible = true;
+        aiming = true;
+      }
+
+      if(aiming && !controls.aiming) {
+        chargerAnim.gotoAndStop(0);
+        chargerAnim.visible = false;
+        aiming = false;
+      }
+
+      draw.clear();
+      draw.lineStyle(1, 0).moveTo(playerEntity.state.x, playerEntity.state.y).lineTo(controls.mouse.x, controls.mouse.y);
+      const v = { x: controls.mouse.x - playerEntity.state.x, y: controls.mouse.y - playerEntity.state.y };
+      const theta = Math.atan2(v.y, v.x) * 90 / Math.PI;
+      // console.log('theta', theta);
+      chargerAnim.angle = theta * (Math.PI * 2);
+    }
 
       candleLight.x = candle.x + candleLightConfig.xOffset;
       candleLight.y = candle.y + candleLightConfig.yOffset;
@@ -182,5 +220,7 @@ function setup() {
       }
 
       playerEntity.setFacing(pFacing);
+      charger.x = playerEntity.state.x;
+      charger.y = playerEntity.state.y + 5;
     });
 }
