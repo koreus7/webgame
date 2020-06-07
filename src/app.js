@@ -28,6 +28,22 @@ const app = new PIXI.Application({
   height: 600,
 });
 
+function Sprite(texture, { x, y } = {}) {
+  const sprite = new PIXI.Sprite(getTexture(app, texture));
+  if(x) sprite.x = x;
+  if(y) sprite.y = y;
+  sprite.anchor.x = 0.5;
+  return sprite;
+}
+
+function AnimatedSprite(anim, { x, y } = {}) {
+  const sprite = new PIXI.AnimatedSprite(anim);
+  if(x) sprite.x = x;
+  if(y) sprite.y = y;
+  sprite.anchor.x = 0.5;
+  return sprite;
+}
+
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
 document.body.appendChild(app.view);
@@ -76,32 +92,23 @@ function setup() {
       }
     });
 
-    const wall = new PIXI.Sprite(getTexture(app, WALL_TEXTURE));
-    app.stage.addChild(wall);
-    wall.x = 325;
-    wall.width = 36;
-    wall.height = 36
-    wall.y = 100 - 12;
+    // const wall = new PIXI.Sprite(getTexture(app, WALL_TEXTURE));
+    // app.stage.addChild(wall);
+    // wall.x = 325;
+    // wall.width = 36;
+    // wall.height = 36
+    // wall.y = 100 - 12;
 
-    const cabin = new PIXI.Sprite(getTexture(app, CABIN_TEXTURE));
+    const cabin = Sprite(CABIN_TEXTURE);
+    cabin.x = cabin.width;
     cabin.scale.set(2, 2);
     app.stage.addChild(cabin);
 
-    const candle = new PIXI.Sprite(app.loader.resources[CANDLE_TEXTURE].texture);
+    const candle = Sprite(CANDLE_TEXTURE, { x: 120, y: 43 });
     candle.scale.set(2, 2);
-    candle.x = 120;
-    candle.y = 43;
     app.stage.addChild(candle);
 
-    const candleLightConfig = {
-      xOffset: -41,
-      yOffset: -45,
-      alpha: 0.3,
-    }
-
-    const barrel = new PIXI.Sprite(app.loader.resources[BARREL_TEXTURE].texture);
-    barrel.x = 321;
-    barrel.y = 83;
+    const barrel = Sprite(BARREL_TEXTURE, { x: 321, y: 83 });
     barrel.scale.set(2, 2);
     app.stage.addChild(barrel);
 
@@ -111,25 +118,22 @@ function setup() {
 
     const runSheet = getSheet(app, PLAYER_RUN_SHEET);
 
-    const playerIdle = new PIXI.AnimatedSprite([getTexture(app, PLAYER_IDLE_TEXTURE)]);
+    const playerIdle = AnimatedSprite([getTexture(app, PLAYER_IDLE_TEXTURE)]);
     playerIdle.visible = false;
-    playerIdle.anchor.x = 0.5;
     app.stage.addChild(playerIdle);
 
-    const playerJump = new PIXI.Sprite(getTexture(app, PLAYER_JUMP_TEXTURE));
+    const playerJump = Sprite(PLAYER_JUMP_TEXTURE);
     playerJump.visible = false;
-    playerJump.anchor.x = 0.5;
     app.stage.addChild(playerJump);
 
-    const playerWalk = new PIXI.AnimatedSprite(getAnim(runSheet, 'run'));
+    const playerWalk = AnimatedSprite(getAnim(runSheet, 'run'));
     playerWalk.visible = false;
     playerWalk.animationSpeed = 0.2;
-    playerWalk.anchor.x = 0.5;
     app.stage.addChild(playerWalk);
 
     let player = playerIdle;
     player.visible = true;
-    player.x = 10;
+    player.x = 30;
     player.y = 25;
 
     let pState = PS_IDLE;
@@ -147,15 +151,20 @@ function setup() {
       player.scale.x = pFacing;
     }
 
-    const ground = new PIXI.Sprite(getTexture(app, GROUND_TEXTURE));
-    app.stage.addChild(ground);
-    ground.x = 0;
-    ground.y = 128;
+    const ground = Sprite(GROUND_TEXTURE, { x: 0, y: 128 });
     ground.width = 1000;
+    app.stage.addChild(ground);
 
-    const groundBBs = [getBB(ground), getBB(wall)];
+    const groundBBs = [getBB(ground), getBB(barrel)];
 
-    const candleLight = new PIXI.Sprite(app.loader.resources[CANDLE_LIGHT_TEXTURE].texture);
+    const candleLightConfig = {
+      xOffset: 0,
+      yOffset: 10,
+      alpha: 0.3,
+    }
+
+    const candleLight = Sprite(CANDLE_LIGHT_TEXTURE);
+    candleLight.anchor.y = 0.5;
     candleLight.blendMode = PIXI.BLEND_MODES.LIGHTEN;
     candleLight.scale.set(2, 2);
     app.stage.addChild(candleLight);
