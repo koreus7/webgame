@@ -21,18 +21,21 @@ PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
 document.body.appendChild(app.view);
 
+console.log('run me');
+
 loadAssets(
   app,
   [
     './assets/images/player-run.json',
     GROUND_TEXTURE,
     WALL_TEXTURE,
-    CABIN_TEXTURE,
+    CABIN_TEXTURE
   ],
   setup
 );
 
 function setup() {
+  console.log('setup');
     const dat = window.dat || null;
     GUI.init(dat);
 
@@ -80,7 +83,6 @@ function setup() {
     cabin.scale.set(2, 2);
     app.stage.addChild(cabin);
 
-    console.log(app.loader.resources['./assets/images/player-run.json']);
     const player = new PIXI.AnimatedSprite(app.loader.resources['./assets/images/player-run.json'].spritesheet.animations['run']);
     player.animationSpeed = 0.2;
     player.play();

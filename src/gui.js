@@ -1,29 +1,35 @@
 class GUI
 {
-  init = (dat) => {
+  init(dat) {
     if (window.__DEV_MODE) {
       this.dat = dat;
       this.gui = new dat.GUI();
     }
   }
 
-  add = (...args) => {
+  add(...args) {
     if(this.gui) {
       return this.gui.add(...args);
     }
     return this;
   }
 
-  addFolder = (...args) => {
+  addFolder(...args) {
     if(this.gui) {
       return this.gui.addFolder(...args);
     }
     return this;
   }
 
-  min = () => this;
-  max = () => this;
-  step = () => this;
+  min() {
+    return this;
+  }
+  max() {
+    return this;
+  }
+  step() {
+    return this;
+  }
 
 }
 

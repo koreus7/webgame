@@ -4,15 +4,15 @@ export function loadAssets(app, assets, then) {
     .load(then);
 }
 
-export const getBB = (obj) => {
+export function getBB(obj) {
   return { left: obj.x, top: obj.y, right: obj.x + obj.width, bottom: obj.y + obj.height };
 }
 
-const isBetween = (v, start, end) => {
+function isBetween(v, start, end) {
   return v >= start || v < end;
 }
 
-export const playerCollides = (player, walls) => {
+export function playerCollides(player, walls) {
   const collided = [];
   for(let i = 0; i < walls.length; i++) {
     const wall = walls[i];
