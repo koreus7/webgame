@@ -14,13 +14,15 @@ import assetList, {
   BARREL_TEXTURE,
   ENEMY_IDLE_TEXTURE,
   CHARGER_SHEET,
-  OVEN_TEXTURE
+  OVEN_TEXTURE,
+  KNIFE_TEXTURE
 } from './assets.js';
 import { Sprite, AnimatedSprite } from './lib.js';
-import StateSprite from './Entity.js';
+import Entity from './Entity.js';
 
 const PLAYER_VELOCITY = 2;
 const JUMP_VELOCITY = 10;
+const GRAVITY = 1;
 
 const PS_IDLE = 'IDLE';
 const PS_WALKING = 'WALKING';
@@ -51,7 +53,6 @@ function setup() {
     cabin.x = cabin.width / 2;
     app.stage.addChild(cabin);
 
-
     const candleSheet = getSheet(CANDLE_SHEET);
     const candle = AnimatedSprite(getAnim(candleSheet, 'candle_animated'), { x: 120, y: 43 });
     candle.animationSpeed = 0.2;
@@ -75,23 +76,21 @@ function setup() {
     ovenGUI.add(oven, 'y').min(0).max(200);
     const runSheet = getSheet(PLAYER_RUN_SHEET);
 
-
     const playerStates = {
       [PS_IDLE]: Sprite(PLAYER_IDLE_TEXTURE),
       [PS_JUMPING]: Sprite(PLAYER_JUMP_TEXTURE),
       [PS_WALKING]: AnimatedSprite(getAnim(runSheet, 'run'), { speed: 0.2 }),
     };
 
-    const playerEntity = new StateSprite(playerStates, PS_IDLE, { x: 30, y: 25 });
+    const playerEntity = new Entity(playerStates, PS_IDLE, { x: 30, y: 25 });
     let pDir = 1;
     let pFacing = 1;
-    let pA = { x: 0, y: 1 };
 
     const enemyStates = {
       idle: Sprite(ENEMY_IDLE_TEXTURE)
     };
 
-    const enemyEntity = new StateSprite(enemyStates, 'idle', { x: 200, y: 25 });
+    const enemyEntity = new Entity(enemyStates, 'idle', { x: 200, y: 25 });
 
     const entities = [playerEntity, enemyEntity];
 
@@ -124,18 +123,28 @@ function setup() {
     const chargerSheet = getSheet(CHARGER_SHEET);
     const charger = new PIXI.Container();
     const chargerAnim = new PIXI.AnimatedSprite(getAnim(chargerSheet, 'charger'));
+    chargerAnim.anchor.y = 0.5;
     chargerAnim.animationSpeed = 0.1;
     chargerAnim.scale.set(2);
     chargerAnim.x = 10;
-    chargerAnim.y = 5;
     chargerAnim.visible = false;
     charger.addChild(chargerAnim);
     app.stage.addChild(charger);
+
+    const chargerConfig = {
+      trace: false,
+    }
+
+    const throwGUI = GUI.addFolder('throw');
+    throwGUI.add(chargerConfig, 'trace');
 
     const draw = new PIXI.Graphics();
     app.stage.addChild(draw);
 
     let aiming = false;
+
+    const knives = [];
+
     app.ticker.add(delta => {
       const player = playerEntity.state;
       const enemy = enemyEntity.state;
@@ -155,13 +164,21 @@ function setup() {
         playerEntity.setState(PS_JUMPING);
 
       } else {
-        playerEntity.velocity.y += pA.y;
+        playerEntity.velocity.y += GRAVITY;
       }
 
-      enemyEntity.velocity.y += 1;
-      
+      enemyEntity.velocity.y += GRAVITY;
 
     if(controls.mouse) {
+      draw.clear();
+      if(chargerConfig.trace) {
+        draw.lineStyle(1, 0).moveTo(charger.x, charger.y).lineTo(controls.mouse.x, controls.mouse.y);
+      }
+      const v = { x: controls.mouse.x - charger.x, y: controls.mouse.y - charger.y };
+      const mag = Math.sqrt(v.x * v.x + v.y * v.y);
+      const theta = Math.atan2(v.y, v.x);
+      charger.angle = theta * 180 / Math.PI;
+
       if(controls.aiming && !aiming) {
         chargerAnim.gotoAndPlay(0);
         chargerAnim.loop = false;
@@ -170,22 +187,36 @@ function setup() {
       }
 
       if(aiming && !controls.aiming) {
+        aiming = false;
+        const knife = new Entity({ knife: Sprite(KNIFE_TEXTURE) }, 'knife', charger);
+        knife.frozen = false;
+        knife.velocity.x = v.x / mag * (chargerAnim.currentFrame + 1) * 5;
+        knife.velocity.y = v.y / mag * (chargerAnim.currentFrame + 1) * 5;
+        knives.push(knife);
         chargerAnim.gotoAndStop(0);
         chargerAnim.visible = false;
-        aiming = false;
       }
-
-      draw.clear();
-      draw.lineStyle(1, 0).moveTo(playerEntity.state.x, playerEntity.state.y).lineTo(controls.mouse.x, controls.mouse.y);
-      const v = { x: controls.mouse.x - playerEntity.state.x, y: controls.mouse.y - playerEntity.state.y };
-      const theta = Math.atan2(v.y, v.x) * 90 / Math.PI;
-      // console.log('theta', theta);
-      chargerAnim.angle = theta * (Math.PI * 2);
     }
 
       candleLight.x = candle.x + candleLightConfig.xOffset;
       candleLight.y = candle.y + candleLightConfig.yOffset;
       candleLight.alpha = candleLightConfig.alpha;
+
+      for(const knife of knives) {
+        if(!knife.frozen) {
+          const knifeBB = getBB(knife.state);
+          const collisions = entityCollides(knifeBB, groundBBs);
+          if(collisions.length) {
+            knife.frozen = true;
+            continue;
+          }
+
+          knife.velocity.y += GRAVITY;
+          knife.state.x += knife.velocity.x;
+          knife.state.y += knife.velocity.y;
+          knife.state.angle = 90 + (Math.atan2(knife.velocity.y, knife.velocity.x) * 180 / Math.PI);
+        }
+      }
 
       for(const entity of entities) {
         const prevBB = getBB(entity.state);
@@ -238,6 +269,6 @@ function setup() {
 
       playerEntity.setFacing(pFacing);
       charger.x = playerEntity.state.x;
-      charger.y = playerEntity.state.y + 5;
+      charger.y = playerEntity.state.y + 20;
     });
 }

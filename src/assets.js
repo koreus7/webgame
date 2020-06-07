@@ -6,6 +6,7 @@ export const PLAYER_RUN_SHEET = './assets/images/player/player-run.json';
 
 // charge throw
 export const CHARGER_SHEET = './assets/images/charger.json';
+export const KNIFE_TEXTURE = './assets/images/knife.png';
 
 // environment
 export const GROUND_TEXTURE = './assets/images/ground.png';
@@ -25,6 +26,7 @@ export default [
   PLAYER_RUN_SHEET,
 
   CHARGER_SHEET,
+  KNIFE_TEXTURE,
 
   GROUND_TEXTURE,
   CABIN_TEXTURE,
