@@ -15,7 +15,8 @@ import assetList, {
   ENEMY_IDLE_TEXTURE,
   CHARGER_SHEET,
   OVEN_TEXTURE,
-  KNIFE_TEXTURE
+  KNIFE_TEXTURE,
+  OVEN_SHEET,
 } from './assets.js';
 import { Sprite, AnimatedSprite } from './lib.js';
 import Entity from './Entity.js';
@@ -58,6 +59,7 @@ function setup() {
     cabin.x = cabin.width / 2;
     app.stage.addChild(cabin);
 
+
     const candleSheet = getSheet(CANDLE_SHEET);
     const candle = AnimatedSprite(getAnim(candleSheet, 'candle_animated'), { x: 120, y: 43 });
     candle.animationSpeed = 0.2;
@@ -94,8 +96,11 @@ function setup() {
     barrelGUI.add(barrel, 'x').min(0).max(800);
     barrelGUI.add(barrel, 'y').min(0).max(200);
 
-    const oven = Sprite(OVEN_TEXTURE, { x: 30, y: 41 });
+    const ovenSheet = getSheet(OVEN_SHEET);
+    const oven = AnimatedSprite(getAnim(ovenSheet, 'oven'), { x: 30, y: 41 });
     oven.scale.set(2,2);
+    oven.animationSpeed = 0.15;
+    oven.play();
     app.stage.addChild(oven);
     const ovenGUI = GUI.addFolder('oven');
     ovenGUI.add(oven, 'x').min(0).max(800);
