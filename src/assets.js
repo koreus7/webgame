@@ -12,6 +12,7 @@ export const CANDLE_SHEET = './assets/images/candle-sheet.json';
 export const CANDLE_LIGHT_TEXTURE = './assets/images/candle-light.png';
 export const BARREL_TEXTURE = './assets/images/barrel.png'
 export const OVEN_TEXTURE = './assets/images/oven.png';
+export const OVEN_SHEET = './assets/images/oven.json';
 
 // entities
 export const ENEMY_IDLE_TEXTURE = './assets/images/enemy-idle.png';
@@ -28,6 +29,7 @@ export default [
   CANDLE_LIGHT_TEXTURE,
   BARREL_TEXTURE,
   OVEN_TEXTURE,
+  OVEN_SHEET,
 
   ENEMY_IDLE_TEXTURE
 ];

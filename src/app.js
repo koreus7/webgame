@@ -13,7 +13,8 @@ import assetList, {
   CANDLE_LIGHT_TEXTURE,
   BARREL_TEXTURE,
   OVEN_TEXTURE,
-  ENEMY_IDLE_TEXTURE
+  ENEMY_IDLE_TEXTURE,
+  OVEN_SHEET
 } from './assets.js';
 import { Sprite, AnimatedSprite } from './lib.js';
 import StateSprite from './Entity.js';
@@ -66,12 +67,16 @@ function setup() {
     barrelGUI.add(barrel, 'x').min(0).max(800);
     barrelGUI.add(barrel, 'y').min(0).max(200);
 
-    const oven = Sprite(OVEN_TEXTURE, { x: 30, y: 41 });
+    const ovenSheet = getSheet(OVEN_SHEET);
+    const oven = AnimatedSprite(getAnim(ovenSheet, 'oven'), { x: 30, y: 41 });
     oven.scale.set(2,2);
+    oven.animationSpeed = 0.15;
+    oven.play();
     app.stage.addChild(oven);
     const ovenGUI = GUI.addFolder('oven');
     ovenGUI.add(oven, 'x').min(0).max(800);
     ovenGUI.add(oven, 'y').min(0).max(200);
+    ovenGUI.add(oven, 'animationSpeed').min(0).max(1);
     const runSheet = getSheet(PLAYER_RUN_SHEET);
 
 
