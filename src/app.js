@@ -113,15 +113,18 @@ function setup() {
 
     const playerIdle = new PIXI.AnimatedSprite([getTexture(app, PLAYER_IDLE_TEXTURE)]);
     playerIdle.visible = false;
+    playerIdle.anchor.x = 0.5;
     app.stage.addChild(playerIdle);
 
     const playerJump = new PIXI.Sprite(getTexture(app, PLAYER_JUMP_TEXTURE));
     playerJump.visible = false;
+    playerJump.anchor.x = 0.5;
     app.stage.addChild(playerJump);
 
     const playerWalk = new PIXI.AnimatedSprite(getAnim(runSheet, 'run'));
     playerWalk.visible = false;
     playerWalk.animationSpeed = 0.2;
+    playerWalk.anchor.x = 0.5;
     app.stage.addChild(playerWalk);
 
     let player = playerIdle;
@@ -131,6 +134,7 @@ function setup() {
 
     let pState = PS_IDLE;
     let pDir = 1;
+    let pFacing = 1;
     let pA = { x: 0, y: 1 };
     let pV = { x: 0, y: 0 };
 
@@ -140,6 +144,7 @@ function setup() {
       newSprite.y = player.y;
       newSprite.visible = true;
       player = newSprite;
+      player.scale.x = pFacing;
     }
 
     const ground = new PIXI.Sprite(getTexture(app, GROUND_TEXTURE));
@@ -169,7 +174,11 @@ function setup() {
       const prevGrounded = isGrounded;
 
       pDir = moveRight - moveLeft;
-      pV.x = (moveRight - moveLeft) * 5;
+      if(pDir) {
+        pFacing = pDir;
+      }
+
+      pV.x = pDir * 5;
       
       if(isGrounded && pressingJump) {
         pV.y = -JUMP_VELOCITY;
@@ -232,5 +241,7 @@ function setup() {
           swapPlayerSprite(playerWalk);
         }
       }
+
+      player.scale.x = pFacing;
     });
 }
