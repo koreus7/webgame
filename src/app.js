@@ -1,5 +1,6 @@
 import GUI from './gui.js';
-import { getBB, playerCollides, loadAssets, getTexture, getSheet, getAnim } from './lib.js';
+import { loadAssets, getTexture, getSheet, getAnim } from './lib.js';
+import { getBB, entityCollides } from './collision.js';
 import Controls from './controls.js';
 import assetList, {
   PLAYER_IDLE_TEXTURE,
@@ -13,6 +14,7 @@ import assetList, {
   ENEMY_IDLE_TEXTURE
 } from './assets.js';
 import { Sprite, AnimatedSprite } from './lib.js';
+import StateSprite from './Entity.js';
 
 const PLAYER_VELOCITY = 2;
 const JUMP_VELOCITY = 10;
@@ -37,13 +39,10 @@ loadAssets(
 );
 
 function setup() {
-  console.log('setup');
     const dat = window.dat || null;
     GUI.init(dat);
 
     const controls = new Controls();
-
-    let isGrounded = false;
 
     const cabin = Sprite(CABIN_TEXTURE);
     cabin.x = cabin.width;
@@ -64,43 +63,31 @@ function setup() {
 
     const runSheet = getSheet(PLAYER_RUN_SHEET);
 
-    const playerIdle = Sprite(PLAYER_IDLE_TEXTURE, { visible: false });
-    app.stage.addChild(playerIdle);
+    const playerStates = {
+      [PS_IDLE]: Sprite(PLAYER_IDLE_TEXTURE),
+      [PS_JUMPING]: Sprite(PLAYER_JUMP_TEXTURE),
+      [PS_WALKING]: AnimatedSprite(getAnim(runSheet, 'run'), { speed: 0.2 }),
+    };
 
-    const playerJump = Sprite(PLAYER_JUMP_TEXTURE, { visible: false });
-    app.stage.addChild(playerJump);
-
-    const playerWalk = AnimatedSprite(getAnim(runSheet, 'run'), { visible: false, speed: 0.2 });
-    app.stage.addChild(playerWalk);
-
-    let player = playerIdle;
-    player.visible = true;
-    player.x = 30;
-    player.y = 25;
-
+    const playerEntity = new StateSprite(playerStates, PS_IDLE, { x: 30, y: 25 });
     let pState = PS_IDLE;
     let pDir = 1;
     let pFacing = 1;
     let pA = { x: 0, y: 1 };
-    let pV = { x: 0, y: 0 };
 
-    const swapPlayerSprite = (newSprite) => {
-      player.visible = false;
-      newSprite.x = player.x;
-      newSprite.y = player.y;
-      newSprite.visible = true;
-      player = newSprite;
-      player.scale.x = pFacing;
-    }
+    const enemyStates = {
+      idle: Sprite(ENEMY_IDLE_TEXTURE)
+    };
 
-    const ground = Sprite(GROUND_TEXTURE, { x: 0, y: 128 });
+    const enemyEntity = new StateSprite(enemyStates, 'idle', { x: 200, y: 25 });
+
+    const entities = [playerEntity, enemyEntity];
+
+    const ground = Sprite(GROUND_TEXTURE, { x: 100, y: 128 });
     ground.width = 1000;
     app.stage.addChild(ground);
 
     const groundBBs = [getBB(ground), getBB(barrel)];
-
-    const enemy = Sprite(ENEMY_IDLE_TEXTURE);
-    app.stage.addChild(enemy);
 
     const candleLightConfig = {
       xOffset: 0,
@@ -123,79 +110,81 @@ function setup() {
 
 
     app.ticker.add(delta => {
+      const player = playerEntity.state;
+      const enemy = enemyEntity.state;
+
       const prevState = pState;
       const prevDir = pDir;
-      const prevGrounded = isGrounded;
 
       pDir = controls.getDirection();
       if(pDir) {
         pFacing = pDir;
       }
 
-      pV.x = pDir * 5;
+      playerEntity.velocity.x = pDir * 5;
       
-      if(isGrounded && controls.jump) {
-        pV.y = -JUMP_VELOCITY;
+      if(playerEntity.isGrounded && controls.jump) {
+        playerEntity.velocity.y = -JUMP_VELOCITY;
         pState = PS_JUMPING;
       } else {
-        pV.y += pA.y;
+        playerEntity.velocity.y += pA.y;
       }
+
+      enemyEntity.velocity.y += 1;
 
       candleLight.x = candle.x + candleLightConfig.xOffset;
       candleLight.y = candle.y + candleLightConfig.yOffset;
       candleLight.alpha = candleLightConfig.alpha;
 
-      const prevBB = getBB(player);
+      for(const entity of entities) {
+        const prevBB = getBB(entity.state);
+        entity.state.x += entity.velocity.x;
+        entity.state.y += entity.velocity.y;
+        let nextBB = getBB(entity.state);
+        entity.isGrounded = false;
+        const collisions = entityCollides(nextBB, groundBBs);
+        for(const collided of collisions) {
+          if(nextBB.bottom > collided.top && prevBB.bottom <= collided.top) {
+            entity.state.y = collided.top - entity.state.height;
+            entity.velocity.y = 0;
+            entity.isGrounded = true;
 
-      player.x += pV.x;
-      player.y += pV.y;
-      let playerBB = getBB(player);
-      isGrounded = false;
-      const collisions = playerCollides(playerBB, groundBBs);
-      for(const collided of collisions) {
-        if(playerBB.bottom > collided.top && prevBB.bottom <= collided.top) {
-          player.y = collided.top - player.height;
-          pV.y = 0;
-          isGrounded = true;
-        } else if(playerBB.top < collided.bottom && prevBB.top >= collided.bottom) {
-          player.y = collided.bottom;
-          pV.y = 0;
-          isGrounded = true;
-        } else if(playerBB.right > collided.left && prevBB.right <= collided.left) {
-          player.x = collided.left - player.width;
-          pV.x = 0;
-        } else if(playerBB.left < collided.right && prevBB.left >= collided.right) {
-          player.x = collided.right;
-          pV.x = 0;
+          } else if(nextBB.top < collided.bottom && prevBB.top >= collided.bottom) {
+            entity.state.y = collided.bottom;
+            entity.velocity.y = 0;
+            entity.isGrounded = true;
+
+          } else if(nextBB.right > collided.left && prevBB.right <= collided.left) {
+            entity.state.x = collided.left - entity.state.width / 2;
+            entity.velocity.x = 0;
+
+          } else if(nextBB.left < collided.right && prevBB.left >= collided.right) {
+            entity.state.x = collided.right + entity.state.width / 2;
+            entity.velocity.x = 0;
+          }
+          nextBB = getBB(entity.state);
         }
-        playerBB = getBB(player);
       }
 
-      if(!isGrounded && prevState !== PS_JUMPING) {
-        pState = PS_JUMPING;
-        swapPlayerSprite(playerJump);
+      if(!playerEntity.isGrounded && playerEntity.stateName !== PS_JUMPING) {
+        playerEntity.setState(PS_JUMPING);
         
-      } else if(isGrounded && pState === PS_JUMPING) {
+      } else if(playerEntity.isGrounded && playerEntity.stateName === PS_JUMPING) {
         if(pDir === 0) {
-          pState = PS_IDLE;
-          swapPlayerSprite(playerIdle);
+          playerEntity.setState(PS_IDLE);
+
         } else {
-          pState = PS_WALKING;
-          playerWalk.gotoAndPlay(0);
-          swapPlayerSprite(playerWalk);
+          playerEntity.setState(PS_WALKING);
         }
       } else if(pDir !== prevDir) {
         if(pDir === 0) {
-          pState = PS_IDLE;
-          swapPlayerSprite(playerIdle);
+          playerEntity.setState(PS_IDLE);
 
         } else {
-          pState = PS_WALKING;
-          playerWalk.gotoAndPlay(0);
-          swapPlayerSprite(playerWalk);
+          playerEntity.setState(PS_WALKING);
         }
       }
 
-      player.scale.x = pFacing;
+      playerEntity.setFacing(pFacing);
     });
 }
