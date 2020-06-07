@@ -41,4 +41,12 @@ export default class Entity {
   setFacing(facing) {
     this.state.scale.x = 2 * facing;
   }
+
+  destroy() {
+    for(const key in this.states) {
+      app.stage.removeChild(this.states[key]);
+    }
+
+    delete this.states;
+  }
 }

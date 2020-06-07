@@ -84,6 +84,7 @@ function setup() {
     const playerEntity = new Entity(playerStates, PS_IDLE, { x: 100, y: 25 });
     let pDir = 1;
     let pFacing = 1;
+    let pKnives = 3;
 
     const deathSheet = getSheet(ENEMY_DEATH_SHEET);
     const enemyStates = {
@@ -106,9 +107,7 @@ function setup() {
     barrelGUI.add(barrel, 'y').min(0).max(200);
 
     const ovenSheet = getSheet(OVEN_SHEET);
-    const oven = AnimatedSprite(getAnim(ovenSheet, 'oven'), { x: 30, y: 41 });
-    oven.scale.set(2,2);
-    oven.animationSpeed = 0.15;
+    const oven = AnimatedSprite(getAnim(ovenSheet, 'oven'), { x: 30, y: 41, speed: 0.15 });
     oven.play();
     app.stage.addChild(oven);
     const ovenGUI = GUI.addFolder('oven');
@@ -164,6 +163,17 @@ function setup() {
     charger.addChild(chargerAnim);
     app.stage.addChild(charger);
 
+    const pKnifeSprites = [];
+    for(let i = 0; i < pKnives; i++) {
+      const knifeTally = Sprite(KNIFE_TEXTURE);
+      knifeTally.scale.set(4);
+      app.stage.addChild(knifeTally);
+      knifeTally.angle = 45;
+      knifeTally.x = app.view.width - 100 + (i * (knifeTally.width + 20));
+      knifeTally.y = app.view.height - 50;
+      pKnifeSprites.push(knifeTally);
+    }
+
     const traceGUI = GUI.addFolder('trace');
     traceGUI.add(traceConfig, 'aim');
     traceGUI.add(traceConfig, 'collision');
@@ -173,7 +183,7 @@ function setup() {
 
     let aiming = false;
 
-    const knives = [];
+    const knives = new Set();
 
     app.ticker.add(delta => {
       draw.clear();
@@ -209,7 +219,7 @@ function setup() {
       const theta = Math.atan2(v.y, v.x);
       charger.angle = theta * 180 / Math.PI;
 
-      if(controls.aiming && !aiming) {
+      if(controls.aiming && !aiming && pKnives > 0) {
         chargerAnim.gotoAndPlay(0);
         chargerAnim.loop = false;
         chargerAnim.visible = true;
@@ -218,13 +228,15 @@ function setup() {
 
       if(aiming && !controls.aiming) {
         aiming = false;
-        const knife = new Entity({ knife: Sprite(KNIFE_TEXTURE,) }, 'knife', { x: charger.x, y: charger.y, index: knifeIndex });
+        pKnives--;
+        pKnifeSprites[pKnives].alpha = 0.25;
+        const knife = new Entity({ knife: Sprite(KNIFE_TEXTURE) }, 'knife', { x: charger.x, y: charger.y, index: knifeIndex });
         knife.frozen = false;
         knife.state.anchor.y = 0.5;
         knife.state.anchor.x = 0.5;
         knife.velocity.x = v.x / mag * (chargerAnim.currentFrame + 1) * 5;
         knife.velocity.y = v.y / mag * (chargerAnim.currentFrame + 1) * 5;
-        knives.push(knife);
+        knives.add(knife);
         chargerAnim.gotoAndStop(0);
         chargerAnim.visible = false;
       }
@@ -236,7 +248,15 @@ function setup() {
 
       for(const knife of knives) {
         if(knife.frozen) {
-          traceBB(fakeBB(knife.state, 10, 10));
+          const pickupBB = fakeBB(knife.state, 30, 30);
+          traceBB(pickupBB);
+
+          if(anyCollide(pickupBB, [getBB(playerEntity.state)])) {
+            pKnifeSprites[pKnives].alpha = 1;
+            pKnives++;
+            knife.destroy();
+            knives.delete(knife);
+          }
           continue;
         };
 
