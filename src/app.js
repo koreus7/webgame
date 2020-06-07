@@ -1,8 +1,10 @@
 import GUI from './gui.js';
+import { getBB, playerCollides, loadAssets } from './lib.js';
 
 const PLAYER_TEXTURE = './assets/images/player.png';
 const GROUND_TEXTURE = './assets/images/ground.png';
 const WALL_TEXTURE = './assets/images/wall.png';
+const CABIN_TEXTURE = './assets/images/cabin.png';
 const MOVE_LEFT = 37;
 const MOVE_RIGHT = 39;
 const JUMP = 32;
@@ -15,37 +17,20 @@ const app = new PIXI.Application({
   height: 600,
 });
 
-const getBB = (obj) => {
-  return { left: obj.x, top: obj.y, right: obj.x + obj.width, bottom: obj.y + obj.height };
-}
-
-const isBetween = (v, start, end) => {
-  return v >= start || v < end;
-}
-
-const playerCollides = (player, walls) => {
-  const collided = [];
-  for(let i = 0; i < walls.length; i++) {
-    const wall = walls[i];
-    if(
-      player.left < wall.right &&
-      player.right > wall.left &&
-      player.top < wall.bottom &&
-      player.bottom > wall.top) {
-        collided.push(wall);
-      }
-  }
-
-  return collided
-};
+PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
 document.body.appendChild(app.view);
 
-app.loader
-    .add(PLAYER_TEXTURE)
-    .add(GROUND_TEXTURE)
-    .add(WALL_TEXTURE)
-    .load(setup);
+loadAssets(
+  app,
+  [
+    './assets/images/player-run.json',
+    GROUND_TEXTURE,
+    WALL_TEXTURE,
+    CABIN_TEXTURE,
+  ],
+  setup
+);
 
 function setup() {
     const dat = window.dat || null;
@@ -53,7 +38,7 @@ function setup() {
 
     let moveLeft = 0;
     let moveRight = 0;
-    let jump = 0;
+    let isJumping = 0;
     let isGrounded = false;
 
     window.addEventListener('keydown', (event) => {
@@ -65,7 +50,7 @@ function setup() {
           moveRight = 1;
           break;
         case JUMP:
-          jump = 1;
+          isJumping = 1;
           break;
       }
     });
@@ -79,12 +64,26 @@ function setup() {
           moveRight = 0;
           break;
           case JUMP:
-            jump = 0;
+            isJumping = 0;
             break;
       }
     });
 
-    const player = new PIXI.Sprite(app.loader.resources[PLAYER_TEXTURE].texture);
+    const wall = new PIXI.Sprite(app.loader.resources[WALL_TEXTURE].texture);
+    app.stage.addChild(wall);
+    wall.x = 325;
+    wall.width = 36;
+    wall.height = 36
+    wall.y = 100 - 12;
+
+    const cabin = new PIXI.Sprite(app.loader.resources[CABIN_TEXTURE].texture);
+    cabin.scale.set(2, 2);
+    app.stage.addChild(cabin);
+
+    console.log(app.loader.resources['./assets/images/player-run.json']);
+    const player = new PIXI.AnimatedSprite(app.loader.resources['./assets/images/player-run.json'].spritesheet.animations['run']);
+    player.animationSpeed = 0.2;
+    player.play();
     app.stage.addChild(player);
     player.x = 10;
     player.y = 25;
@@ -94,21 +93,15 @@ function setup() {
     const ground = new PIXI.Sprite(app.loader.resources[GROUND_TEXTURE].texture);
     app.stage.addChild(ground);
     ground.x = 0;
-    ground.y = 100;
-
-    const wall = new PIXI.Sprite(app.loader.resources[WALL_TEXTURE].texture);
-    app.stage.addChild(wall);
-    wall.x = 128 - 32;
-    wall.width = 32;
-    wall.height = 32
-    wall.y = 100 - 32;
+    ground.y = 128;
+    ground.width = 1000;
 
     const groundBBs = [getBB(ground), getBB(wall)];
 
     app.ticker.add(delta => {
       pV.x = (moveRight - moveLeft) * 5;
       
-      if(isGrounded && jump) {
+      if(isGrounded && isJumping) {
         pV.y = -JUMP_VELOCITY;
       } else {
         pV.y += pA.y;
