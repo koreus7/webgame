@@ -111,21 +111,35 @@ function setup() {
 
     const runSheet = getSheet(app, PLAYER_RUN_SHEET);
 
-    let player = new PIXI.AnimatedSprite([getTexture(app, PLAYER_IDLE_TEXTURE)]);
-    app.stage.addChild(player);
-    let pState = PS_IDLE;
-    let pDir = 1;
+    const playerIdle = new PIXI.AnimatedSprite([getTexture(app, PLAYER_IDLE_TEXTURE)]);
+    playerIdle.visible = false;
+    app.stage.addChild(playerIdle);
+
+    const playerJump = new PIXI.Sprite(getTexture(app, PLAYER_JUMP_TEXTURE));
+    playerJump.visible = false;
+    app.stage.addChild(playerJump);
+
+    const playerWalk = new PIXI.AnimatedSprite(getAnim(runSheet, 'run'));
+    playerWalk.visible = false;
+    playerWalk.animationSpeed = 0.2;
+    app.stage.addChild(playerWalk);
+
+    let player = playerIdle;
+    player.visible = true;
     player.x = 10;
     player.y = 25;
+
+    let pState = PS_IDLE;
+    let pDir = 1;
     let pA = { x: 0, y: 1 };
     let pV = { x: 0, y: 0 };
 
     const swapPlayerSprite = (newSprite) => {
+      player.visible = false;
       newSprite.x = player.x;
       newSprite.y = player.y;
-      app.stage.removeChild(player);
+      newSprite.visible = true;
       player = newSprite;
-      app.stage.addChild(player);
     }
 
     const ground = new PIXI.Sprite(getTexture(app, GROUND_TEXTURE));
@@ -196,29 +210,26 @@ function setup() {
 
       if(!isGrounded && prevState !== PS_JUMPING) {
         pState = PS_JUMPING;
-        swapPlayerSprite(new PIXI.Sprite(getTexture(app, PLAYER_JUMP_TEXTURE)));
+        swapPlayerSprite(playerJump);
         
       } else if(isGrounded && pState === PS_JUMPING) {
         if(pDir === 0) {
           pState = PS_IDLE;
-          swapPlayerSprite(new PIXI.Sprite(getTexture(app, PLAYER_IDLE_TEXTURE)));
+          swapPlayerSprite(playerIdle);
         } else {
           pState = PS_WALKING;
-          swapPlayerSprite(new PIXI.AnimatedSprite(getAnim(runSheet, 'run')));
+          playerWalk.gotoAndPlay(0);
+          swapPlayerSprite(playerWalk);
         }
       } else if(pDir !== prevDir) {
         if(pDir === 0) {
-          console.log('STOP WALKING');
           pState = PS_IDLE;
-          swapPlayerSprite(new PIXI.Sprite(getTexture(app, PLAYER_IDLE_TEXTURE)));
-          
+          swapPlayerSprite(playerIdle);
+
         } else {
-          console.log('NOW WALKING');
           pState = PS_WALKING;
-          const sprite = new PIXI.AnimatedSprite(getAnim(runSheet, 'run'));
-          sprite.animationSpeed = 0.2;
-          sprite.play();
-          swapPlayerSprite(sprite);
+          playerWalk.gotoAndPlay(0);
+          swapPlayerSprite(playerWalk);
         }
       }
     });
