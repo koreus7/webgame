@@ -45,16 +45,13 @@ function setup() {
     const controls = new Controls();
 
     const cabin = Sprite(CABIN_TEXTURE);
-    cabin.x = cabin.width;
-    cabin.scale.set(2, 2);
+    cabin.x = cabin.width / 2;
     app.stage.addChild(cabin);
 
     const candle = Sprite(CANDLE_TEXTURE, { x: 120, y: 43 });
-    candle.scale.set(2, 2);
     app.stage.addChild(candle);
 
     const barrel = Sprite(BARREL_TEXTURE, { x: 321, y: 83 });
-    barrel.scale.set(2, 2);
     app.stage.addChild(barrel);
 
     const barrelGUI = GUI.addFolder('barrel');
@@ -70,7 +67,6 @@ function setup() {
     };
 
     const playerEntity = new StateSprite(playerStates, PS_IDLE, { x: 30, y: 25 });
-    let pState = PS_IDLE;
     let pDir = 1;
     let pFacing = 1;
     let pA = { x: 0, y: 1 };
@@ -98,7 +94,6 @@ function setup() {
     const candleLight = Sprite(CANDLE_LIGHT_TEXTURE);
     candleLight.anchor.y = 0.5;
     candleLight.blendMode = PIXI.BLEND_MODES.LIGHTEN;
-    candleLight.scale.set(2, 2);
     app.stage.addChild(candleLight);
 
     const candleGUI = GUI.addFolder('candle');
@@ -113,7 +108,7 @@ function setup() {
       const player = playerEntity.state;
       const enemy = enemyEntity.state;
 
-      const prevState = pState;
+      const prevState = player.stateName;
       const prevDir = pDir;
 
       pDir = controls.getDirection();
@@ -125,7 +120,8 @@ function setup() {
       
       if(playerEntity.isGrounded && controls.jump) {
         playerEntity.velocity.y = -JUMP_VELOCITY;
-        pState = PS_JUMPING;
+        playerEntity.setState(PS_JUMPING);
+
       } else {
         playerEntity.velocity.y += pA.y;
       }
