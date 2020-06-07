@@ -65,4 +65,12 @@ export default class Entity {
       }
     }
   }
+  
+  destroy() {
+    for(const key in this.states) {
+      app.stage.removeChild(this.states[key]);
+    }
+
+    delete this.states;
+  }
 }

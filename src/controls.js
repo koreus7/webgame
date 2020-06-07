@@ -12,12 +12,12 @@ export default class Controls {
     this.aiming = false;
     this.mouse = null;
 
-    window.addEventListener('mousedown', (event) => {
+    canvas.addEventListener('mousedown', (event) => {
       const canvasBB = canvas.getBoundingClientRect();
       this.aiming = true;
     });
 
-    window.addEventListener('mousemove', (event) => {
+    canvas.addEventListener('mousemove', (event) => {
         const canvasBB = canvas.getBoundingClientRect();
         this.mouse = {
           x: event.clientX - canvasBB.left,
@@ -25,7 +25,7 @@ export default class Controls {
         }
     });
 
-    window.addEventListener('mouseup', (event) => {
+    canvas.addEventListener('mouseup', (event) => {
       this.aiming = false;
     });
 

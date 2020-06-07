@@ -18,12 +18,13 @@ export function Sprite(texture, { x, y, visible = true } = {}) {
   return sprite;
 }
 
-export function AnimatedSprite(anim, { x, y, visible = true, speed = 1 } = {}) {
+export function AnimatedSprite(anim, { x, y, visible = true, speed = 1, loop = true } = {}) {
   const sprite = new PIXI.AnimatedSprite(anim);
   if(x) sprite.x = x;
   if(y) sprite.y = y;
   sprite.visible = visible;
   sprite.animationSpeed = speed;
+  sprite.loop = loop;
   sprite.scale.set(2);
   sprite.anchor.x = 0.5;
   return sprite;
