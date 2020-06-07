@@ -1,13 +1,17 @@
 
 
 export default class Entity {
-  constructor(states, current, { x, y }) {
+  constructor(states, current, { x, y, index }) {
     this.facing = 1;
     this.states = {};
     for(const name in states) {
       this.states[name] = states[name];
       this.states[name].visible = false;
-      app.stage.addChild(this.states[name]);
+      if(index) {
+        app.stage.addChildAt(this.states[name], index);
+      } else {
+        app.stage.addChild(this.states[name]);
+      }
     }
 
     this.stateName = current;

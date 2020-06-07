@@ -1,6 +1,6 @@
 import GUI from './gui.js';
 import { loadAssets, getTexture, getSheet, getAnim } from './lib.js';
-import { getBB, entityCollides } from './collision.js';
+import { getBB, fakeBB, entityCollides, anyCollide } from './collision.js';
 import Controls from './controls.js';
 import assetList, {
   PLAYER_IDLE_TEXTURE,
@@ -27,6 +27,11 @@ const GRAVITY = 1;
 const PS_IDLE = 'IDLE';
 const PS_WALKING = 'WALKING';
 const PS_JUMPING = 'JUMPING';
+
+const traceConfig = {
+  aim: false,
+  collision: false
+}
 
 const app = window.app = new PIXI.Application({
   backgroundColor: 0xf0e2e2,
@@ -94,6 +99,8 @@ function setup() {
 
     const entities = [playerEntity, enemyEntity];
 
+    const knifeIndex = app.stage.children.length;
+
     const ground = Sprite(GROUND_TEXTURE, { x: 100, y: 128 });
     ground.width = 1000;
     app.stage.addChild(ground);
@@ -120,6 +127,17 @@ function setup() {
     candleGUI.add(candleLightConfig, 'yOffset').min(-64).max(64);
     candleGUI.add(candleLightConfig, 'alpha').min(0.01).max(1.0);
 
+    function traceBB(bb) {
+      if(traceConfig.collision) {
+        draw.moveTo(bb.left, bb.top)
+          .lineStyle(1, 0xff0000)
+          .lineTo(bb.right, bb.top)
+          .lineTo(bb.right, bb.bottom)
+          .lineTo(bb.left, bb.bottom)
+          .lineTo(bb.left, bb.top);
+      }
+    }
+
     const chargerSheet = getSheet(CHARGER_SHEET);
     const charger = new PIXI.Container();
     const chargerAnim = new PIXI.AnimatedSprite(getAnim(chargerSheet, 'charger'));
@@ -131,12 +149,9 @@ function setup() {
     charger.addChild(chargerAnim);
     app.stage.addChild(charger);
 
-    const chargerConfig = {
-      trace: false,
-    }
-
-    const throwGUI = GUI.addFolder('throw');
-    throwGUI.add(chargerConfig, 'trace');
+    const traceGUI = GUI.addFolder('trace');
+    traceGUI.add(traceConfig, 'aim');
+    traceGUI.add(traceConfig, 'collision');
 
     const draw = new PIXI.Graphics();
     app.stage.addChild(draw);
@@ -146,6 +161,7 @@ function setup() {
     const knives = [];
 
     app.ticker.add(delta => {
+      draw.clear();
       const player = playerEntity.state;
       const enemy = enemyEntity.state;
 
@@ -164,14 +180,13 @@ function setup() {
         playerEntity.setState(PS_JUMPING);
 
       } else {
-        playerEntity.velocity.y += GRAVITY;
+        playerEntity.velocity.y += GRAVITY * delta;
       }
 
-      enemyEntity.velocity.y += GRAVITY;
+      enemyEntity.velocity.y += GRAVITY * delta;
 
     if(controls.mouse) {
-      draw.clear();
-      if(chargerConfig.trace) {
+      if(traceConfig.aim) {
         draw.lineStyle(1, 0).moveTo(charger.x, charger.y).lineTo(controls.mouse.x, controls.mouse.y);
       }
       const v = { x: controls.mouse.x - charger.x, y: controls.mouse.y - charger.y };
@@ -188,8 +203,10 @@ function setup() {
 
       if(aiming && !controls.aiming) {
         aiming = false;
-        const knife = new Entity({ knife: Sprite(KNIFE_TEXTURE) }, 'knife', charger);
+        const knife = new Entity({ knife: Sprite(KNIFE_TEXTURE,) }, 'knife', { x: charger.x, y: charger.y, index: knifeIndex });
         knife.frozen = false;
+        knife.state.anchor.y = 0.5;
+        knife.state.anchor.x = 0.5;
         knife.velocity.x = v.x / mag * (chargerAnim.currentFrame + 1) * 5;
         knife.velocity.y = v.y / mag * (chargerAnim.currentFrame + 1) * 5;
         knives.push(knife);
@@ -203,26 +220,50 @@ function setup() {
       candleLight.alpha = candleLightConfig.alpha;
 
       for(const knife of knives) {
-        if(!knife.frozen) {
-          const knifeBB = getBB(knife.state);
-          const collisions = entityCollides(knifeBB, groundBBs);
-          if(collisions.length) {
-            knife.frozen = true;
-            continue;
-          }
+        if(knife.frozen) {
+          traceBB(fakeBB(knife.state, 10, 10));
+          continue;
+        };
 
-          knife.velocity.y += GRAVITY;
-          knife.state.x += knife.velocity.x;
-          knife.state.y += knife.velocity.y;
-          knife.state.angle = 90 + (Math.atan2(knife.velocity.y, knife.velocity.x) * 180 / Math.PI);
+        knife.velocity.y += GRAVITY * delta;
+        knife.state.x += knife.velocity.x * delta;
+        knife.state.y += knife.velocity.y * delta;
+        knife.state.angle = 90 + (Math.atan2(knife.velocity.y, knife.velocity.x) * 180 / Math.PI);
+        
+        const nextPos = {
+          x: knife.state.x + knife.velocity.x * delta,
+          y: knife.state.y + knife.velocity.y * delta
+        };
+
+        let nextBB = fakeBB(nextPos, 10, 10);
+        if(anyCollide(nextBB, groundBBs)) {
+          knife.frozen = true;
+
+          while(anyCollide(nextBB, groundBBs)) {
+            nextPos.x -= knife.velocity.x * delta / 5;
+            nextPos.y -= knife.velocity.y * delta / 5;
+            nextBB = fakeBB(nextPos, 10, 10);
+          }
+          nextPos.x += knife.velocity.x * delta / 3;
+          nextPos.y += knife.velocity.y * delta / 3;
+        }
+
+        knife.state.x = nextPos.x;
+        knife.state.y = nextPos.y;
+      }
+      
+      if(traceConfig.collision) {
+        for(const groundBB of groundBBs) {
+          traceBB(groundBB);
         }
       }
 
       for(const entity of entities) {
         const prevBB = getBB(entity.state);
-        entity.state.x += entity.velocity.x;
-        entity.state.y += entity.velocity.y;
+        entity.state.x += entity.velocity.x * delta;
+        entity.state.y += entity.velocity.y * delta;
         let nextBB = getBB(entity.state);
+        traceBB(nextBB);
         entity.isGrounded = false;
         const collisions = entityCollides(nextBB, groundBBs);
         for(const collided of collisions) {
