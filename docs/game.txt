@@ -17,3 +17,4 @@ You are a chef on a ship, and you're running out of food. You need to kill and c
 - Climb on the outside of the hull by exiting via a porthole
   - Some way of limiting this mechanic
 - Climb on the rigging
+- Feed captain his favourite meal, unlock captain's sword - throw in straight line

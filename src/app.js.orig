@@ -50,30 +50,50 @@ function setup() {
     cabin.x = cabin.width / 2;
     app.stage.addChild(cabin);
 
+<<<<<<< HEAD
 
-    const candleSheet = getSheet(CANDLE_SHEET);
+    const candleSheet = getSheet(app, CANDLE_SHEET);
     const candle = AnimatedSprite(getAnim(candleSheet, 'candle_animated'), { x: 120, y: 43 });
     candle.animationSpeed = 0.2;
     candle.play();
     candle.scale.set(2, 2);
+=======
+    const candle = Sprite(CANDLE_TEXTURE, { x: 120, y: 43 });
+>>>>>>> master
     app.stage.addChild(candle);
 
     const barrel = Sprite(BARREL_TEXTURE, { x: 321, y: 83 });
-    barrel.scale.set(2, 2);
     app.stage.addChild(barrel);
 
     const barrelGUI = GUI.addFolder('barrel');
     barrelGUI.add(barrel, 'x').min(0).max(800);
     barrelGUI.add(barrel, 'y').min(0).max(200);
 
+<<<<<<< HEAD
     const oven = Sprite(OVEN_TEXTURE, { x: 30, y: 41 });
     oven.scale.set(2,2);
     app.stage.addChild(oven);
     const ovenGUI = GUI.addFolder('oven');
     ovenGUI.add(oven, 'x').min(0).max(800);
     ovenGUI.add(oven, 'y').min(0).max(200);
-    const runSheet = getSheet(PLAYER_RUN_SHEET);
 
+    const runSheet = getSheet(app, PLAYER_RUN_SHEET);
+
+    const playerIdle = AnimatedSprite([getTexture(app, PLAYER_IDLE_TEXTURE)]);
+    playerIdle.visible = false;
+    app.stage.addChild(playerIdle);
+
+    const playerJump = Sprite(PLAYER_JUMP_TEXTURE);
+    playerJump.visible = false;
+    app.stage.addChild(playerJump);
+
+    const playerWalk = AnimatedSprite(getAnim(runSheet, 'run'));
+    playerWalk.visible = false;
+    playerWalk.animationSpeed = 0.2;
+    app.stage.addChild(playerWalk);
+=======
+    const runSheet = getSheet(PLAYER_RUN_SHEET);
+>>>>>>> master
 
     const playerStates = {
       [PS_IDLE]: Sprite(PLAYER_IDLE_TEXTURE),
@@ -109,7 +129,6 @@ function setup() {
     const candleLight = Sprite(CANDLE_LIGHT_TEXTURE);
     candleLight.anchor.y = 0.5;
     candleLight.blendMode = PIXI.BLEND_MODES.LIGHTEN;
-    candleLight.scale.set(2, 2);
     app.stage.addChild(candleLight);
 
     const candleGUI = GUI.addFolder('candle');
@@ -133,12 +152,20 @@ function setup() {
         pFacing = pDir;
       }
 
-      playerEntity.velocity.x = pDir * 5;
+<<<<<<< HEAD
+      pV.x = pDir * 5;
 
+      if(isGrounded && controls.jump) {
+        pV.y = -JUMP_VELOCITY;
+        pState = PS_JUMPING;
+=======
+      playerEntity.velocity.x = pDir * 5;
+      
       if(playerEntity.isGrounded && controls.jump) {
         playerEntity.velocity.y = -JUMP_VELOCITY;
         playerEntity.setState(PS_JUMPING);
 
+>>>>>>> master
       } else {
         playerEntity.velocity.y += pA.y;
       }
@@ -179,10 +206,18 @@ function setup() {
         }
       }
 
+<<<<<<< HEAD
+      if(!isGrounded && prevState !== PS_JUMPING) {
+        pState = PS_JUMPING;
+        swapPlayerSprite(playerJump);
+
+      } else if(isGrounded && pState === PS_JUMPING) {
+=======
       if(!playerEntity.isGrounded && playerEntity.stateName !== PS_JUMPING) {
         playerEntity.setState(PS_JUMPING);
-
+        
       } else if(playerEntity.isGrounded && playerEntity.stateName === PS_JUMPING) {
+>>>>>>> master
         if(pDir === 0) {
           playerEntity.setState(PS_IDLE);
 
