@@ -145,7 +145,7 @@ function setup() {
         playerBB = getBB(player);
       }
 
-      if(!isGrounded && pState !== PS_JUMPING) {
+      if(!isGrounded && prevState !== PS_JUMPING) {
         pState = PS_JUMPING;
         swapPlayerSprite(new PIXI.Sprite(getTexture(app, PLAYER_JUMP_TEXTURE)));
         
