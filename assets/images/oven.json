@@ -1,0 +1,95 @@
+{"frames": {
+
+"oven1.png":
+{
+	"frame": {"x":0,"y":0,"w":34,"h":44},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":34,"h":44},
+	"sourceSize": {"w":34,"h":44}
+},
+"oven2.png":
+{
+	"frame": {"x":34,"y":0,"w":34,"h":44},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":34,"h":44},
+	"sourceSize": {"w":34,"h":44}
+},
+"oven3.png":
+{
+	"frame": {"x":68,"y":0,"w":34,"h":44},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":34,"h":44},
+	"sourceSize": {"w":34,"h":44}
+},
+"oven4.png":
+{
+	"frame": {"x":102,"y":0,"w":34,"h":44},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":34,"h":44},
+	"sourceSize": {"w":34,"h":44}
+},
+"oven5.png":
+{
+	"frame": {"x":136,"y":0,"w":34,"h":44},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":34,"h":44},
+	"sourceSize": {"w":34,"h":44}
+},
+"oven6.png":
+{
+	"frame": {"x":170,"y":0,"w":34,"h":44},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":34,"h":44},
+	"sourceSize": {"w":34,"h":44}
+},
+"oven7.png":
+{
+	"frame": {"x":204,"y":0,"w":34,"h":44},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":34,"h":44},
+	"sourceSize": {"w":34,"h":44}
+},
+"oven8.png":
+{
+	"frame": {"x":238,"y":0,"w":34,"h":44},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":34,"h":44},
+	"sourceSize": {"w":34,"h":44}
+},
+"oven9.png":
+{
+	"frame": {"x":272,"y":0,"w":34,"h":44},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":34,"h":44},
+	"sourceSize": {"w":34,"h":44}
+},
+"oven10.png":
+{
+	"frame": {"x":306,"y":0,"w":34,"h":44},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":34,"h":44},
+	"sourceSize": {"w":34,"h":44}
+}},
+"animations": {
+	"oven": ["oven1.png","oven2.png","oven3.png","oven4.png","oven5.png","oven6.png","oven7.png","oven8.png","oven9.png","oven10.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "oven.png",
+	"format": "RGBA8888",
+	"size": {"w":340,"h":44},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:88c93c9ee7a3d64a49d1214a560f91ed:6ad6c1f46d91ed56b98f00551c69d3c8:0e7422ed094280528691839f47c7f288$"
+}
+}
