@@ -71,7 +71,6 @@ function setup() {
     const candle = AnimatedSprite(getAnim(candleSheet, 'candle_animated'), { x: 120, y: 43 });
     candle.animationSpeed = 0.2;
     candle.play();
-    candle.scale.set(2, 2);
     app.stage.addChild(candle);
 
     const runSheet = getSheet(PLAYER_RUN_SHEET);
@@ -99,7 +98,6 @@ function setup() {
     const knifeIndex = app.stage.children.length;
 
     const barrel = Sprite(BARREL_TEXTURE, { x: 321, y: 83 });
-    barrel.scale.set(2, 2);
     app.stage.addChild(barrel);
 
     const barrelGUI = GUI.addFolder('barrel');
@@ -130,7 +128,6 @@ function setup() {
     const candleLight = Sprite(CANDLE_LIGHT_TEXTURE);
     candleLight.anchor.y = 0.5;
     candleLight.blendMode = PIXI.BLEND_MODES.LIGHTEN;
-    candleLight.scale.set(2, 2);
     app.stage.addChild(candleLight);
 
     const candleGUI = GUI.addFolder('candle');
