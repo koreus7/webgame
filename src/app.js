@@ -12,6 +12,7 @@ import assetList, {
   BARREL_TEXTURE,
   ENEMY_IDLE_TEXTURE
 } from './assets.js';
+import { Sprite, AnimatedSprite } from './lib.js';
 
 const PLAYER_VELOCITY = 2;
 const JUMP_VELOCITY = 10;
@@ -20,34 +21,17 @@ const PS_IDLE = 'IDLE';
 const PS_WALKING = 'WALKING';
 const PS_JUMPING = 'JUMPING';
 
-const app = new PIXI.Application({
+const app = window.app = new PIXI.Application({
   backgroundColor: 0xf0e2e2,
   width: 800,
   height: 600,
 });
-
-function Sprite(texture, { x, y } = {}) {
-  const sprite = new PIXI.Sprite(getTexture(app, texture));
-  if(x) sprite.x = x;
-  if(y) sprite.y = y;
-  sprite.anchor.x = 0.5;
-  return sprite;
-}
-
-function AnimatedSprite(anim, { x, y } = {}) {
-  const sprite = new PIXI.AnimatedSprite(anim);
-  if(x) sprite.x = x;
-  if(y) sprite.y = y;
-  sprite.anchor.x = 0.5;
-  return sprite;
-}
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
 document.body.appendChild(app.view);
 
 loadAssets(
-  app,
   assetList,
   setup
 );
@@ -78,19 +62,15 @@ function setup() {
     barrelGUI.add(barrel, 'x').min(0).max(800);
     barrelGUI.add(barrel, 'y').min(0).max(200);
 
-    const runSheet = getSheet(app, PLAYER_RUN_SHEET);
+    const runSheet = getSheet(PLAYER_RUN_SHEET);
 
-    const playerIdle = AnimatedSprite([getTexture(app, PLAYER_IDLE_TEXTURE)]);
-    playerIdle.visible = false;
+    const playerIdle = Sprite(PLAYER_IDLE_TEXTURE, { visible: false });
     app.stage.addChild(playerIdle);
 
-    const playerJump = Sprite(PLAYER_JUMP_TEXTURE);
-    playerJump.visible = false;
+    const playerJump = Sprite(PLAYER_JUMP_TEXTURE, { visible: false });
     app.stage.addChild(playerJump);
 
-    const playerWalk = AnimatedSprite(getAnim(runSheet, 'run'));
-    playerWalk.visible = false;
-    playerWalk.animationSpeed = 0.2;
+    const playerWalk = AnimatedSprite(getAnim(runSheet, 'run'), { visible: false, speed: 0.2 });
     app.stage.addChild(playerWalk);
 
     let player = playerIdle;
@@ -118,6 +98,9 @@ function setup() {
     app.stage.addChild(ground);
 
     const groundBBs = [getBB(ground), getBB(barrel)];
+
+    const enemy = Sprite(ENEMY_IDLE_TEXTURE);
+    app.stage.addChild(enemy);
 
     const candleLightConfig = {
       xOffset: 0,
