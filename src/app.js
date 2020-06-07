@@ -5,6 +5,9 @@ const PLAYER_TEXTURE = './assets/images/player.png';
 const GROUND_TEXTURE = './assets/images/ground.png';
 const WALL_TEXTURE = './assets/images/wall.png';
 const CABIN_TEXTURE = './assets/images/cabin.png';
+const CANDLE_TEXTURE = './assets/images/candle.png';
+const CANDLE_LIGHT_TEXTURE = './assets/images/candle-light.png';
+const BARREL_TEXTURE = './assets/images/barrel.png'
 const MOVE_LEFT = 37;
 const MOVE_RIGHT = 39;
 const JUMP = 32;
@@ -29,7 +32,10 @@ loadAssets(
     './assets/images/player-run.json',
     GROUND_TEXTURE,
     WALL_TEXTURE,
-    CABIN_TEXTURE
+    CABIN_TEXTURE,
+    CANDLE_TEXTURE,
+    CANDLE_LIGHT_TEXTURE,
+    BARREL_TEXTURE,
   ],
   setup
 );
@@ -83,6 +89,33 @@ function setup() {
     cabin.scale.set(2, 2);
     app.stage.addChild(cabin);
 
+
+
+
+    const candle = new PIXI.Sprite(app.loader.resources[CANDLE_TEXTURE].texture);
+    candle.scale.set(2, 2);
+    candle.x = 120;
+    candle.y = 43;
+    app.stage.addChild(candle);
+
+    const candleLightConfig = {
+      xOffset: -41,
+      yOffset: -45,
+      alpha: 0.3,
+    }
+
+
+
+    const barrel = new PIXI.Sprite(app.loader.resources[BARREL_TEXTURE].texture);
+    barrel.x = 321;
+    barrel.y = 83;
+    barrel.scale.set(2, 2);
+    app.stage.addChild(barrel);
+
+    const barrelGUI = GUI.addFolder('barrel');
+    barrelGUI.add(barrel, 'x').min(0).max(800);
+    barrelGUI.add(barrel, 'y').min(0).max(200);
+
     const player = new PIXI.AnimatedSprite(app.loader.resources['./assets/images/player-run.json'].spritesheet.animations['run']);
     player.animationSpeed = 0.2;
     player.play();
@@ -100,9 +133,27 @@ function setup() {
 
     const groundBBs = [getBB(ground), getBB(wall)];
 
+    const candleLight = new PIXI.Sprite(app.loader.resources[CANDLE_LIGHT_TEXTURE].texture);
+    candleLight.blendMode = PIXI.BLEND_MODES.LIGHTEN;
+    candleLight.scale.set(2, 2);
+    app.stage.addChild(candleLight);
+
+    const candleGUI = GUI.addFolder('candle');
+    candleGUI.add(candle, 'x').min(0).max(200);
+    candleGUI.add(candle, 'y').min(0).max(200);
+    candleGUI.add(candleLightConfig, 'xOffset').min(-64).max(64);
+    candleGUI.add(candleLightConfig, 'yOffset').min(-64).max(64);
+    candleGUI.add(candleLightConfig, 'alpha').min(0.01).max(1.0);
+
+
     app.ticker.add(delta => {
+
+      candleLight.x = candle.x + candleLightConfig.xOffset;
+      candleLight.y = candle.y + candleLightConfig.yOffset;
+      candleLight.alpha = candleLightConfig.alpha;
+
       pV.x = (moveRight - moveLeft) * 5;
-      
+
       if(isGrounded && isJumping) {
         pV.y = -JUMP_VELOCITY;
       } else {
