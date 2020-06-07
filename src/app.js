@@ -3,7 +3,7 @@ import { loadAssets, getTexture, getSheet, getAnim } from './lib.js';
 import { getBB, fakeBB, entityCollides, anyCollide } from './collision.js';
 import Controls from './controls.js';
 import assetList, {
-  PLAYER_IDLE_TEXTURE,
+  PLAYER_IDLE_SHEET,
   PLAYER_JUMP_TEXTURE,
   PLAYER_RUN_SHEET,
   GROUND_TEXTURE,
@@ -40,8 +40,8 @@ const traceConfig = {
 
 const app = window.app = new PIXI.Application({
   backgroundColor: 0,
-  width: 800,
-  height: 600,
+  width: document.body.clientWidth,
+  height: document.body.clientHeight,
 });
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
@@ -57,6 +57,7 @@ function setup() {
     const dat = window.dat || null;
     GUI.init(dat);
 
+    app.stage.worldTransform.scale(2, 2);
     const controls = new Controls(app.view);
 
     const cabin = Sprite(CABIN_TEXTURE);
@@ -66,7 +67,6 @@ function setup() {
     cabin2.x = cabin.width * 1.5;
     app.stage.addChild(cabin2);
 
-
     const candleSheet = getSheet(CANDLE_SHEET);
     const candle = AnimatedSprite(getAnim(candleSheet, 'candle_animated'), { x: 120, y: 43 });
     candle.animationSpeed = 0.2;
@@ -74,8 +74,9 @@ function setup() {
     app.stage.addChild(candle);
 
     const runSheet = getSheet(PLAYER_RUN_SHEET);
+    const idleSheet = getSheet(PLAYER_IDLE_SHEET);
     const playerStates = {
-      [PS_IDLE]: Sprite(PLAYER_IDLE_TEXTURE),
+      [PS_IDLE]: AnimatedSprite(getAnim(idleSheet, 'idle'), { speed: 0.2 }),
       [PS_JUMPING]: Sprite(PLAYER_JUMP_TEXTURE),
       [PS_WALKING]: AnimatedSprite(getAnim(runSheet, 'run'), { speed: 0.2 }),
     };
@@ -138,10 +139,10 @@ function setup() {
     candleGUI.add(candleLightConfig, 'yOffset').min(-64).max(64);
     candleGUI.add(candleLightConfig, 'alpha').min(0.01).max(1.0);
 
-    function traceBB(bb) {
+    function traceBB(bb, colour) {
       if(traceConfig.collision) {
         draw.moveTo(bb.left, bb.top)
-          .lineStyle(1, 0xff0000)
+          .lineStyle(1, colour)
           .lineTo(bb.right, bb.top)
           .lineTo(bb.right, bb.bottom)
           .lineTo(bb.left, bb.bottom)
@@ -231,8 +232,8 @@ function setup() {
         knife.frozen = false;
         knife.state.anchor.y = 0.5;
         knife.state.anchor.x = 0.5;
-        knife.velocity.x = v.x / mag * (chargerAnim.currentFrame + 1) * 5;
-        knife.velocity.y = v.y / mag * (chargerAnim.currentFrame + 1) * 5;
+        knife.velocity.x = v.x / mag * (chargerAnim.currentFrame + 1) * 3;
+        knife.velocity.y = v.y / mag * (chargerAnim.currentFrame + 1) * 3;
         knives.add(knife);
         chargerAnim.gotoAndStop(0);
         chargerAnim.visible = false;
@@ -246,7 +247,7 @@ function setup() {
       for(const knife of knives) {
         if(knife.frozen) {
           const pickupBB = fakeBB(knife.state, 30, 30);
-          traceBB(pickupBB);
+          traceBB(pickupBB, 0xffff00);
 
           if(anyCollide(pickupBB, [getBB(playerEntity.state)])) {
             pKnifeSprites[pKnives].alpha = 1;
@@ -268,6 +269,7 @@ function setup() {
         };
 
         let nextBB = fakeBB(nextPos, 10, 10);
+        traceBB(nextBB, 0xff0000);
         const enemyBBs = [{ entity: enemyEntity, ...getBB(enemyEntity.state) }];
         const hits = entityCollides(nextBB, enemyBBs);
         if(hits.length) {
@@ -293,7 +295,7 @@ function setup() {
       
       if(traceConfig.collision) {
         for(const groundBB of groundBBs) {
-          traceBB(groundBB);
+          traceBB(groundBB, 0x00FFFF);
         }
       }
 
@@ -302,7 +304,7 @@ function setup() {
         entity.state.x += entity.velocity.x * delta;
         entity.state.y += entity.velocity.y * delta;
         let nextBB = getBB(entity.state);
-        traceBB(nextBB);
+        traceBB(nextBB, 0x00ff00);
         entity.isGrounded = false;
         const collisions = entityCollides(nextBB, groundBBs);
         for(const collided of collisions) {

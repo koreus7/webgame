@@ -1,6 +1,6 @@
 
 // player
-export const PLAYER_IDLE_TEXTURE = './assets/images/player/player-idle.png';
+export const PLAYER_IDLE_SHEET = './assets/images/player/player-idle.json';
 export const PLAYER_JUMP_TEXTURE = './assets/images/player/player-jump.png';
 export const PLAYER_RUN_SHEET = './assets/images/player/player-run.json';
 
@@ -23,7 +23,7 @@ export const ENEMY_IDLE_TEXTURE = './assets/images/enemy-idle.png';
 export const ENEMY_DEATH_SHEET = './assets/images/enemy-death.json';
 
 export default [
-  PLAYER_IDLE_TEXTURE,
+  PLAYER_IDLE_SHEET,
   PLAYER_JUMP_TEXTURE,
   PLAYER_RUN_SHEET,
 
