@@ -1,34 +1,55 @@
 import GUI from './gui.js';
 import { loadAssets, getTexture, getSheet, getAnim } from './lib.js';
-import { getBB, entityCollides } from './collision.js';
+import { getBB, fakeBB, entityCollides, anyCollide } from './collision.js';
 import Controls from './controls.js';
+import Trigger from './trigger.js';
 import assetList, {
-  PLAYER_IDLE_TEXTURE,
+  PLAYER_IDLE_SHEET,
   PLAYER_JUMP_TEXTURE,
   PLAYER_RUN_SHEET,
+  PLAYER_DRAG_SHEET,
   GROUND_TEXTURE,
   CABIN_TEXTURE,
   CANDLE_TEXTURE,
   CANDLE_SHEET,
   CANDLE_LIGHT_TEXTURE,
   BARREL_TEXTURE,
+  ENEMY_IDLE_TEXTURE,
+  ENEMY_CORPSE_TEXTURE,
+  CHARGER_SHEET,
   OVEN_TEXTURE,
-  ENEMY_IDLE_TEXTURE
+  KNIFE_TEXTURE,
+  OVEN_SHEET,
+  ENEMY_DEATH_SHEET,
 } from './assets.js';
 import { Sprite, AnimatedSprite } from './lib.js';
-import StateSprite from './Entity.js';
+import Entity from './Entity.js';
 
 const PLAYER_VELOCITY = 2;
 const JUMP_VELOCITY = 10;
+const GRAVITY = 1;
 
 const PS_IDLE = 'IDLE';
 const PS_WALKING = 'WALKING';
 const PS_JUMPING = 'JUMPING';
+const PS_DRAGGING  = 'DRAGGING';
+
+
+const EN_IDLE = 'IDLE';
+const EN_DEATH = 'DEATH';
+
+const EN_IDLE = 'IDLE';
+const EN_DEATH = 'DEATH';
+
+const traceConfig = {
+  aim: false,
+  collision: false
+}
 
 const app = window.app = new PIXI.Application({
-  backgroundColor: 0xf0e2e2,
-  width: 800,
-  height: 600,
+  backgroundColor: 0,
+  width: document.body.clientWidth,
+  height: document.body.clientHeight,
 });
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
@@ -44,23 +65,88 @@ function setup() {
     const dat = window.dat || null;
     GUI.init(dat);
 
-    const controls = new Controls();
+    app.stage.worldTransform.scale(2, 2);
+    const controls = new Controls(app.view);
 
     const cabin = Sprite(CABIN_TEXTURE);
     cabin.x = cabin.width / 2;
     app.stage.addChild(cabin);
+    const cabin2 = Sprite(CABIN_TEXTURE);
+    cabin2.x = cabin.width * 1.5;
+    app.stage.addChild(cabin2);
 
-<<<<<<< HEAD
-
-    const candleSheet = getSheet(app, CANDLE_SHEET);
+    const candleSheet = getSheet(CANDLE_SHEET);
     const candle = AnimatedSprite(getAnim(candleSheet, 'candle_animated'), { x: 120, y: 43 });
     candle.animationSpeed = 0.2;
     candle.play();
-    candle.scale.set(2, 2);
-=======
-    const candle = Sprite(CANDLE_TEXTURE, { x: 120, y: 43 });
->>>>>>> master
     app.stage.addChild(candle);
+
+    const runSheet = getSheet(PLAYER_RUN_SHEET);
+    const idleSheet = getSheet(PLAYER_IDLE_SHEET);
+<<<<<<< HEAD
+    const dragSheet = getSheet(PLAYER_DRAG_SHEET);
+
+=======
+>>>>>>> master
+    const playerStates = {
+      [PS_IDLE]: AnimatedSprite(getAnim(idleSheet, 'idle'), { speed: 0.2 }),
+      [PS_JUMPING]: Sprite(PLAYER_JUMP_TEXTURE),
+      [PS_WALKING]: AnimatedSprite(getAnim(runSheet, 'run'), { speed: 0.2 }),
+      [PS_DRAGGING]: AnimatedSprite(getAnim(dragSheet, 'drag'), { speed: 0.2 } ),
+    };
+
+    const playerEntity = new Entity(playerStates, PS_IDLE, { x: 100, y: 25 });
+    let pDir = 1;
+    let pFacing = 1;
+    let pKnives = 3;
+
+    const deathSheet = getSheet(ENEMY_DEATH_SHEET);
+    const enemyStates = {
+      [EN_IDLE]: Sprite(ENEMY_IDLE_TEXTURE),
+      [EN_DEATH]: AnimatedSprite(getAnim(deathSheet, 'enemy-death'), { loop: false, speed: 0.5 }),
+    };
+
+    const enemyEntity = new Entity(enemyStates, EN_IDLE, { x: 400, y: 25 });
+
+    let draggableCorpse = null;
+    let dragMode = false;
+    const corpseStates = {
+      dead: Sprite(ENEMY_CORPSE_TEXTURE),
+    }
+    const corpseEntity = new Entity(corpseStates, 'dead', { x: 400, y:25 });
+    const triggerZone = new Trigger({ localX: -15, localY: 0, width: 20, height: 20 },
+      {
+        onEnter: () => {
+          draggableCorpse = corpseEntity;
+        },
+        onExit: () => {
+          if(!dragMode) {
+            draggableCorpse = null;
+          }
+        },
+    });
+    const dragTriggerGUI = GUI.addFolder('dragTrigger');
+    dragTriggerGUI.add(triggerZone, 'localX');
+    dragTriggerGUI.add(triggerZone, 'localY');
+    dragTriggerGUI.add(triggerZone, 'width');
+    dragTriggerGUI.add(triggerZone, 'height');
+    corpseEntity.addTrigger(triggerZone);
+    const dragText = new PIXI.Text(`Press E to drag`);
+    app.stage.addChild(dragText);
+
+    const dragConfig = {
+      corpseOffsetX: 25,
+      corpseOffsetFlipX: -48,
+      corpseOffsetY: 46,
+    };
+    const dragGUI = GUI.addFolder('dragging');
+    dragGUI.add(dragConfig, 'corpseOffsetX').min(0).max(64);
+    dragGUI.add(dragConfig, 'corpseOffsetFlipX').min(-64).max(64);
+    dragGUI.add(dragConfig, 'corpseOffsetY').min(0).max(64);
+
+    const entities = [playerEntity, enemyEntity, corpseEntity];
+
+    const knifeIndex = app.stage.children.length;
 
     const barrel = Sprite(BARREL_TEXTURE, { x: 321, y: 83 });
     app.stage.addChild(barrel);
@@ -69,56 +155,20 @@ function setup() {
     barrelGUI.add(barrel, 'x').min(0).max(800);
     barrelGUI.add(barrel, 'y').min(0).max(200);
 
-<<<<<<< HEAD
-    const oven = Sprite(OVEN_TEXTURE, { x: 30, y: 41 });
-    oven.scale.set(2,2);
+    const ovenSheet = getSheet(OVEN_SHEET);
+    const oven = AnimatedSprite(getAnim(ovenSheet, 'oven'), { x: 30, y: 41, speed: 0.15 });
+    oven.play();
     app.stage.addChild(oven);
     const ovenGUI = GUI.addFolder('oven');
     ovenGUI.add(oven, 'x').min(0).max(800);
     ovenGUI.add(oven, 'y').min(0).max(200);
 
-    const runSheet = getSheet(app, PLAYER_RUN_SHEET);
-
-    const playerIdle = AnimatedSprite([getTexture(app, PLAYER_IDLE_TEXTURE)]);
-    playerIdle.visible = false;
-    app.stage.addChild(playerIdle);
-
-    const playerJump = Sprite(PLAYER_JUMP_TEXTURE);
-    playerJump.visible = false;
-    app.stage.addChild(playerJump);
-
-    const playerWalk = AnimatedSprite(getAnim(runSheet, 'run'));
-    playerWalk.visible = false;
-    playerWalk.animationSpeed = 0.2;
-    app.stage.addChild(playerWalk);
-=======
-    const runSheet = getSheet(PLAYER_RUN_SHEET);
->>>>>>> master
-
-    const playerStates = {
-      [PS_IDLE]: Sprite(PLAYER_IDLE_TEXTURE),
-      [PS_JUMPING]: Sprite(PLAYER_JUMP_TEXTURE),
-      [PS_WALKING]: AnimatedSprite(getAnim(runSheet, 'run'), { speed: 0.2 }),
-    };
-
-    const playerEntity = new StateSprite(playerStates, PS_IDLE, { x: 30, y: 25 });
-    let pDir = 1;
-    let pFacing = 1;
-    let pA = { x: 0, y: 1 };
-
-    const enemyStates = {
-      idle: Sprite(ENEMY_IDLE_TEXTURE)
-    };
-
-    const enemyEntity = new StateSprite(enemyStates, 'idle', { x: 200, y: 25 });
-
-    const entities = [playerEntity, enemyEntity];
-
     const ground = Sprite(GROUND_TEXTURE, { x: 100, y: 128 });
     ground.width = 1000;
+    ground.x = ground.width / 2;
     app.stage.addChild(ground);
 
-    const groundBBs = [getBB(ground), getBB(barrel)];
+    const groundBBs = [getBB(ground), getBB(barrel), getBB(oven)];
 
     const candleLightConfig = {
       xOffset: 0,
@@ -139,8 +189,81 @@ function setup() {
     candleGUI.add(candleLightConfig, 'yOffset').min(-64).max(64);
     candleGUI.add(candleLightConfig, 'alpha').min(0.01).max(1.0);
 
+<<<<<<< HEAD
+    function traceBB(bb, color = 0xff0000) {
+      if(traceConfig.collision) {
+        draw.moveTo(bb.left, bb.top)
+          .lineStyle(1, color)
+=======
+    function traceBB(bb, colour) {
+      if(traceConfig.collision) {
+        draw.moveTo(bb.left, bb.top)
+          .lineStyle(1, colour)
+>>>>>>> master
+          .lineTo(bb.right, bb.top)
+          .lineTo(bb.right, bb.bottom)
+          .lineTo(bb.left, bb.bottom)
+          .lineTo(bb.left, bb.top);
+      }
+    }
+
+    const chargerSheet = getSheet(CHARGER_SHEET);
+    const charger = new PIXI.Container();
+    const chargerAnim = new PIXI.AnimatedSprite(getAnim(chargerSheet, 'charger'));
+    chargerAnim.anchor.y = 0.5;
+    chargerAnim.animationSpeed = 0.1;
+    chargerAnim.scale.set(2);
+    chargerAnim.x = 10;
+    chargerAnim.visible = false;
+    charger.addChild(chargerAnim);
+    app.stage.addChild(charger);
+
+    const pKnifeSprites = [];
+    for(let i = 0; i < pKnives; i++) {
+      const knifeTally = Sprite(KNIFE_TEXTURE);
+      knifeTally.scale.set(4);
+      app.stage.addChild(knifeTally);
+      knifeTally.angle = 45;
+      knifeTally.x = app.view.width - 100 + (i * (knifeTally.width + 20));
+      knifeTally.y = app.view.height - 50;
+      pKnifeSprites.push(knifeTally);
+    }
+
+    const traceGUI = GUI.addFolder('trace');
+    traceGUI.add(traceConfig, 'aim');
+    traceGUI.add(traceConfig, 'collision');
+
+    const draw = new PIXI.Graphics();
+    app.stage.addChild(draw);
+
+    let aiming = false;
+
+    const knives = new Set();
 
     app.ticker.add(delta => {
+
+      dragText.visible = !!draggableCorpse && !dragMode;
+      dragText.x = draggableCorpse ? draggableCorpse.state.x : 0;
+      dragText.y = 20;
+
+      if(controls.interact && draggableCorpse && !dragMode) {
+        dragMode = true;
+        pFacing = -pFacing;
+      }
+
+      if(controls.drop && dragMode) {
+        dragMode = false;
+        playerEntity.velocity.x = 0;
+        playerEntity.setState(PS_IDLE);
+      }
+
+      if(dragMode) {
+        draggableCorpse.state.x = playerEntity.state.x -dragConfig.corpseOffsetX * pFacing;
+        draggableCorpse.state.y = playerEntity.state.y + dragConfig.corpseOffsetY;
+        draggableCorpse.setFacing(-pFacing);
+      }
+
+      draw.clear();
       const player = playerEntity.state;
       const enemy = enemyEntity.state;
 
@@ -152,35 +275,120 @@ function setup() {
         pFacing = pDir;
       }
 
-<<<<<<< HEAD
-      pV.x = pDir * 5;
-
-      if(isGrounded && controls.jump) {
-        pV.y = -JUMP_VELOCITY;
-        pState = PS_JUMPING;
-=======
       playerEntity.velocity.x = pDir * 5;
-      
+
       if(playerEntity.isGrounded && controls.jump) {
         playerEntity.velocity.y = -JUMP_VELOCITY;
         playerEntity.setState(PS_JUMPING);
 
->>>>>>> master
       } else {
-        playerEntity.velocity.y += pA.y;
+        playerEntity.velocity.y += GRAVITY * delta;
       }
 
-      enemyEntity.velocity.y += 1;
+      enemyEntity.velocity.y += GRAVITY * delta;
+
+      if(!dragMode) {
+        corpseEntity.velocity.y += GRAVITY * delta;
+      }
+
+    if(controls.mouse) {
+      if(traceConfig.aim) {
+        draw.lineStyle(1, 0).moveTo(charger.x, charger.y).lineTo(controls.mouse.x, controls.mouse.y);
+      }
+      const v = { x: controls.mouse.x - charger.x, y: controls.mouse.y - charger.y };
+      const mag = Math.sqrt(v.x * v.x + v.y * v.y);
+      const theta = Math.atan2(v.y, v.x);
+      charger.angle = theta * 180 / Math.PI;
+
+      if(controls.aiming && !aiming && pKnives > 0) {
+        chargerAnim.gotoAndPlay(0);
+        chargerAnim.loop = false;
+        chargerAnim.visible = true;
+        aiming = true;
+      }
+
+      if(aiming && !controls.aiming) {
+        aiming = false;
+        pKnives--;
+        pKnifeSprites[pKnives].alpha = 0.25;
+        const knife = new Entity({ knife: Sprite(KNIFE_TEXTURE) }, 'knife', { x: charger.x, y: charger.y, index: knifeIndex });
+        knife.frozen = false;
+        knife.state.anchor.y = 0.5;
+        knife.state.anchor.x = 0.5;
+        knife.velocity.x = v.x / mag * (chargerAnim.currentFrame + 1) * 3;
+        knife.velocity.y = v.y / mag * (chargerAnim.currentFrame + 1) * 3;
+        knives.add(knife);
+        chargerAnim.gotoAndStop(0);
+        chargerAnim.visible = false;
+      }
+    }
 
       candleLight.x = candle.x + candleLightConfig.xOffset;
       candleLight.y = candle.y + candleLightConfig.yOffset;
       candleLight.alpha = candleLightConfig.alpha;
 
+      for(const knife of knives) {
+        if(knife.frozen) {
+          const pickupBB = fakeBB(knife.state, 30, 30);
+          traceBB(pickupBB, 0xffff00);
+
+          if(anyCollide(pickupBB, [getBB(playerEntity.state)])) {
+            pKnifeSprites[pKnives].alpha = 1;
+            pKnives++;
+            knife.destroy();
+            knives.delete(knife);
+          }
+          continue;
+        };
+
+        knife.velocity.y += GRAVITY * delta;
+        knife.state.x += knife.velocity.x * delta;
+        knife.state.y += knife.velocity.y * delta;
+        knife.state.angle = 90 + (Math.atan2(knife.velocity.y, knife.velocity.x) * 180 / Math.PI);
+
+        const nextPos = {
+          x: knife.state.x + knife.velocity.x * delta,
+          y: knife.state.y + knife.velocity.y * delta
+        };
+
+        let nextBB = fakeBB(nextPos, 10, 10);
+        traceBB(nextBB, 0xff0000);
+        const enemyBBs = [{ entity: enemyEntity, ...getBB(enemyEntity.state) }];
+        const hits = entityCollides(nextBB, enemyBBs);
+        if(hits.length) {
+          const deadFella = hits[0];
+          deadFella.entity.setState(EN_DEATH);
+        }
+
+        if(anyCollide(nextBB, groundBBs)) {
+          knife.frozen = true;
+
+          while(anyCollide(nextBB, groundBBs)) {
+            nextPos.x -= knife.velocity.x * delta / 5;
+            nextPos.y -= knife.velocity.y * delta / 5;
+            nextBB = fakeBB(nextPos, 10, 10);
+          }
+          nextPos.x += knife.velocity.x * delta / 3;
+          nextPos.y += knife.velocity.y * delta / 3;
+        }
+
+        knife.state.x = nextPos.x;
+        knife.state.y = nextPos.y;
+      }
+
+      if(traceConfig.collision) {
+        for(const groundBB of groundBBs) {
+          traceBB(groundBB, 0x00FFFF);
+        }
+      }
+
       for(const entity of entities) {
+        entity.updateTriggers(traceBB, playerEntity);
         const prevBB = getBB(entity.state);
-        entity.state.x += entity.velocity.x;
-        entity.state.y += entity.velocity.y;
+        entity.state.x += entity.velocity.x * delta;
+        entity.state.y += entity.velocity.y * delta;
         let nextBB = getBB(entity.state);
+        traceBB(nextBB, 0x00ff00);
         entity.isGrounded = false;
         const collisions = entityCollides(nextBB, groundBBs);
         for(const collided of collisions) {
@@ -206,33 +414,27 @@ function setup() {
         }
       }
 
-<<<<<<< HEAD
-      if(!isGrounded && prevState !== PS_JUMPING) {
-        pState = PS_JUMPING;
-        swapPlayerSprite(playerJump);
-
-      } else if(isGrounded && pState === PS_JUMPING) {
-=======
-      if(!playerEntity.isGrounded && playerEntity.stateName !== PS_JUMPING) {
+      if(!playerEntity.isGrounded && playerEntity.stateName !== PS_JUMPING && playerEntity.stateName != PS_DRAGGING) {
         playerEntity.setState(PS_JUMPING);
-        
+
       } else if(playerEntity.isGrounded && playerEntity.stateName === PS_JUMPING) {
->>>>>>> master
         if(pDir === 0) {
           playerEntity.setState(PS_IDLE);
 
         } else {
-          playerEntity.setState(PS_WALKING);
+          playerEntity.setState(dragMode ? PS_DRAGGING : PS_WALKING);
         }
       } else if(pDir !== prevDir) {
         if(pDir === 0) {
           playerEntity.setState(PS_IDLE);
 
         } else {
-          playerEntity.setState(PS_WALKING);
+          playerEntity.setState(dragMode ? PS_DRAGGING : PS_WALKING);
         }
       }
 
       playerEntity.setFacing(pFacing);
+      charger.x = playerEntity.state.x;
+      charger.y = playerEntity.state.y + 20;
     });
 }

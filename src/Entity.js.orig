@@ -1,6 +1,5 @@
 import { getBB, anyCollide } from './collision.js';
 
-
 export default class Entity {
   constructor(states, current, { x, y, index }) {
     this.facing = 1;
@@ -44,6 +43,7 @@ export default class Entity {
     this.state.scale.x = 2 * facing;
   }
 
+<<<<<<< HEAD
   addTrigger(trigger) {
     this.triggers.push(trigger);
   }
@@ -67,6 +67,8 @@ export default class Entity {
     }
   }
   
+=======
+>>>>>>> master
   destroy() {
     for(const key in this.states) {
       app.stage.removeChild(this.states[key]);
@@ -74,4 +76,8 @@ export default class Entity {
 
     delete this.states;
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> master

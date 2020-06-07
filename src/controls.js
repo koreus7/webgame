@@ -1,6 +1,8 @@
 const MOVE_LEFT = 65;
 const MOVE_RIGHT = 68;
 const JUMP = 32;
+const INTERACT = 69;
+const DROP = 81;
 
 export default class Controls {
   constructor(canvas) {
@@ -38,6 +40,12 @@ export default class Controls {
         case JUMP:
           this.jump = 1;
           break;
+        case INTERACT:
+          this.interact = 1;
+          break;
+        case DROP:
+          this.drop = 1;
+          break;
       }
     });
 
@@ -49,9 +57,15 @@ export default class Controls {
         case MOVE_RIGHT:
           this.moveRight = 0;
           break;
-          case JUMP:
-            this.jump = 0;
-            break;
+        case JUMP:
+          this.jump = 0;
+          break;
+        case INTERACT:
+          this.interact = 0;
+          break;
+        case DROP:
+          this.drop = 0;
+          break;
       }
     });
   }
