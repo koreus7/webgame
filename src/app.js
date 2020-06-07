@@ -65,6 +65,27 @@ function setup() {
     candle.scale.set(2, 2);
     app.stage.addChild(candle);
 
+    const runSheet = getSheet(PLAYER_RUN_SHEET);
+    const playerStates = {
+      [PS_IDLE]: Sprite(PLAYER_IDLE_TEXTURE),
+      [PS_JUMPING]: Sprite(PLAYER_JUMP_TEXTURE),
+      [PS_WALKING]: AnimatedSprite(getAnim(runSheet, 'run'), { speed: 0.2 }),
+    };
+
+    const playerEntity = new Entity(playerStates, PS_IDLE, { x: 100, y: 25 });
+    let pDir = 1;
+    let pFacing = 1;
+
+    const enemyStates = {
+      idle: Sprite(ENEMY_IDLE_TEXTURE)
+    };
+
+    const enemyEntity = new Entity(enemyStates, 'idle', { x: 400, y: 25 });
+
+    const entities = [playerEntity, enemyEntity];
+
+    const knifeIndex = app.stage.children.length;
+
     const barrel = Sprite(BARREL_TEXTURE, { x: 321, y: 83 });
     barrel.scale.set(2, 2);
     app.stage.addChild(barrel);
@@ -79,33 +100,12 @@ function setup() {
     const ovenGUI = GUI.addFolder('oven');
     ovenGUI.add(oven, 'x').min(0).max(800);
     ovenGUI.add(oven, 'y').min(0).max(200);
-    const runSheet = getSheet(PLAYER_RUN_SHEET);
-
-    const playerStates = {
-      [PS_IDLE]: Sprite(PLAYER_IDLE_TEXTURE),
-      [PS_JUMPING]: Sprite(PLAYER_JUMP_TEXTURE),
-      [PS_WALKING]: AnimatedSprite(getAnim(runSheet, 'run'), { speed: 0.2 }),
-    };
-
-    const playerEntity = new Entity(playerStates, PS_IDLE, { x: 30, y: 25 });
-    let pDir = 1;
-    let pFacing = 1;
-
-    const enemyStates = {
-      idle: Sprite(ENEMY_IDLE_TEXTURE)
-    };
-
-    const enemyEntity = new Entity(enemyStates, 'idle', { x: 200, y: 25 });
-
-    const entities = [playerEntity, enemyEntity];
-
-    const knifeIndex = app.stage.children.length;
 
     const ground = Sprite(GROUND_TEXTURE, { x: 100, y: 128 });
     ground.width = 1000;
     app.stage.addChild(ground);
 
-    const groundBBs = [getBB(ground), getBB(barrel)];
+    const groundBBs = [getBB(ground), getBB(barrel), getBB(oven)];
 
     const candleLightConfig = {
       xOffset: 0,
