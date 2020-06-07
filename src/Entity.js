@@ -1,4 +1,4 @@
-
+import { getBB, anyCollide } from './collision.js';
 
 export default class Entity {
   constructor(states, current, { x, y, index }) {
@@ -21,6 +21,7 @@ export default class Entity {
     this.state.y = y;
     this.velocity = { x: 0, y: 0 };
     this.isGrounded = false;
+    this.triggers = [];
   }
 
   setState(newState) {
@@ -40,5 +41,28 @@ export default class Entity {
 
   setFacing(facing) {
     this.state.scale.x = 2 * facing;
+  }
+
+  addTrigger(trigger) {
+    this.triggers.push(trigger);
+  }
+
+  updateTriggers(traceBB, player) {
+    for(const trigger of this.triggers) {
+      trigger.x = trigger.localX + this.state.x;
+      trigger.y = trigger.localY + this.state.y;
+      traceBB(getBB(trigger), 0x00ff00);
+      if(anyCollide(getBB(player.state), [getBB(trigger)])) {
+        if(!trigger.colliding) {
+          trigger.onEnter();
+          trigger.colliding = true;
+        }
+      } else {
+        if(trigger.colliding) {
+          trigger.onExit();
+          trigger.colliding = false;
+        }
+      }
+    }
   }
 }
