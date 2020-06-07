@@ -20,6 +20,7 @@ export const OVEN_SHEET = './assets/images/oven.json';
 
 // entities
 export const ENEMY_IDLE_TEXTURE = './assets/images/enemy-idle.png';
+export const ENEMY_DEATH_SHEET = './assets/images/enemy-death.json';
 
 export default [
   PLAYER_IDLE_TEXTURE,
@@ -38,5 +39,6 @@ export default [
   OVEN_TEXTURE,
   OVEN_SHEET,
 
-  ENEMY_IDLE_TEXTURE
+  ENEMY_IDLE_TEXTURE,
+  ENEMY_DEATH_SHEET
 ];

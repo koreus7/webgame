@@ -17,6 +17,7 @@ import assetList, {
   OVEN_TEXTURE,
   KNIFE_TEXTURE,
   OVEN_SHEET,
+  ENEMY_DEATH_SHEET,
 } from './assets.js';
 import { Sprite, AnimatedSprite } from './lib.js';
 import Entity from './Entity.js';
@@ -29,13 +30,16 @@ const PS_IDLE = 'IDLE';
 const PS_WALKING = 'WALKING';
 const PS_JUMPING = 'JUMPING';
 
+const EN_IDLE = 'IDLE';
+const EN_DEATH = 'DEATH';
+
 const traceConfig = {
   aim: false,
   collision: false
 }
 
 const app = window.app = new PIXI.Application({
-  backgroundColor: 0xf0e2e2,
+  backgroundColor: 0,
   width: 800,
   height: 600,
 });
@@ -58,6 +62,9 @@ function setup() {
     const cabin = Sprite(CABIN_TEXTURE);
     cabin.x = cabin.width / 2;
     app.stage.addChild(cabin);
+    const cabin2 = Sprite(CABIN_TEXTURE);
+    cabin2.x = cabin.width * 1.5;
+    app.stage.addChild(cabin2);
 
 
     const candleSheet = getSheet(CANDLE_SHEET);
@@ -78,11 +85,13 @@ function setup() {
     let pDir = 1;
     let pFacing = 1;
 
+    const deathSheet = getSheet(ENEMY_DEATH_SHEET);
     const enemyStates = {
-      idle: Sprite(ENEMY_IDLE_TEXTURE)
+      [EN_IDLE]: Sprite(ENEMY_IDLE_TEXTURE),
+      [EN_DEATH]: AnimatedSprite(getAnim(deathSheet, 'enemy-death'), { loop: false, speed: 0.5 }),
     };
 
-    const enemyEntity = new Entity(enemyStates, 'idle', { x: 400, y: 25 });
+    const enemyEntity = new Entity(enemyStates, EN_IDLE, { x: 400, y: 25 });
 
     const entities = [playerEntity, enemyEntity];
 
@@ -108,6 +117,7 @@ function setup() {
 
     const ground = Sprite(GROUND_TEXTURE, { x: 100, y: 128 });
     ground.width = 1000;
+    ground.x = ground.width / 2;
     app.stage.addChild(ground);
 
     const groundBBs = [getBB(ground), getBB(barrel), getBB(oven)];
@@ -241,6 +251,13 @@ function setup() {
         };
 
         let nextBB = fakeBB(nextPos, 10, 10);
+        const enemyBBs = [{ entity: enemyEntity, ...getBB(enemyEntity.state) }];
+        const hits = entityCollides(nextBB, enemyBBs);
+        if(hits.length) {
+          const deadFella = hits[0];
+          deadFella.entity.setState(EN_DEATH);
+        }
+
         if(anyCollide(nextBB, groundBBs)) {
           knife.frozen = true;
 
