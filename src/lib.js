@@ -4,6 +4,18 @@ export function loadAssets(app, assets, then) {
     .load(then);
 }
 
+export function getTexture(app, texture) {
+  return app.loader.resources[texture].texture;
+}
+
+export function getSheet(app, sheet) {
+  return app.loader.resources[sheet].spritesheet;
+}
+
+export function getAnim(sheet, anim) {
+  return sheet.animations[anim];
+}
+
 export function getBB(obj) {
   return { left: obj.x, top: obj.y, right: obj.x + obj.width, bottom: obj.y + obj.height };
 }
