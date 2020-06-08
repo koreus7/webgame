@@ -1,5 +1,14 @@
+import Entity from "./Entity.js";
+
 export function getBB(obj) {
+  if(obj instanceof Entity) {
+    return {
+      ...getBB(obj.state),
+      name: obj.name
+    };
+  }
   return {
+    name: obj.name,
     left: obj.x - (obj.width / 2),
     top: obj.y,
     right: obj.x + (obj.width / 2),

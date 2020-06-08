@@ -1,18 +1,16 @@
 import { getBB, anyCollide } from './collision.js';
 
 export default class Entity {
-  constructor(states, current, { x, y, index }) {
+  constructor(name, states, current, { x, y, layer }) {
+    this.name = name;
+    this.layer = layer;
     this.facing = 1;
     this.gravityEnabled = true;
     this.states = {};
     for(const name in states) {
       this.states[name] = states[name];
       this.states[name].visible = false;
-      if(index) {
-        app.stage.addChildAt(this.states[name], index);
-      } else {
-        app.stage.addChild(this.states[name]);
-      }
+        layer.addChild(this.states[name]);
     }
 
     this.stateName = current;
@@ -71,9 +69,10 @@ export default class Entity {
   
   destroy() {
     for(const key in this.states) {
-      app.stage.removeChild(this.states[key]);
+      this.layer.removeChild(this.states[key]);
     }
 
     delete this.states;
+    delete this.layer;
   }
 }

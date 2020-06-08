@@ -27,29 +27,4 @@ export const ENEMY_DEATH_SHEET = './assets/images/enemy-death.json';
 // GUI
 export const CHARGER_SHEET = './assets/images/charger.json';
 export const INTERACT_TEXTURE = './assets/images/interact.png';
-
-export default [
-  PLAYER_IDLE_SHEET,
-  PLAYER_JUMP_TEXTURE,
-  PLAYER_RUN_SHEET,
-  PLAYER_DRAG_SHEET,
-
-  KNIFE_TEXTURE,
-  KNIFE_WOBBLE_SHEET,
-
-  GROUND_TEXTURE,
-  CABIN_TEXTURE,
-  CANDLE_TEXTURE,
-  CANDLE_SHEET,
-  CANDLE_LIGHT_TEXTURE,
-  BARREL_TEXTURE,
-  OVEN_TEXTURE,
-  OVEN_SHEET,
-
-  ENEMY_IDLE_TEXTURE,
-  ENEMY_CORPSE_TEXTURE,
-  ENEMY_DEATH_SHEET,
-
-  CHARGER_SHEET,
-  INTERACT_TEXTURE
-];
+export const OVEN_TIMER_SHEET = './assets/images/oven-timer.json';

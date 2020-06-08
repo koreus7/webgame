@@ -1,0 +1,55 @@
+{"frames": {
+
+"oven-timer_0.png":
+{
+	"frame": {"x":0,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+"oven-timer_1.png":
+{
+	"frame": {"x":32,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+"oven-timer_2.png":
+{
+	"frame": {"x":64,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+"oven-timer_3.png":
+{
+	"frame": {"x":96,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+"oven-timer_4.png":
+{
+	"frame": {"x":128,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+}},
+"animations": {
+	"oven-timer": ["oven-timer_0.png","oven-timer_1.png","oven-timer_2.png","oven-timer_3.png","oven-timer_4.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "oven-timer.png",
+	"format": "RGBA8888",
+	"size": {"w":160,"h":32},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:afe83fab0a1d3db7af24c44f2f8c1ee3:e2c0aa63558aeca8475a1ba87889b4cb:dc7b4fc8839f39a11a2151da6eb6b282$"
+}
+}

@@ -1,4 +1,4 @@
-class GUI
+class GUISingleton
 {
   init(dat) {
     if (window.__DEV_MODE) {
@@ -33,4 +33,23 @@ class GUI
 
 }
 
-export default new GUI;
+const GUI = new GUISingleton();
+
+export default GUI;
+
+export function showGUI(name, target, keys = Object.keys(target)) {
+  const folder = GUI.addFolder(name);
+  for(const key of keys) {
+    if(typeof key === 'object') {
+      const name = key.name;
+      delete key.name;
+      let row = folder.add(target, name);
+      for(const prop in key) {
+        row = row[prop].call(row, key[prop])
+      }
+
+    } else {
+      folder.add(target, key);
+    }
+  }
+}
