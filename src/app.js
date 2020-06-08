@@ -241,9 +241,9 @@ function setup() {
 
     if(controls.mouse) {
       if(traceConfig.aim) {
-        draw.lineStyle(1, 0).moveTo(charger.x, charger.y).lineTo(controls.mouse.x, controls.mouse.y);
+        draw.lineStyle(1, 0).moveTo(charger.x, charger.y).lineTo(controls.mouse.x - scene.x, controls.mouse.y - scene.y);
       }
-      const v = { x: controls.mouse.x - charger.x, y: controls.mouse.y - charger.y };
+      const v = { x: controls.mouse.x - charger.x - scene.x, y: controls.mouse.y - charger.y - scene.y };
       const mag = Math.sqrt(v.x * v.x + v.y * v.y);
       v.x /= mag;
       v.y /= mag;
