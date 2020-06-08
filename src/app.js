@@ -36,6 +36,12 @@ const traceConfig = {
   collision: false
 }
 
+const cameraConfig = {
+  scale: 2,
+  panLeftBound: 0.25,
+  panRightBound: 0.75,
+}
+
 const app = window.app = new PIXI.Application({
   backgroundColor: 0x00ffff,
   width: document.body.clientWidth - 40,
@@ -54,7 +60,6 @@ function container(parent) {
   return layer;
 }
 
-
 loadAssets(
   assets,
   setup
@@ -63,9 +68,11 @@ loadAssets(
 function setup() {
     const dat = window.dat || null;
     GUI.init(dat);
+    showGUI('camera', cameraConfig);
+    showGUI('trace', traceConfig);
 
     const scene = container(app.stage);
-    scene.scale.set(2);
+    scene.scale.set(cameraConfig.scale);
     const backgroundLayer = container(scene);
     const spriteLayer = container(scene);
     const knifeLayer = container(scene);
@@ -192,8 +199,6 @@ function setup() {
       knifeTally.y = app.view.height - 50;
       pKnifeSprites.push(knifeTally);
     }
-
-    showGUI('trace', traceConfig);
     
     const draw = new PIXI.Graphics();
     localGuiLayer.addChild(draw);
@@ -203,6 +208,7 @@ function setup() {
     const knives = new Set();
 
     app.ticker.add(delta => {
+      scene.scale.set(cameraConfig.scale);
       const groundBBs = [getBB(ground), getBB(barrel), getBB(oven)];
 
       dragPrompt.visible = !!draggableCorpse && !dragMode;
@@ -424,13 +430,13 @@ function setup() {
 
       // Camera
       const playerOffset = player.state.x + scene.x / scene.scale.x;
-      const moveRightAmount = playerOffset - (app.view.width / scene.scale.x * 0.75);
+      const moveRightAmount = playerOffset - (app.view.width / scene.scale.x * cameraConfig.panRightBound);
       console.log(moveRightAmount);
       if(moveRightAmount > 0) {
         scene.x -= moveRightAmount * scene.scale.x;
       }
 
-      const moveLeftAmount = playerOffset - (app.view.width / scene.scale.x * 0.25);
+      const moveLeftAmount = playerOffset - (app.view.width / scene.scale.x * cameraConfig.panLeftBound);
       if(moveLeftAmount < 0 && scene.x < 0) {
         scene.x = Math.min(0, scene.x - moveLeftAmount * scene.scale.x);
       }
