@@ -8,17 +8,18 @@ export function getTexture(texture) {
   return app.loader.resources[texture].texture;
 }
 
-export function Sprite(texture, { x, y, visible = true } = {}) {
+export function Sprite(texture, { x, y, visible = true, anchorY = 0 } = {}) {
   const sprite = new PIXI.Sprite(getTexture(texture));
   if(x) sprite.x = x;
   if(y) sprite.y = y;
   sprite.visible = visible;
   sprite.scale.set(2);
   sprite.anchor.x = 0.5;
+  sprite.anchor.y = anchorY;
   return sprite;
 }
 
-export function AnimatedSprite(anim, { x, y, visible = true, speed = 1, loop = true } = {}) {
+export function AnimatedSprite(anim, { x, y, visible = true, anchorY = 0, speed = 1, loop = true } = {}) {
   const sprite = new PIXI.AnimatedSprite(anim);
   if(x) sprite.x = x;
   if(y) sprite.y = y;
@@ -27,6 +28,7 @@ export function AnimatedSprite(anim, { x, y, visible = true, speed = 1, loop = t
   sprite.loop = loop;
   sprite.scale.set(2);
   sprite.anchor.x = 0.5;
+  sprite.anchor.y = anchorY;
   return sprite;
 }
 

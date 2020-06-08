@@ -7,6 +7,7 @@ export const PLAYER_DRAG_SHEET  = './assets/images/player/player-drag.json';
 
 // items
 export const KNIFE_TEXTURE = './assets/images/knife.png';
+export const KNIFE_WOBBLE_SHEET = './assets/images/knife-wobble.json';
 
 // environment
 export const GROUND_TEXTURE = './assets/images/ground.png';
@@ -34,6 +35,7 @@ export default [
   PLAYER_DRAG_SHEET,
 
   KNIFE_TEXTURE,
+  KNIFE_WOBBLE_SHEET,
 
   GROUND_TEXTURE,
   CABIN_TEXTURE,

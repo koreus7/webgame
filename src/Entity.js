@@ -30,6 +30,7 @@ export default class Entity {
     this.state.visible = false;
     state.x = this.state.x;
     state.y = this.state.y;
+    state.angle = this.state.angle;
     state.visible = true;
     state.scale.x = this.state.scale.x;
     this.state = state;

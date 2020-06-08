@@ -22,6 +22,7 @@ import assetList, {
   OVEN_SHEET,
   ENEMY_DEATH_SHEET,
   INTERACT_TEXTURE,
+  KNIFE_WOBBLE_SHEET,
 } from './assets.js';
 import { Sprite, AnimatedSprite } from './lib.js';
 import Entity from './Entity.js';
@@ -307,10 +308,14 @@ function setup() {
         aiming = false;
         pKnives--;
         pKnifeSprites[pKnives].alpha = 0.25;
-        const knife = new Entity({ knife: Sprite(KNIFE_TEXTURE) }, 'knife', { x: charger.x, y: charger.y, index: knifeIndex });
+        const knifeSheet = getSheet(KNIFE_WOBBLE_SHEET)
+        const knifeStates = {
+          knife: Sprite(KNIFE_TEXTURE, { anchorY: 0.5 }),
+          wobble: AnimatedSprite(getAnim(knifeSheet, 'knife-wobble'), { loop: false, speed: 0.35, anchorY: 0.5 }),
+        };
+
+        const knife = new Entity(knifeStates, 'knife', { x: charger.x, y: charger.y, index: knifeIndex });
         knife.frozen = false;
-        knife.state.anchor.y = 0.5;
-        knife.state.anchor.x = 0.5;
         knife.velocity.x = v.x / mag * (chargerAnim.currentFrame + 1) * 3;
         knife.velocity.y = v.y / mag * (chargerAnim.currentFrame + 1) * 3;
         knives.add(knife);
@@ -372,6 +377,7 @@ function setup() {
           nextPos.y += knife.velocity.y * delta / 3;
         }
 
+        knife.setState('wobble');
         knife.state.x = nextPos.x;
         knife.state.y = nextPos.y;
       }
