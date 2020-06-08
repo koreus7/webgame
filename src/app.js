@@ -27,7 +27,7 @@ import assetList, {
 import { Sprite, AnimatedSprite } from './lib.js';
 import Entity from './Entity.js';
 
-const PLAYER_VELOCITY = 2;
+const PLAYER_VELOCITY = 1.5;
 const JUMP_VELOCITY = 10;
 const GRAVITY = 1;
 
@@ -114,7 +114,7 @@ function setup() {
     const deathSheet = getSheet(ENEMY_DEATH_SHEET);
     const enemyStates = {
       [EN_IDLE]: Sprite(ENEMY_IDLE_TEXTURE),
-      [EN_DEATH]: AnimatedSprite(getAnim(deathSheet, 'enemy-death'), { loop: false, speed: 0.5 }),
+      [EN_DEATH]: AnimatedSprite(getAnim(deathSheet, 'enemy-death'), { loop: false, speed: 0.4 }),
     };
 
     const enemy = new Entity(enemyStates, EN_IDLE, { x: 500, y: 0 });
