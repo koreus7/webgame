@@ -111,12 +111,12 @@ function setup() {
       const corpseStates = {
         dead: Sprite(ENEMY_CORPSE_TEXTURE),
       }
-      const corpseEntity = new Entity(corpseStates, 'dead', { x: enemy.state.x });
-      corpseEntity.state.y = enemy.state.y + enemy.state.height - corpseEntity.state.height;
+      const corpse = new Entity(corpseStates, 'dead', { x: enemy.state.x });
+      corpse.state.y = enemy.state.y + enemy.state.height - corpse.state.height;
       const triggerZone = new Trigger({ localX: -15, localY: 0, width: 20, height: 20 },
         {
           onEnter: () => {
-            draggableCorpse = corpseEntity;
+            draggableCorpse = corpse;
           },
           onExit: () => {
             if(!dragMode) {
@@ -124,15 +124,15 @@ function setup() {
             }
           },
       });
-      corpseEntity.addTrigger(triggerZone);
+      corpse.addTrigger(triggerZone);
       
-    //   const dragTriggerGUI = GUI.addFolder('dragTrigger');
-    //   dragTriggerGUI.add(triggerZone, 'localX');
-    //   dragTriggerGUI.add(triggerZone, 'localY');
-    //   dragTriggerGUI.add(triggerZone, 'width');
-    //   dragTriggerGUI.add(triggerZone, 'height');
+      const dragTriggerGUI = GUI.addFolder('dragTrigger');
+      dragTriggerGUI.add(triggerZone, 'localX');
+      dragTriggerGUI.add(triggerZone, 'localY');
+      dragTriggerGUI.add(triggerZone, 'width');
+      dragTriggerGUI.add(triggerZone, 'height');
 
-      entities.add(corpseEntity);
+      entities.add(corpse);
     };
 
     const dragText = new PIXI.Text(`Press E to drag`);
@@ -335,12 +335,15 @@ function setup() {
 
         let nextBB = fakeBB(nextPos, 10, 10);
         traceBB(nextBB, 0xff0000);
-        const enemyBBs = [{ entity: enemy, ...getBB(enemy.state) }];
+        const enemyBBs = Array.from(entities)
+          .filter(entity => EN_DEATH in entity.states)
+          .map(entity => ({ entity, ...getBB(entity.state) }));
+
         const hits = entityCollides(nextBB, enemyBBs);
         if(hits.length) {
-          const deadFella = hits[0];
-          deadFella.entity.setState(EN_DEATH);
-          deadFella.entity.velocity.x = -5;
+          const deadFella = hits[0].entity;
+          deadFella.setState(EN_DEATH);
+          deadFella.velocity.x = -5;
         }
 
         if(anyCollide(nextBB, groundBBs)) {
