@@ -63,7 +63,19 @@ function setup() {
     const dat = window.dat || null;
     GUI.init(dat);
 
-    // app.stage.worldTransform.scale(2, 2);
+    const backgroundLayer = new PIXI.Container();
+    app.stage.addChild(backgroundLayer);
+
+    const foregroundLayer = new PIXI.Container();
+    app.stage.addChild(foregroundLayer);
+
+    const lightLayer = new PIXI.Container();
+    app.stage.addChild(lightLayer);
+
+    const guiLayer = new PIXI.Container();
+    app.stage.addChild(guiLayer);
+
+    app.stage.worldTransform.scale(2, 2);
     const controls = new Controls(app.view);
     const entities = new Set();
     let draggableCorpse = null;
@@ -71,16 +83,16 @@ function setup() {
 
     const cabin = Sprite(CABIN_TEXTURE);
     cabin.x = cabin.width / 2;
-    app.stage.addChild(cabin);
+    backgroundLayer.addChild(cabin);
     const cabin2 = Sprite(CABIN_TEXTURE);
     cabin2.x = cabin.width * 1.5;
-    app.stage.addChild(cabin2);
+    backgroundLayer.addChild(cabin2);
 
     const candleSheet = getSheet(CANDLE_SHEET);
     const candle = AnimatedSprite(getAnim(candleSheet, 'candle_animated'), { x: 120, y: 43 });
     candle.animationSpeed = 0.2;
     candle.play();
-    app.stage.addChild(candle);
+    backgroundLayer.addChild(candle);
 
     const runSheet = getSheet(PLAYER_RUN_SHEET);
     const idleSheet = getSheet(PLAYER_IDLE_SHEET);
@@ -384,7 +396,6 @@ function setup() {
         entity.state.x += entity.velocity.x * delta;
         entity.state.y += entity.velocity.y * delta;
         let nextBB = getBB(entity.state);
-        traceBB(nextBB, 0x00ff00);
         entity.isGrounded = false;
         const collisions = entityCollides(nextBB, groundBBs);
         for(const collided of collisions) {
@@ -411,6 +422,7 @@ function setup() {
           }
           nextBB = getBB(entity.state);
         }
+        traceBB(nextBB, 0x00ff00);
       }
 
       if(!player.isGrounded && player.stateName !== PS_JUMPING && player.stateName != PS_DRAGGING) {
