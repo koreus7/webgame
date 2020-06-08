@@ -47,9 +47,11 @@ const traceConfig = {
 
 const app = window.app = new PIXI.Application({
   backgroundColor: 0,
-  width: document.body.clientWidth,
-  height: document.body.clientHeight,
+  width: document.body.clientWidth - 40,
+  height: document.body.clientHeight - 40,
 });
+
+app.view.style.margin = '20px';
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
@@ -76,7 +78,7 @@ function setup() {
     const guiLayer = new PIXI.Container();
     app.stage.addChild(guiLayer);
 
-    app.stage.worldTransform.scale(2, 2);
+    // app.stage.worldTransform.scale(2, 2);
     const controls = new Controls(app.view);
     const entities = new Set();
     let draggableCorpse = null;
@@ -130,7 +132,7 @@ function setup() {
       const triggerZone = new Trigger({ localX: -15, localY: 0, width: 20, height: 20 },
         {
           onEnter: () => {
-            draggableCorpse = corpse;
+              draggableCorpse = corpse;
           },
           onExit: () => {
             if(!dragMode) {
@@ -223,7 +225,7 @@ function setup() {
     const charger = new PIXI.Container();
     const chargerAnim = new PIXI.AnimatedSprite(getAnim(chargerSheet, 'charger'));
     chargerAnim.anchor.y = 0.5;
-    chargerAnim.animationSpeed = 0.1;
+    chargerAnim.animationSpeed = 0.075;
     chargerAnim.scale.set(2);
     chargerAnim.x = 10;
     chargerAnim.visible = false;
@@ -305,20 +307,30 @@ function setup() {
       }
 
       if(aiming && !controls.aiming) {
-        aiming = false;
-        pKnives--;
-        pKnifeSprites[pKnives].alpha = 0.25;
-        const knifeSheet = getSheet(KNIFE_WOBBLE_SHEET)
-        const knifeStates = {
-          knife: Sprite(KNIFE_TEXTURE, { anchorY: 0.5 }),
-          wobble: AnimatedSprite(getAnim(knifeSheet, 'knife-wobble'), { loop: false, speed: 0.35, anchorY: 0.5 }),
-        };
+        if(dragMode) {
+          dragMode = false;
+          draggableCorpse.velocity.x = player.velocity.x + (v.x / mag * (chargerAnim.currentFrame + 1) * 3.5);
+          draggableCorpse.velocity.y = player.velocity.y + (v.y / mag * (chargerAnim.currentFrame + 1) * 3.5);
+          draggableCorpse.gravityEnabled = true;
+          draggableCorpse = null;
+          
+        } else {
+          pKnives--;
+          pKnifeSprites[pKnives].alpha = 0.25;
+          const knifeSheet = getSheet(KNIFE_WOBBLE_SHEET)
+          const knifeStates = {
+            knife: Sprite(KNIFE_TEXTURE, { anchorY: 0.5 }),
+            wobble: AnimatedSprite(getAnim(knifeSheet, 'knife-wobble'), { loop: false, speed: 0.35, anchorY: 0.5 }),
+          };
 
-        const knife = new Entity(knifeStates, 'knife', { x: charger.x, y: charger.y, index: knifeIndex });
-        knife.frozen = false;
-        knife.velocity.x = v.x / mag * (chargerAnim.currentFrame + 1) * 3;
-        knife.velocity.y = v.y / mag * (chargerAnim.currentFrame + 1) * 3;
-        knives.add(knife);
+          const knife = new Entity(knifeStates, 'knife', { x: charger.x, y: charger.y, index: knifeIndex });
+          knife.frozen = false;
+          knife.velocity.x = player.velocity.x + (v.x / mag * (chargerAnim.currentFrame + 1) * 2);
+          knife.velocity.y = (v.y / mag * (chargerAnim.currentFrame + 1) * 2);
+          knives.add(knife);
+        }
+
+        aiming = false;
         chargerAnim.gotoAndStop(0);
         chargerAnim.visible = false;
       }
@@ -342,7 +354,7 @@ function setup() {
           continue;
         };
 
-        knife.velocity.y += GRAVITY * delta;
+        knife.velocity.y += GRAVITY / 3 * delta;
         knife.state.x += knife.velocity.x * delta;
         knife.state.y += knife.velocity.y * delta;
         knife.state.angle = 90 + (Math.atan2(knife.velocity.y, knife.velocity.x) * 180 / Math.PI);
