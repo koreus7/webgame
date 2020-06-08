@@ -9,6 +9,8 @@ export default class Controls {
     this.moveLeft = 0;
     this.moveRight = 0;
     this.jump = 0;
+    this.interact = 0;
+    this.drop = 0;
     this.aiming = false;
     this.mouse = null;
 

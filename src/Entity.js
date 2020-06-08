@@ -1,9 +1,9 @@
 import { getBB, anyCollide } from './collision.js';
 
-
 export default class Entity {
   constructor(states, current, { x, y, index }) {
     this.facing = 1;
+    this.gravityEnabled = true;
     this.states = {};
     for(const name in states) {
       this.states[name] = states[name];
