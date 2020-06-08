@@ -37,7 +37,7 @@ const traceConfig = {
 }
 
 const app = window.app = new PIXI.Application({
-  backgroundColor: 0,
+  backgroundColor: 0x00ffff,
   width: document.body.clientWidth - 40,
   height: document.body.clientHeight - 40,
 });
@@ -65,6 +65,7 @@ function setup() {
     GUI.init(dat);
 
     const scene = container(app.stage);
+    scene.scale.set(2);
     const backgroundLayer = container(scene);
     const spriteLayer = container(scene);
     const knifeLayer = container(scene);
@@ -240,10 +241,11 @@ function setup() {
       player.velocity.x = pDir * 5;
 
     if(controls.mouse) {
+      const mousePos = { x: controls.mouse.x / scene.scale.x - scene.x / scene.scale.x, y: controls.mouse.y / scene.scale.x - scene.y / scene.scale.x };
       if(traceConfig.aim) {
-        draw.lineStyle(1, 0).moveTo(charger.x, charger.y).lineTo(controls.mouse.x - scene.x, controls.mouse.y - scene.y);
+        draw.lineStyle(1, 0).moveTo(charger.x, charger.y).lineTo(mousePos.x, mousePos.y);
       }
-      const v = { x: controls.mouse.x - charger.x - scene.x, y: controls.mouse.y - charger.y - scene.y };
+      const v = { x: mousePos.x - charger.x, y: mousePos.y - charger.y };
       const mag = Math.sqrt(v.x * v.x + v.y * v.y);
       v.x /= mag;
       v.y /= mag;
@@ -283,7 +285,7 @@ function setup() {
       candleLight.alpha = candleLightConfig.alpha;
 
       for(const knife of knives) {
-        if(knife.frozen) {
+        if(knife.frozen || knife.embedded) {
           const pickupBB = fakeBB(knife.state, 30, 30);
           traceBB(pickupBB, 0xffff00);
 
@@ -293,6 +295,12 @@ function setup() {
             knife.destroy();
             knives.delete(knife);
           }
+          
+          if(knife.embedded) {
+            knife.state.x = knife.embedded.state.x + knife.hitPoint.x;
+            knife.state.y = knife.embedded.state.y + knife.hitPoint.y;
+          }
+
           continue;
         };
 
@@ -309,14 +317,19 @@ function setup() {
         let nextBB = fakeBB(nextPos, 10, 10);
         traceBB(nextBB, 0xff0000);
         const enemyBBs = Array.from(entities)
-          .filter(entity => EN_DEATH in entity.states)
+          .filter(entity => entity.name === 'enemy')
           .map(entity => ({ entity, ...getBB(entity) }));
 
         const hits = entityCollides(nextBB, enemyBBs);
         if(hits.length) {
           const deadFella = hits[0].entity;
+          knife.embedded = deadFella;
+          knife.hitPoint = { x: knife.state.x - deadFella.state.x, y: knife.state.y - deadFella.state.y };
+          const initialRotation = knife.state.angle;
           deadFella.setState(EN_DEATH);
           deadFella.velocity.x = -5;
+
+          continue;
         }
 
         if(anyCollide(nextBB, groundBBs)) {
@@ -410,15 +423,16 @@ function setup() {
       }
 
       // Camera
-      const playerOffset = player.state.x + scene.x;
-      const moveRightAmount = playerOffset - (app.view.width * 0.75);
+      const playerOffset = player.state.x + scene.x / scene.scale.x;
+      const moveRightAmount = playerOffset - (app.view.width / scene.scale.x * 0.75);
+      console.log(moveRightAmount);
       if(moveRightAmount > 0) {
-        scene.x -= moveRightAmount;
+        scene.x -= moveRightAmount * scene.scale.x;
       }
 
-      const moveLeftAmount = playerOffset - (app.view.width * 0.25);
+      const moveLeftAmount = playerOffset - (app.view.width / scene.scale.x * 0.25);
       if(moveLeftAmount < 0 && scene.x < 0) {
-        scene.x = Math.min(0, scene.x - moveLeftAmount);
+        scene.x = Math.min(0, scene.x - moveLeftAmount * scene.scale.x);
       }
 
       player.setFacing(pFacing);
