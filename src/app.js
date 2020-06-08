@@ -21,6 +21,7 @@ import assetList, {
   KNIFE_TEXTURE,
   OVEN_SHEET,
   ENEMY_DEATH_SHEET,
+  INTERACT_TEXTURE,
 } from './assets.js';
 import { Sprite, AnimatedSprite } from './lib.js';
 import Entity from './Entity.js';
@@ -135,8 +136,8 @@ function setup() {
       entities.add(corpse);
     };
 
-    const dragText = new PIXI.Text(`Press E to drag`);
-    app.stage.addChild(dragText);
+    const dragPrompt = Sprite(INTERACT_TEXTURE);
+    app.stage.addChild(dragPrompt);
 
     const dragConfig = {
       corpseOffsetX: 25,
@@ -239,10 +240,11 @@ function setup() {
     const knives = new Set();
 
     app.ticker.add(delta => {
-
-      dragText.visible = !!draggableCorpse && !dragMode;
-      dragText.x = draggableCorpse ? draggableCorpse.state.x : 0;
-      dragText.y = 20;
+      dragPrompt.visible = !!draggableCorpse && !dragMode;
+      if(dragPrompt.visible) {
+        dragPrompt.x = player.state.x + player.facing * -3;
+        dragPrompt.y = player.state.y - 45;
+      }
 
       if(controls.interact && draggableCorpse && !dragMode) {
         dragMode = true;

@@ -41,6 +41,7 @@ export default class Entity {
   }
 
   setFacing(facing) {
+    this.facing = facing;
     this.state.scale.x = 2 * facing;
   }
 

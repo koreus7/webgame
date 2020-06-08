@@ -5,8 +5,7 @@ export const PLAYER_JUMP_TEXTURE = './assets/images/player/player-jump.png';
 export const PLAYER_RUN_SHEET = './assets/images/player/player-run.json';
 export const PLAYER_DRAG_SHEET  = './assets/images/player/player-drag.json';
 
-// charge throw
-export const CHARGER_SHEET = './assets/images/charger.json';
+// items
 export const KNIFE_TEXTURE = './assets/images/knife.png';
 
 // environment
@@ -24,8 +23,9 @@ export const ENEMY_IDLE_TEXTURE = './assets/images/enemy-idle.png';
 export const ENEMY_CORPSE_TEXTURE = './assets/images/corpse.png';
 export const ENEMY_DEATH_SHEET = './assets/images/enemy-death.json';
 
-// misc
-export const CUBE_TEXTURE = './assets/images/misc/player-cube.png';
+// GUI
+export const CHARGER_SHEET = './assets/images/charger.json';
+export const INTERACT_TEXTURE = './assets/images/interact.png';
 
 export default [
   PLAYER_IDLE_SHEET,
@@ -33,7 +33,6 @@ export default [
   PLAYER_RUN_SHEET,
   PLAYER_DRAG_SHEET,
 
-  CHARGER_SHEET,
   KNIFE_TEXTURE,
 
   GROUND_TEXTURE,
@@ -48,5 +47,7 @@ export default [
   ENEMY_IDLE_TEXTURE,
   ENEMY_CORPSE_TEXTURE,
   ENEMY_DEATH_SHEET,
-  CUBE_TEXTURE,
+
+  CHARGER_SHEET,
+  INTERACT_TEXTURE
 ];
