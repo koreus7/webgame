@@ -51,8 +51,6 @@ const candleLightConfig = {
 
 const dragConfig = {
   corpseOffsetX: 25,
-  corpseOffsetFlipX: -48,
-  corpseOffsetY: 0,
 };
 
 function container(parent) {
@@ -61,50 +59,7 @@ function container(parent) {
   return layer;
 }
 
-const level = [
-  {
-    type: 'player',
-    x: 100,
-    y: 25
-  },
-  {
-    type: 'enemy',
-    x: 500,
-    y: 0
-  },
-  {
-    type: 'cabin',
-    x: 200,
-    y: 0,
-  },
-  {
-    type: 'cabin',
-    x: 600,
-    y: 0,
-  },
-  {
-    type: 'candle',
-    x: 120,
-    y: 43,
-  },
-  {
-    type: 'ground',
-    x: 100,
-    y: 128,
-  },
-  {
-    type: 'barrel',
-    x: 500,
-    y: 83,
-  },
-  {
-    type: 'oven',
-    x: 30,
-    y: 41,
-  },
-];
-
-export default function setup(app) {
+export default function setup(app, level) {
     const dat = window.dat || null;
     GUI.init(dat);
     showGUI('camera', cameraConfig);
