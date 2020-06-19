@@ -1,7 +1,9 @@
-export function loadAssets(assets, then) {
-  return Object.values(assets)
-    .reduce((loader, asset) => loader.add(asset), app.loader)
-    .load(then);
+export function loadAssets(assets) {
+  return new Promise(resolve => {
+    Object.values(assets)
+      .reduce((loader, asset) => loader.add(asset), app.loader)
+      .load(resolve);
+  });
 }
 
 export function getTexture(texture) {
