@@ -17,5 +17,21 @@ Promise.all([
   fetch('/levels').then(response => response.json()),
   loadAssets(assets)
 ]).then(([levels]) => {
-  startGame(app, levels[0]);
+  const menu = new PIXI.Container();
+  app.stage.addChild(menu);
+  let y = 50;
+
+  for(const level of levels) {
+    const text = new PIXI.Text(level.name);
+    text.interactive = true;
+    text.x = 50;
+    text.y = y;
+    y += 50;
+    text.on('click', () => {
+      menu.visible = false;
+      startGame(app, level);
+    });
+
+    menu.addChild(text);
+  }
 });

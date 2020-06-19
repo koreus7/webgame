@@ -98,7 +98,7 @@ export default function setup(app, level) {
 
     let player;
 
-    for(const item of level) {
+    for(const item of level.contents) {
       const { x, y, type } = item;
       switch(type) {
         case 'cabin': {

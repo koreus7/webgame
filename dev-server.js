@@ -1,10 +1,12 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const bodyParser = require('body-parser');
 const app = module.exports = express();
 
 const PORT = 3000;
 
+app.use(bodyParser.json({ inflate: true }));
 app.use(express.static(__dirname));
 
 app.get('/', (req, res) => {
@@ -25,6 +27,11 @@ app.get('/levels', (req, res) => {
   }
 
   res.send(levels);
+});
+
+app.put('/levels/:level', (req, res) => {
+  const level = req.body;
+  fs.writeFileSync('./levels/' + req.params.level, JSON.stringify(level), { flag: 'w', encoding: 'utf8' });
 })
 
 app.get('/dev', (req, res) => {
