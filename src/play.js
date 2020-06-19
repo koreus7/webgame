@@ -26,6 +26,7 @@ import Entity from './Entity.js';
 import Player, { PS_DRAGGING, PS_IDLE, PS_JUMPING, PS_WALKING } from './entities/Player.js';
 import Enemy, { EN_DEATH } from './entities/Enemy.js';
 import Knife from './entities/Knife.js';
+import Candle from './Candle.js';
 
 const PLAYER_VELOCITY = 1.5;
 const JUMP_VELOCITY = 10;
@@ -42,17 +43,77 @@ const cameraConfig = {
   panRightBound: 0.75,
 }
 
+const candleLightConfig = {
+  xOffset: 0,
+  yOffset: 10,
+  alpha: 0.3,
+}
+
+const dragConfig = {
+  corpseOffsetX: 25,
+  corpseOffsetFlipX: -48,
+  corpseOffsetY: 0,
+};
+
 function container(parent) {
   const layer = new PIXI.Container();
   parent.addChild(layer);
   return layer;
 }
 
+const level = [
+  {
+    type: 'player',
+    x: 100,
+    y: 25
+  },
+  {
+    type: 'enemy',
+    x: 500,
+    y: 0
+  },
+  {
+    type: 'cabin',
+    x: 200,
+    y: 0,
+  },
+  {
+    type: 'cabin',
+    x: 600,
+    y: 0,
+  },
+  {
+    type: 'candle',
+    x: 120,
+    y: 43,
+  },
+  {
+    type: 'ground',
+    x: 100,
+    y: 128,
+  },
+  {
+    type: 'barrel',
+    x: 500,
+    y: 83,
+  },
+  {
+    type: 'oven',
+    x: 30,
+    y: 41,
+  },
+];
+
 export default function setup(app) {
     const dat = window.dat || null;
     GUI.init(dat);
     showGUI('camera', cameraConfig);
     showGUI('trace', traceConfig);
+    showGUI('dragging', dragConfig);
+    const candleGUI = GUI.addFolder('candle');
+    candleGUI.add(candleLightConfig, 'xOffset').min(-64).max(64);
+    candleGUI.add(candleLightConfig, 'yOffset').min(-64).max(64);
+    candleGUI.add(candleLightConfig, 'alpha').min(0.01).max(1.0);
 
     const scene = container(app.stage);
     scene.scale.set(cameraConfig.scale);
@@ -64,99 +125,96 @@ export default function setup(app) {
     const localGuiLayer = container(scene);
     const globalGuiLayer = container(app.stage);
 
+    let pDir = 1;
+    let pFacing = 1;
+    let pKnives = 3;
+
     // app.stage.worldTransform.scale(2, 2);
     const controls = new Controls(app.view);
     const entities = new Set();
     let draggableCorpse = null;
     let dragMode = false;
 
-    const cabin = Sprite(CABIN_TEXTURE, { layer: backgroundLayer });
-    cabin.x = cabin.width * 0.5;
-    const cabin2 = Sprite(CABIN_TEXTURE, { layer: backgroundLayer });
-    cabin2.x = cabin.width * 1.5;
-
-    const candle = AnimatedSprite(CANDLE_SHEET, 'candle_animated', { x: 120, y: 43, speed: 0.2, layer: backgroundLayer });
-    candle.play();
-
-    const player = new Player({ x: 100, y: 25, layer: spriteLayer });
-    let pDir = 1;
-    let pFacing = 1;
-    let pKnives = 3;
-
-    const enemy = new Enemy({ x: 500, y: 0, layer: spriteLayer });
-
-    enemy.onDie(() => {
-      enemy.destroy();
-      entities.delete(enemy);
-      const corpseStates = {
-        dead: Sprite(ENEMY_CORPSE_TEXTURE),
-      }
-      const corpse = new Entity('corpse', corpseStates, 'dead', { x: enemy.state.x, layer: spriteLayer });
-      corpse.state.y = enemy.state.y + enemy.state.height - corpse.state.height;
-      const triggerZone = new Trigger({ localX: -15, localY: 0, width: 20, height: 20 },
-        {
-          onEnter: () => {
-              draggableCorpse = corpse;
-          },
-          onExit: () => {
-            if(!dragMode) {
-              draggableCorpse = null;
-            }
-          },
-      });
-      corpse.addTrigger(triggerZone);
-      
-      showGUI('dragTrigger', triggerZone, ['localX', 'localY', 'width', 'height']);
-
-      entities.add(corpse);
-    });
+    const steppables = [];
+    const collidables = [];
 
     const dragPrompt = Sprite(INTERACT_TEXTURE);
     localGuiLayer.addChild(dragPrompt);
 
-    const dragConfig = {
-      corpseOffsetX: 25,
-      corpseOffsetFlipX: -48,
-      corpseOffsetY: 0,
-    };
+    let player;
 
-    showGUI('dragging', dragConfig);
+    for(const item of level) {
+      const { x, y, type } = item;
+      switch(type) {
+        case 'cabin': {
+          Sprite(CABIN_TEXTURE, { x, y, layer: backgroundLayer });
+          break;
+        }
 
-    entities.add(player);
-    entities.add(enemy);
+        case 'player': {
+          player = new Player({ x, y, layer: spriteLayer });
+          entities.add(player);
+          break;
+        }
 
-    const barrel = Sprite(BARREL_TEXTURE, { x: 500, y: 83 });
-    furnitureLayer.addChild(barrel);
-    showGUI('barrel', barrel, [{ name: 'x', min: 0, max: 800 }, { name: 'y', min: 0, max: 200 }]);
+        case 'candle': {
+          steppables.push(new Candle({ backgroundLayer, lightLayer, candleLightConfig }));
+          break;
+        }
 
-    const oven = AnimatedSprite(OVEN_SHEET, 'oven', { x: 30, y: 41, speed: 0.15 });
-    oven.play();
-    furnitureLayer.addChild(oven);
-    showGUI('oven', oven, [{ name: 'x', min: 0, max: 800 }, { name: 'y', min: 0, max: 200 }]);
+        case 'enemy': {
+          const enemy = new Enemy({ x: 500, y: 0, layer: spriteLayer });
+          enemy.onDie(() => {
+            enemy.destroy();
+            entities.delete(enemy);
+            const corpseStates = {
+              dead: Sprite(ENEMY_CORPSE_TEXTURE),
+            }
+            const corpse = new Entity('corpse', corpseStates, 'dead', { x: enemy.state.x, layer: spriteLayer });
+            corpse.state.y = enemy.state.y + enemy.state.height - corpse.state.height;
+            const triggerZone = new Trigger({ localX: -15, localY: 0, width: 20, height: 20 },
+              {
+                onEnter: () => {
+                    draggableCorpse = corpse;
+                },
+                onExit: () => {
+                  if(!dragMode) {
+                    draggableCorpse = null;
+                  }
+                },
+            });
+            corpse.addTrigger(triggerZone);
+            
+            showGUI('dragTrigger', triggerZone, ['localX', 'localY', 'width', 'height']);
+      
+            entities.add(corpse);
+          });
+          entities.add(enemy);
+          break;
+        }
+        case 'barrel': {
+          const barrel = Sprite(BARREL_TEXTURE, { x, y });
+          collidables.push(barrel);
+          furnitureLayer.addChild(barrel);
+          break;
+        }
+        case 'oven': {
+          const oven = AnimatedSprite(OVEN_SHEET, 'oven', { x, y, speed: 0.15 });
+          collidables.push(oven);
+          oven.play();
+          furnitureLayer.addChild(oven);
+          break;
+        }
 
-    const ground = Sprite(GROUND_TEXTURE, { x: 100, y: 128 });
-    ground.width = 2000;
-    ground.x = ground.width / 2;
-    furnitureLayer.addChild(ground);
-
-    const candleLightConfig = {
-      xOffset: 0,
-      yOffset: 10,
-      alpha: 0.3,
+        case 'ground': {
+          const ground = Sprite(GROUND_TEXTURE, { x, y });
+          ground.width = 2000;
+          collidables.push(ground);
+          furnitureLayer.addChild(ground);
+          break;
+        }
+      }
     }
-
-    const candleLight = Sprite(CANDLE_LIGHT_TEXTURE);
-    candleLight.anchor.y = 0.5;
-    candleLight.blendMode = PIXI.BLEND_MODES.LIGHTEN;
-    lightLayer.addChild(candleLight);
-
-    const candleGUI = GUI.addFolder('candle');
-    candleGUI.add(candle, 'x').min(0).max(200);
-    candleGUI.add(candle, 'y').min(0).max(200);
-    candleGUI.add(candle, 'animationSpeed').min(0).max(1);
-    candleGUI.add(candleLightConfig, 'xOffset').min(-64).max(64);
-    candleGUI.add(candleLightConfig, 'yOffset').min(-64).max(64);
-    candleGUI.add(candleLightConfig, 'alpha').min(0.01).max(1.0);
 
     function traceBB(bb, color = 0xff0000) {
       if(traceConfig.collision) {
@@ -192,7 +250,7 @@ export default function setup(app) {
 
     app.ticker.add(delta => {
       scene.scale.set(cameraConfig.scale);
-      const groundBBs = [getBB(ground), getBB(barrel), getBB(oven)];
+      const groundBBs = collidables.map(getBB);
 
       dragPrompt.visible = !!draggableCorpse && !dragMode;
       if(dragPrompt.visible) {
@@ -269,9 +327,9 @@ export default function setup(app) {
       }
     }
 
-      candleLight.x = candle.x + candleLightConfig.xOffset;
-      candleLight.y = candle.y + candleLightConfig.yOffset;
-      candleLight.alpha = candleLightConfig.alpha;
+    for(const steppable of steppables) {
+      steppable.step();
+    }
 
       for(const knife of knives) {
         if(knife.frozen || knife.embedded) {
@@ -414,7 +472,6 @@ export default function setup(app) {
       // Camera
       const playerOffset = player.state.x + scene.x / scene.scale.x;
       const moveRightAmount = playerOffset - (app.view.width / scene.scale.x * cameraConfig.panRightBound);
-      console.log(moveRightAmount);
       if(moveRightAmount > 0) {
         scene.x -= moveRightAmount * scene.scale.x;
       }
