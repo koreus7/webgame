@@ -34,7 +34,7 @@ app.put('/levels/:level', (req, res) => {
   if(id !== req.params.level) {
     return res.status(500).json({ error: 'mismatched ID' });
   }
-  fs.writeFileSync('./levels/' + req.params.level, JSON.stringify(level), { flag: 'w', encoding: 'utf8' });
+  fs.writeFileSync('./levels/' + req.params.level, JSON.stringify(level, undefined, 2), { flag: 'w', encoding: 'utf8' });
 })
 
 app.get('/dev', (req, res) => {

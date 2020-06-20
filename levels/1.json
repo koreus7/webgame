@@ -1,1 +1,45 @@
-{"name":"kill the guy","contents":[{"type":"player","x":137.763671875,"y":63.953125},{"type":"enemy","x":499.345703125,"y":18.884765625},{"type":"cabin","x":200,"y":0},{"type":"cabin","x":600,"y":0},{"type":"candle","x":120,"y":43},{"type":"ground","x":999.982421875,"y":128.013671875},{"type":"barrel","x":500,"y":83},{"type":"oven","x":30,"y":41}]}
+{
+  "name": "kill the guy",
+  "contents": [
+    {
+      "type": "player",
+      "x": 141,
+      "y": 64
+    },
+    {
+      "type": "enemy",
+      "x": 499,
+      "y": 18
+    },
+    {
+      "type": "cabin",
+      "x": 200,
+      "y": 0
+    },
+    {
+      "type": "cabin",
+      "x": 600,
+      "y": 0
+    },
+    {
+      "type": "candle",
+      "x": 326,
+      "y": 53
+    },
+    {
+      "type": "ground",
+      "x": 1000,
+      "y": 128
+    },
+    {
+      "type": "barrel",
+      "x": 500,
+      "y": 83
+    },
+    {
+      "type": "oven",
+      "x": 30,
+      "y": 41
+    }
+  ]
+}

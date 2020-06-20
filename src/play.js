@@ -148,7 +148,7 @@ export default function setup(app, level, devMode) {
           }
 
           case 'candle': {
-            steppables.push(new Candle({ backgroundLayer, lightLayer, candleLightConfig }));
+            steppables.push(new Candle({ x, y, backgroundLayer, lightLayer, candleLightConfig, drag: devMode && item }));
             break;
           }
 
