@@ -10,8 +10,8 @@ export function getTexture(texture) {
   return app.loader.resources[texture].texture;
 }
 
-export function Sprite(texture, { x, y, visible = true, anchorX = 0.5, anchorY = 0, layer } = {}) {
-  const sprite = new PIXI.Sprite(getTexture(texture));
+export function Sprite(texture, { x, y, visible = true, anchorX = 0.5, anchorY = 0, layer, drag } = {}) {
+  const sprite = new PIXI.Sprite(texture instanceof PIXI.Texture ? texture : getTexture(texture));
   sprite.name = texture.match(/\/([a-z-]+)\.png$/)[1];
   if(x) sprite.x = x;
   if(y) sprite.y = y;
@@ -20,6 +20,31 @@ export function Sprite(texture, { x, y, visible = true, anchorX = 0.5, anchorY =
   sprite.anchor.x = anchorX;
   sprite.anchor.y = anchorY;
   layer && layer.addChild(sprite);
+
+  if(drag) {
+    let handle = null;
+    sprite.interactive = true;
+    sprite.on('mousedown', (event) => {
+      handle = {
+        x: event.data.global.x / 2 - sprite.x,// - (sprite.width * sprite.anchor.x),
+        y: event.data.global.y / 2 - sprite.y
+      };
+      event.dead = true;
+    });
+    sprite.on('mouseup', (event) => {
+      handle = null;
+      drag.x = sprite.x;
+      drag.y = sprite.y;
+      event.dead = true;
+    })
+    sprite.on('mousemove', (event) => {
+      if(handle) {
+        sprite.x = event.data.global.x / 2 - handle.x;
+        sprite.y = event.data.global.y / 2 - handle.y;
+      }
+      event.dead = true;
+    });
+  }
   return sprite;
 }
 

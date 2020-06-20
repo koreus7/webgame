@@ -1,5 +1,6 @@
 
 // player
+export const PLAYER_GHOST_TEXTURE = './assets/images/player-ghost.png';
 export const PLAYER_IDLE_SHEET = './assets/images/player/player-idle.json';
 export const PLAYER_JUMP_TEXTURE = './assets/images/player/player-jump.png';
 export const PLAYER_RUN_SHEET = './assets/images/player/player-run.json';

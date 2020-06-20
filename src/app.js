@@ -8,6 +8,16 @@ const app = window.app = new PIXI.Application({
   height: document.body.clientHeight - 40,
 });
 
+window.addEventListener('resize', () => {
+  const width = document.body.clientWidth - 40;
+  const height = document.body.clientHeight - 40;
+  app.view.style.width = width + 'px';
+  app.view.style.height = height + 'px';
+  app.resize(width, height);
+});
+
+let devMode = false;
+
 app.view.style.margin = '20px';
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
@@ -21,6 +31,16 @@ Promise.all([
   app.stage.addChild(menu);
   let y = 50;
 
+  const devModeButton = new PIXI.Text('EDIT');
+  devModeButton.x = document.body.clientWidth - devModeButton.width - 100;
+  devModeButton.y = document.body.clientHeight - devModeButton.height - 100;
+  devModeButton.interactive = true;
+  menu.addChild(devModeButton);
+  devModeButton.on('click', () => {
+    devMode = !devMode;
+    devModeButton.style.fill = devMode ? 'red' : 'black';
+  })
+
   for(const level of levels) {
     const text = new PIXI.Text(level.name);
     text.interactive = true;
@@ -29,7 +49,7 @@ Promise.all([
     y += 50;
     text.on('click', () => {
       menu.visible = false;
-      startGame(app, level);
+      startGame(app, level, devMode);
     });
 
     menu.addChild(text);

@@ -23,14 +23,17 @@ app.get('/levels', (req, res) => {
       return res.status(500).json({ error: `could not read level "${filename}" - invalid json`});
     }
 
-    levels.push(json);
+    levels.push({ ...json, id: filename });
   }
 
   res.send(levels);
 });
 
 app.put('/levels/:level', (req, res) => {
-  const level = req.body;
+  const {id, ...level} = req.body;
+  if(id !== req.params.level) {
+    return res.status(500).json({ error: 'mismatched ID' });
+  }
   fs.writeFileSync('./levels/' + req.params.level, JSON.stringify(level), { flag: 'w', encoding: 'utf8' });
 })
 
