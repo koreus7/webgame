@@ -48,7 +48,7 @@ export function Sprite(texture, { x, y, visible = true, anchorX = 0.5, anchorY =
   return sprite;
 }
 
-export function AnimatedSprite(sheet, anim, { x, y, visible = true, anchorX = 0.5, anchorY = 0, speed = 1, loop = true, layer } = {}) {
+export function AnimatedSprite(sheet, anim, { x, y, visible = true, anchorX = 0.5, anchorY = 0, speed = 1, loop = true, layer, drag } = {}) {
   const sprite = new PIXI.AnimatedSprite(getAnim(getSheet(sheet), anim));
   sprite.name = anim
   if(x) sprite.x = x;
@@ -60,6 +60,32 @@ export function AnimatedSprite(sheet, anim, { x, y, visible = true, anchorX = 0.
   sprite.anchor.x = anchorX;
   sprite.anchor.y = anchorY;
   layer && layer.addChild(sprite);
+
+  if(drag) {
+    let handle = null;
+    sprite.interactive = true;
+    sprite.on('mousedown', (event) => {
+      handle = {
+        x: event.data.global.x / 2 - sprite.x,// - (sprite.width * sprite.anchor.x),
+        y: event.data.global.y / 2 - sprite.y
+      };
+      event.dead = true;
+    });
+    sprite.on('mouseup', (event) => {
+      handle = null;
+      drag.x = sprite.x;
+      drag.y = sprite.y;
+      event.dead = true;
+    })
+    sprite.on('mousemove', (event) => {
+      if(handle) {
+        sprite.x = event.data.global.x / 2 - handle.x;
+        sprite.y = event.data.global.y / 2 - handle.y;
+      }
+      event.dead = true;
+    });
+  }
+  
   return sprite;
 }
 
