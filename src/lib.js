@@ -56,16 +56,13 @@ export function Sprite(texture, { x, y, visible = true, anchorX = 0.5, anchorY =
   sprite.anchor.y = anchorY;
   layer && layer.addChild(sprite);
 
-  if(drag) {
-    bindDrag(sprite, drag);
-  }
-
   return sprite;
 }
 
-export function AnimatedSprite(sheet, anim, { x, y, visible = true, anchorX = 0.5, anchorY = 0, speed = 1, loop = true, layer, drag } = {}) {
+export function AnimatedSprite(sheet, { x, y, visible = true, anchorX = 0.5, anchorY = 0, speed = 1, loop = true, layer, drag } = {}) {
+  const anim = sheet.match(/\/([a-z-]+)\.json$/)[1];
   const sprite = new PIXI.AnimatedSprite(getAnim(getSheet(sheet), anim));
-  sprite.name = anim
+  sprite.name = anim;
   if(x) sprite.x = x;
   if(y) sprite.y = y;
   sprite.visible = visible;
@@ -75,10 +72,6 @@ export function AnimatedSprite(sheet, anim, { x, y, visible = true, anchorX = 0.
   sprite.anchor.x = anchorX;
   sprite.anchor.y = anchorY;
   layer && layer.addChild(sprite);
-
-  if(drag) {
-    bindDrag(sprite, drag);
-  }
 
   return sprite;
 }

@@ -54,9 +54,9 @@ export function entityCollides(entityBB, wallBBs) {
       entityBB.right > wallBB.left &&
       entityBB.top < wallBB.bottom &&
       entityBB.bottom > wallBB.top) {
-        collisions.push(wallBB);
+        return wallBB;
       }
   }
 
-  return collisions;
+  return null;
 };

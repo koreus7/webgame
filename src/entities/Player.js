@@ -12,10 +12,10 @@ export default class Player extends Entity {
     super(
       'player',
       {
-        [PS_IDLE]: AnimatedSprite(PLAYER_IDLE_SHEET, 'idle', { speed: 0.2 }),
+        [PS_IDLE]: AnimatedSprite(PLAYER_IDLE_SHEET, { speed: 0.2 }),
         [PS_JUMPING]: Sprite(PLAYER_JUMP_TEXTURE),
-        [PS_WALKING]: AnimatedSprite(PLAYER_RUN_SHEET, 'run', { speed: 0.2 }),
-        [PS_DRAGGING]: AnimatedSprite(PLAYER_DRAG_SHEET, 'drag', { speed: 0.2 } ),
+        [PS_WALKING]: AnimatedSprite(PLAYER_RUN_SHEET, { speed: 0.2 }),
+        [PS_DRAGGING]: AnimatedSprite(PLAYER_DRAG_SHEET, { speed: 0.2 } ),
       },
       PS_IDLE,
       { x, y, layer }

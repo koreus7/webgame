@@ -8,7 +8,7 @@ export default class Knife extends Entity {
       'knife',
       {
         knife: Sprite(KNIFE_TEXTURE, { anchorY: 0.5 }),
-        wobble: AnimatedSprite(KNIFE_WOBBLE_SHEET, 'knife-wobble', { loop: false, speed: 0.35, anchorY: 0.5 }),
+        wobble: AnimatedSprite(KNIFE_WOBBLE_SHEET, { loop: false, speed: 0.35, anchorY: 0.5 }),
       },
       'knife',
       { x: player.charger.x, y: player.charger.y, layer }

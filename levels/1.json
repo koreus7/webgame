@@ -12,12 +12,16 @@
       "y": 18
     },
     {
-      "type": "cabin",
+      "type": "sprite",
+      "id": "cabin",
+      "layer": "bg",
       "x": 200,
       "y": 0
     },
     {
-      "type": "cabin",
+      "type": "sprite",
+      "id": "cabin",
+      "layer": "bg",
       "x": 600,
       "y": 0
     },
@@ -27,12 +31,16 @@
       "y": 53
     },
     {
-      "type": "ground",
-      "x": 1000,
+      "type": "sprite",
+      "id": "ground",
+      "layer": "furniture",
+      "x": 128,
       "y": 128
     },
     {
-      "type": "barrel",
+      "type": "sprite",
+      "id": "barrel",
+      "layer": "furniture",
       "x": 500,
       "y": 83
     },
@@ -40,6 +48,62 @@
       "type": "oven",
       "x": 30,
       "y": 41
+    },
+    {
+      "type": "sprite",
+      "id": "ground",
+      "layer": "furniture",
+      "x": 640,
+      "y": 128
+    },
+    {
+      "type": "sprite",
+      "id": "ground",
+      "layer": "furniture",
+      "x": 896,
+      "y": 128
+    },
+    {
+      "type": "sprite",
+      "id": "ground",
+      "layer": "furniture",
+      "x": 384,
+      "y": 128
+    },
+    {
+      "type": "sprite",
+      "id": "cabin",
+      "layer": "bg",
+      "x": 1000,
+      "y": 0
+    },
+    {
+      "type": "sprite",
+      "id": "cabin",
+      "layer": "bg",
+      "x": 200,
+      "y": 144
+    },
+    {
+      "type": "sprite",
+      "id": "cabin",
+      "layer": "bg",
+      "x": 600,
+      "y": 144
+    },
+    {
+      "type": "sprite",
+      "id": "cabin",
+      "layer": "bg",
+      "x": 1000,
+      "y": 144
+    },
+    {
+      "type": "sprite",
+      "id": "ground",
+      "layer": "furniture",
+      "x": 1152,
+      "y": 128
     }
   ]
 }

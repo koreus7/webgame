@@ -1,5 +1,5 @@
 import GUI, { showGUI } from './gui.js';
-import { loadAssets, getTexture, getSheet, getAnim } from './lib.js';
+import { loadAssets, getTexture, getSheet, getAnim, bindDrag } from './lib.js';
 import { getBB, fakeBB, entityCollides, anyCollide } from './collision.js';
 import Controls from './controls.js';
 import Trigger from './trigger.js';
@@ -7,7 +7,6 @@ import {
   PLAYER_GHOST_TEXTURE,
   GROUND_TEXTURE,
   CABIN_TEXTURE,
-  CANDLE_TEXTURE,
   CANDLE_SHEET,
   CANDLE_LIGHT_TEXTURE,
   BARREL_TEXTURE,
@@ -86,6 +85,14 @@ export default function setup(app, level, devMode) {
       const globalGuiLayer = container(app.stage);
       const controls = new Controls(app.view, camera);
 
+      const getLayer = (layer) => {
+        switch(layer) {
+          case 'bg': return backgroundLayer;
+          case 'furniture': return furnitureLayer;
+          default: throw new Error(`unknown layer "${layer}" requested`);
+        }
+      }
+
       let pDir = 1;
       let pFacing = 1;
       let pKnives = 3;
@@ -122,6 +129,7 @@ export default function setup(app, level, devMode) {
         saveBtn.y = document.body.clientHeight - 100;
         globalGuiLayer.addChild(saveBtn);
         saveBtn.on('click', (event) => {
+          console.log('LEVEL', level);
           fetch(`/levels/${level.id}`, {
             method: 'PUT',
             headers: { 'content-type': 'application/json' },
@@ -130,32 +138,48 @@ export default function setup(app, level, devMode) {
         });
       }
 
+      const insertSprite = (item) => {
+        const { id, layer, x, y } = item;
+        const sprite = Sprite(`./assets/images/${id}.png`, { x, y });
+        if(layer === 'furniture') {
+          collidables.push(sprite);
+        }
+        getLayer(layer).addChild(sprite);
+        devMode && bindDrag(sprite, item);
+      }
+
       for(const item of level.contents) {
         const { x, y, type } = item;
         switch(type) {
-          case 'cabin': {
-            const cabin = Sprite(CABIN_TEXTURE, { x, y, layer: backgroundLayer, drag: devMode && item });
+          case 'sprite': {
+            insertSprite(item);
             break;
           }
 
           case 'player': {
-            const ghost = Sprite(PLAYER_GHOST_TEXTURE, { x, y, speed: 0.2, layer: spriteLayer, drag: devMode && item })
+            const ghost = Sprite(PLAYER_GHOST_TEXTURE, { x, y, layer: spriteLayer });
             ghost.alpha = 0.5;
             ghost.visible = devMode;
+            devMode && bindDrag(ghost, item);
+
             player = new Player({ x, y, layer: spriteLayer });
             entities.add(player);
             break;
           }
 
           case 'candle': {
-            steppables.push(new Candle({ x, y, backgroundLayer, lightLayer, candleLightConfig, drag: devMode && item }));
+            const candle = new Candle({ x, y, backgroundLayer, lightLayer, candleLightConfig });
+            steppables.push(candle);
+            devMode && bindDrag(candle.candle, item);
             break;
           }
 
           case 'enemy': {
-            const ghost = Sprite(ENEMY_IDLE_TEXTURE, { x, y, speed: 0.2, layer: spriteLayer, drag: devMode && item })
+            const ghost = Sprite(ENEMY_IDLE_TEXTURE, { x, y, speed: 0.2, layer: spriteLayer })
             ghost.alpha = 0.5;
             ghost.visible = devMode;
+            devMode && bindDrag(ghost, item);
+
             const enemy = new Enemy({ x, y, layer: spriteLayer });
             enemy.onDie(() => {
               enemy.destroy();
@@ -183,25 +207,12 @@ export default function setup(app, level, devMode) {
             entities.add(enemy);
             break;
           }
-          case 'barrel': {
-            const barrel = Sprite(BARREL_TEXTURE, { x, y, drag: devMode && item });
-            collidables.push(barrel);
-            furnitureLayer.addChild(barrel);
-            break;
-          }
           case 'oven': {
-            const oven = AnimatedSprite(OVEN_SHEET, 'oven', { x, y, speed: 0.15, drag: devMode && item });
+            const oven = AnimatedSprite(OVEN_SHEET, { x, y, speed: 0.15 });
+            devMode && bindDrag(oven, item);
             collidables.push(oven);
             oven.play();
             furnitureLayer.addChild(oven);
-            break;
-          }
-
-          case 'ground': {
-            const ground = Sprite(GROUND_TEXTURE, { x, y, drag: devMode && item });
-            ground.width = 2000;
-            collidables.push(ground);
-            furnitureLayer.addChild(ground);
             break;
           }
         }
@@ -219,7 +230,42 @@ export default function setup(app, level, devMode) {
       }
 
       const charger = player.charger = container(localGuiLayer);
-      const chargerAnim = charger.cone = AnimatedSprite(CHARGER_SHEET, 'charger', { x: 10, visible: false, speed: 0.075, anchorX: 0, anchorY: 0.5, layer: charger });
+      const chargerAnim = charger.cone = AnimatedSprite(CHARGER_SHEET, { x: 10, visible: false, speed: 0.075, anchorX: 0, anchorY: 0.5, layer: charger });
+
+      if(devMode) {
+        const insertables = [
+          { type: 'sprite', id: 'cabin', layer: 'bg' },
+          { type: 'sprite', id: 'ground', layer: 'furniture' },
+        ];
+
+        let xInsert = 300;
+        const yInsert = app.view.height - 40;
+        for(const i of insertables) {
+          switch(i.type) {
+            case 'sprite': {
+              const sprite = Sprite(`./assets/images/${i.id}.png`, { x: xInsert, y: yInsert, layer: globalGuiLayer });
+              const scale = sprite.width > sprite.height ? sprite.width / 50 : sprite.height / 50;
+              sprite.width /= scale;
+              sprite.height /= scale;
+              sprite.y -= sprite.height / 2;
+              xInsert += 75;
+              sprite.interactive = true;
+              sprite.on('click', () => {
+                const x = (-camera.x + app.view.width / 2) / camera.scale.y;
+                const y = app.view.height / 2 / camera.scale.x;
+                const dupe = Sprite(`./assets/images/${i.id}.png`, { x, y, layer: getLayer(i.layer) });
+                dupe.y -= dupe.height / 2;
+                if(i.layer === 'furniture') {
+                  collidables.push(dupe);
+                }
+                const levelItem = { ...i, x, y };
+                bindDrag(dupe, levelItem);
+                level.contents.push(levelItem);
+              });
+            }
+          }
+        }
+      }
 
       const pKnifeSprites = [];
       for(let i = 0; i < pKnives; i++) {
@@ -358,9 +404,9 @@ export default function setup(app, level, devMode) {
             .filter(entity => entity.name === 'enemy')
             .map(entity => ({ entity, ...getBB(entity) }));
 
-          const hits = entityCollides(nextBB, enemyBBs);
-          if(hits.length) {
-            const deadFella = hits[0].entity;
+          const hit = entityCollides(nextBB, enemyBBs);
+          if(hit) {
+            const deadFella = hit.entity;
             knife.embedded = deadFella;
             knife.hitPoint = { x: knife.state.x - deadFella.state.x, y: knife.state.y - deadFella.state.y };
             const initialRotation = knife.state.angle;
@@ -408,35 +454,57 @@ export default function setup(app, level, devMode) {
           entity.state.y += entity.velocity.y * delta;
           let nextBB = getBB(entity);
           entity.isGrounded = false;
-          const collisions = entityCollides(nextBB, groundBBs);
-          for(const collided of collisions) {
+          let collided = entityCollides(nextBB, groundBBs);
+          let i = 0;
+          while(collided) {
+            i++;
+            if(i > 5) {
+              console.log('TOO MANY COLLISIONS');
+              console.log(entity.name, collided.name);
+              break;
+            }
             if(entity.name === 'corpse' && collided.name === 'oven') {
               // TODO: Corpse goes in oven!
-              continue;
+              break;
             }
 
+            let fixed = false;
+
+            // come from above
             if(nextBB.bottom > collided.top && prevBB.bottom <= collided.top) {
               entity.state.y = collided.top - entity.state.height;
+              nextBB = getBB(entity);
               entity.velocity.y = 0;
               entity.isGrounded = true;
+              fixed = true;
               if(entity !== player) {
                 entity.velocity.x *= 0.9;
               }
 
+
+            // come from below
             } else if(nextBB.top < collided.bottom && prevBB.top >= collided.bottom) {
               entity.state.y = collided.bottom;
+              nextBB = getBB(entity);
               entity.velocity.y = 0;
               entity.isGrounded = true;
+              fixed = true;
 
             } else if(nextBB.right > collided.left && prevBB.right <= collided.left) {
               entity.state.x = collided.left - entity.state.width / 2;
+              nextBB = getBB(entity);
               entity.velocity.x = 0;
+              fixed = true;
 
             } else if(nextBB.left < collided.right && prevBB.left >= collided.right) {
               entity.state.x = collided.right + entity.state.width / 2;
+              nextBB = getBB(entity);
               entity.velocity.x = 0;
+              fixed = true;
             }
+
             nextBB = getBB(entity);
+            collided = fixed ? entityCollides(nextBB, groundBBs) : null;
           }
           traceBB(nextBB, 0x00ff00);
         }
