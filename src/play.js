@@ -19,6 +19,9 @@ import {
   OVEN_SHEET,
   INTERACT_TEXTURE,
   KNIFE_WOBBLE_SHEET,
+  MEAT_0,
+  MEAT_1,
+  MEAT_2,
 } from './assets.js';
 import * as assets from './assets.js';
 import { Sprite, AnimatedSprite } from './lib.js';
@@ -59,6 +62,23 @@ function container(parent) {
   return layer;
 }
 
+function randomMeatTexture() {
+  const randFloat = Math.random();
+  if(randFloat < 0.3) return MEAT_0;
+  if(randFloat < 0.6) return MEAT_1;
+  return MEAT_2;
+}
+
+function randn_bm() {
+  let u = 0, v = 0;
+  while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+  while(v === 0) v = Math.random();
+  let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+  num = num / 10.0 + 0.5; // Translate to 0 -> 1
+  if (num > 1 || num < 0) return randn_bm(); // resample between 0 and 1
+  return num;
+}
+
 export default function setup(app, level, devMode) {
     let selected = null;
     const dat = window.dat || null;
@@ -75,7 +95,7 @@ export default function setup(app, level, devMode) {
       const camera = container(app.stage);
       camera.scale.set(cameraConfig.scale);
       camera.interactive = true;
-      
+
       const backgroundLayer = container(camera);
       const spriteLayer = container(camera);
       const knifeLayer = container(camera);
@@ -201,17 +221,16 @@ export default function setup(app, level, devMode) {
                   },
               });
               corpse.addTrigger(triggerZone);
-        
+
               entities.add(corpse);
             });
             entities.add(enemy);
             break;
           }
           case 'oven': {
-            const oven = AnimatedSprite(OVEN_SHEET, { x, y, speed: 0.15 });
+            const oven = AnimatedSprite(OVEN_SHEET, { x, y, speed: 0.15, loop: false });
             devMode && bindDrag(oven, item);
             collidables.push(oven);
-            oven.play();
             furnitureLayer.addChild(oven);
             break;
           }
@@ -277,7 +296,7 @@ export default function setup(app, level, devMode) {
         knifeTally.y = app.view.height - 50;
         pKnifeSprites.push(knifeTally);
       }
-      
+
       const draw = new PIXI.Graphics();
       localGuiLayer.addChild(draw);
 
@@ -287,7 +306,7 @@ export default function setup(app, level, devMode) {
 
       const step = delta => {
         camera.scale.set(cameraConfig.scale);
-        const groundBBs = collidables.map(getBB);
+        const groundBBs = collidables.map(x => ({...getBB(x), collidable: x}));
 
         dragPrompt.visible = !!draggableCorpse && !dragMode;
         if(dragPrompt.visible) {
@@ -350,7 +369,7 @@ export default function setup(app, level, devMode) {
             draggableCorpse.velocity.y = (v.y * (chargerAnim.currentFrame + 1) * 3.5);
             draggableCorpse.gravityEnabled = true;
             draggableCorpse = null;
-            
+
           } else {
             pKnives--;
             pKnifeSprites[pKnives].alpha = 0.25;
@@ -379,7 +398,7 @@ export default function setup(app, level, devMode) {
               knife.destroy();
               knives.delete(knife);
             }
-            
+
             if(knife.embedded) {
               knife.state.x = knife.embedded.state.x + knife.hitPoint.x;
               knife.state.y = knife.embedded.state.y + knife.hitPoint.y;
@@ -443,7 +462,7 @@ export default function setup(app, level, devMode) {
           if(entity === player && entity.isGrounded && controls.jump) {
             player.velocity.y = -JUMP_VELOCITY;
             player.setState(PS_JUMPING);
-    
+
           } else if(entity.gravityEnabled) {
             entity.velocity.y += GRAVITY * delta;
           }
@@ -464,7 +483,23 @@ export default function setup(app, level, devMode) {
               break;
             }
             if(entity.name === 'corpse' && collided.name === 'oven') {
-              // TODO: Corpse goes in oven!
+              console.log("Corpse Oven");
+              const oven = collided.collidable;
+              oven.play();
+              oven.onComplete = () => {
+                for(let i = 0; i < 5; i++) {
+                    const meatStates = {
+                      meaty: Sprite(randomMeatTexture()),
+                    }
+                    const meat = new Entity('meat', meatStates, 'meaty', { x: oven.x, y: oven.y, layer: spriteLayer });
+                    meat.setVelocity({ x: 10 + randn_bm()*10.0 });
+                    entities.add(meat);
+                }
+              }
+              const corpse = entity;
+              dragMode = false;
+              corpse.destroy();
+              entities.delete(corpse);
               break;
             }
 

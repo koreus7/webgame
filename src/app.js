@@ -21,6 +21,24 @@ let devMode = false;
 app.view.style.margin = '20px';
 
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+PIXI.settings.TARGET_FPMS = 0.06;
+
+app.ticker.autoStart = false;
+app.ticker.stop();
+
+var stats = new Stats();
+stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+document.body.appendChild( stats.domElement );
+stats.domElement.classList.add('fps-monitor');
+
+function animate(time) {
+  stats.begin();
+  app.ticker.update(time);
+  app.renderer.render(app.stage);
+	stats.end();
+  requestAnimationFrame(animate);
+}
+animate(performance.now());
 
 document.body.appendChild(app.view);
 Promise.all([
@@ -54,4 +72,5 @@ Promise.all([
 
     menu.addChild(text);
   }
+
 });

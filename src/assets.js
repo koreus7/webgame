@@ -23,6 +23,9 @@ export const OVEN_SHEET = './assets/images/oven.json';
 export const ENEMY_IDLE_TEXTURE = './assets/images/enemy-idle.png';
 export const ENEMY_CORPSE_TEXTURE = './assets/images/corpse.png';
 export const ENEMY_DEATH_SHEET = './assets/images/enemy-death.json';
+export const MEAT_0 = './assets/images/meat0.png';
+export const MEAT_1 = './assets/images/meat1.png';
+export const MEAT_2 = './assets/images/meat2.png';
 
 // GUI
 export const CHARGER_SHEET = './assets/images/charger.json';

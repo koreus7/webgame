@@ -13,7 +13,7 @@ export function getTexture(texture) {
 export function bindDrag(sprite, drag) {
   let handle = null;
   sprite.interactive = true;
-  
+
   sprite.on('mousedown', (event) => {
     event.dead = false;
     if(event.data.originalEvent.shiftKey) {
@@ -47,7 +47,7 @@ export function bindDrag(sprite, drag) {
 
 export function Sprite(texture, { x, y, visible = true, anchorX = 0.5, anchorY = 0, layer, drag } = {}) {
   const sprite = new PIXI.Sprite(texture instanceof PIXI.Texture ? texture : getTexture(texture));
-  sprite.name = texture.match(/\/([a-z-]+)\.png$/)[1];
+  sprite.name = texture.match(/\/([a-z-]+[0-9]*)\.png$/)[1];
   if(x) sprite.x = x;
   if(y) sprite.y = y;
   sprite.visible = visible;

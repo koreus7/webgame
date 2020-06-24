@@ -9,3 +9,9 @@ body {
     justify-content: center;
     background-color: #111111;
 }
+
+.fps-monitor {
+    position: absolute;
+    top: 0;
+    left: 0;
+}

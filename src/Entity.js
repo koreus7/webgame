@@ -48,6 +48,11 @@ export default class Entity {
     this.triggers.push(trigger);
   }
 
+  setVelocity({ x = null, y = null}) {
+    if(typeof x === 'number') this.velocity.x = x;
+    if(typeof y === 'number') this.velocity.y = y;
+  }
+
   updateTriggers(traceBB, player) {
     for(const trigger of this.triggers) {
       trigger.x = trigger.localX + this.state.x;
@@ -66,7 +71,7 @@ export default class Entity {
       }
     }
   }
-  
+
   destroy() {
     for(const key in this.states) {
       this.layer.removeChild(this.states[key]);
