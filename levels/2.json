@@ -1,0 +1,12 @@
+{
+  "name": "kill the second guy",
+  "contents": [
+    {"type":"player","x":100,"y":25},
+    {"type":"enemy","x":500,"y":0},
+    {"type":"cabin","x":200,"y":0},
+    {"type":"cabin","x":600,"y":0},
+    {"type":"candle","x":120,"y":43},
+    {"type":"ground","x":100,"y":128},
+    {"type":"oven","x":30,"y":41}
+  ]
+}

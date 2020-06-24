@@ -1,6 +1,6 @@
 class GUISingleton
 {
-  init(dat) {
+  init(dat, devMode) {
     if (window.__DEV_MODE) {
       this.dat = dat;
       this.gui = new dat.GUI();
@@ -29,6 +29,9 @@ class GUISingleton
   }
   step() {
     return this;
+  }
+  removeFolder(...args) {
+    return this.gui.removeFolder(...args);
   }
 
 }

@@ -1,9 +1,10 @@
 
 // player
-export const PLAYER_IDLE_SHEET = './assets/images/player/player-idle.json';
-export const PLAYER_JUMP_TEXTURE = './assets/images/player/player-jump.png';
-export const PLAYER_RUN_SHEET = './assets/images/player/player-run.json';
-export const PLAYER_DRAG_SHEET  = './assets/images/player/player-drag.json';
+export const PLAYER_GHOST_TEXTURE = './assets/images/player-ghost.png';
+export const PLAYER_IDLE_SHEET = './assets/images/player/idle.json';
+export const PLAYER_JUMP_TEXTURE = './assets/images/player/jump.png';
+export const PLAYER_RUN_SHEET = './assets/images/player/run.json';
+export const PLAYER_DRAG_SHEET  = './assets/images/player/drag.json';
 
 // items
 export const KNIFE_TEXTURE = './assets/images/knife.png';
@@ -12,8 +13,7 @@ export const KNIFE_WOBBLE_SHEET = './assets/images/knife-wobble.json';
 // environment
 export const GROUND_TEXTURE = './assets/images/ground.png';
 export const CABIN_TEXTURE = './assets/images/cabin.png';
-export const CANDLE_TEXTURE = './assets/images/candle.png';
-export const CANDLE_SHEET = './assets/images/candle-sheet.json';
+export const CANDLE_SHEET = './assets/images/candle.json';
 export const CANDLE_LIGHT_TEXTURE = './assets/images/candle-light.png';
 export const BARREL_TEXTURE = './assets/images/barrel.png'
 export const OVEN_TEXTURE = './assets/images/oven.png';
