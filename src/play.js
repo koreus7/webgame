@@ -4,11 +4,13 @@ import { getBB, fakeBB, entityCollides, anyCollide } from './collision.js';
 import {
   AGENT_TEXTURE,
   TILES_TEXTURE,
+  TARGET_TEXTURE
 } from './assets.js';
 import * as assets from './assets.js';
 import { Sprite, AnimatedSprite } from './lib.js';
 import Entity from './Entity.js';
 
+const AGENT_RADIUS = 16;
 
 const traceConfig = {
   aim: false,
@@ -16,7 +18,7 @@ const traceConfig = {
 }
 
 const cameraConfig = {
-  scale: 2,
+  scale: 1,
 }
 
 function container(parent) {
@@ -84,6 +86,7 @@ const vert = `
 export default function setup(app, level, devMode) {
     const dat = window.dat || null;
     GUI.init(dat);
+    showGUI('trace', traceConfig);
     showGUI('camera', cameraConfig);
 
     function beginLevel() {
@@ -117,8 +120,26 @@ export default function setup(app, level, devMode) {
       camera.scale.set(cameraConfig.scale);
       camera.interactive = true;
 
+      const agentLayer = container(camera);
       const globalGuiLayer = container(app.stage);
       const entities = [];
+      const agents = [];
+
+      let target = Sprite(TARGET_TEXTURE, { x: 100, y: 50, layer: globalGuiLayer, anchorX: 0.5, anchorY: 0.5 });
+
+      app.view.addEventListener('click', (event) => {
+        const bb = app.view.getBoundingClientRect();
+        target.x = event.clientX - bb.left;
+        target.y = event.clientY - bb.top;
+      });
+      
+      function makeAgent({ x, y }) {
+        const agent = Sprite(AGENT_TEXTURE, { x, y, layer: agentLayer, anchorX: 0.5, anchorY: 0.5 });
+        agents.push(agent);
+      }
+
+      makeAgent({ x: 20, y: 20 });
+      makeAgent({ x: 30, y: 20 });
 
       const resetBtn = new PIXI.Text('Reset');
       resetBtn.interactive = true;
@@ -161,6 +182,12 @@ export default function setup(app, level, devMode) {
         }
       }
 
+      function traceAgent(el, color = 0xff0000) {
+        if(traceConfig.collision) {
+          draw.lineStyle(1, color).drawCircle(el.x, el.y, AGENT_RADIUS);
+        }
+      }
+
       const step = delta => {
         camera.scale.set(cameraConfig.scale);
         const groundBBs = []; //collidables.map(x => ({...getBB(x), collidable: x}));
@@ -170,6 +197,38 @@ export default function setup(app, level, devMode) {
         if(traceConfig.collision) {
           for(const groundBB of groundBBs) {
             traceBB(groundBB, 0x00FFFF);
+          }
+        }
+
+        for(let i = 0; i < agents.length; i++) {
+          const agent = agents[i];
+          traceAgent(agent);
+          agent.target = { x: target.x, y: target.y };
+
+          const v = { x: agent.target.x - agent.x, y: agent.target.y - agent.y };
+          const mag = Math.sqrt(v.x * v.x + v.y * v.y);
+          v.x /= mag;
+          v.y /= mag;
+          const theta = Math.atan2(v.y, v.x);
+
+          if(mag > AGENT_RADIUS) {
+            agent.angle = (theta * 180 / Math.PI) + 90;
+            agent.x += v.x * delta;
+            agent.y += v.y * delta;
+          }
+
+          for(let j = 0; j < i; j++) {
+            const dx = agents[j].x - agent.x;
+            const dy = agents[j].y - agent.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const overlap = AGENT_RADIUS * 2 - distance;
+            if(overlap > 0) {
+              agents[j].x += dx / distance * overlap / 2;
+              agents[j].y += dy / distance * overlap / 2;
+              agent.x -= dx / distance * overlap / 2;
+              agent.y -= dy / distance * overlap / 2;
+
+            }
           }
         }
 
