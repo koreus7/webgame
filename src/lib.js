@@ -51,7 +51,6 @@ export function Sprite(texture, { x, y, visible = true, anchorX = 0.5, anchorY =
   if(x) sprite.x = x;
   if(y) sprite.y = y;
   sprite.visible = visible;
-  sprite.scale.set(2);
   sprite.anchor.x = anchorX;
   sprite.anchor.y = anchorY;
   layer && layer.addChild(sprite);

@@ -1,39 +1,16 @@
 import GUI, { showGUI } from './gui.js';
 import { loadAssets, getTexture, getSheet, getAnim, bindDrag } from './lib.js';
 import { getBB, fakeBB, entityCollides, anyCollide } from './collision.js';
-import Controls from './controls.js';
-import Trigger from './trigger.js';
 import {
-  PLAYER_GHOST_TEXTURE,
-  GROUND_TEXTURE,
-  CABIN_TEXTURE,
-  CANDLE_SHEET,
-  CANDLE_LIGHT_TEXTURE,
-  BARREL_TEXTURE,
-  ENEMY_IDLE_TEXTURE,
-  ENEMY_CORPSE_TEXTURE,
-  ENEMY_DEATH_SHEET,
-  CHARGER_SHEET,
-  OVEN_TEXTURE,
-  KNIFE_TEXTURE,
-  OVEN_SHEET,
-  INTERACT_TEXTURE,
-  KNIFE_WOBBLE_SHEET,
-  MEAT_0,
-  MEAT_1,
-  MEAT_2,
+  AGENT_TEXTURE,
+  TILES_TEXTURE,
+  TARGET_TEXTURE
 } from './assets.js';
 import * as assets from './assets.js';
 import { Sprite, AnimatedSprite } from './lib.js';
 import Entity from './Entity.js';
-import Player, { PS_DRAGGING, PS_IDLE, PS_JUMPING, PS_WALKING } from './entities/Player.js';
-import Enemy, { EN_DEATH } from './entities/Enemy.js';
-import Knife from './entities/Knife.js';
-import Candle from './Candle.js';
 
-const PLAYER_VELOCITY = 1.5;
-const JUMP_VELOCITY = 10;
-const GRAVITY = 1;
+const AGENT_RADIUS = 16;
 
 const traceConfig = {
   aim: false,
@@ -41,20 +18,8 @@ const traceConfig = {
 }
 
 const cameraConfig = {
-  scale: 2,
-  panLeftBound: 0.25,
-  panRightBound: 0.75,
+  scale: 1,
 }
-
-const candleLightConfig = {
-  xOffset: 0,
-  yOffset: 10,
-  alpha: 0.3,
-}
-
-const dragConfig = {
-  corpseOffsetX: 25,
-};
 
 function container(parent) {
   const layer = new PIXI.Container();
@@ -62,73 +27,119 @@ function container(parent) {
   return layer;
 }
 
-function randomMeatTexture() {
-  const randFloat = Math.random();
-  if(randFloat < 0.3) return MEAT_0;
-  if(randFloat < 0.6) return MEAT_1;
-  return MEAT_2;
-}
+let mapData = [[[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[6,6],[7,6],[8,6],[1,11],[1,11],[1,11],[1,11],[1,11]],
+[[1,11],[0,0],[1,0],[1,0],[2,0],[1,11],[1,11],[1,11],[6,6],[7,6],[8,6],[1,11],[1,11],[1,11],[1,11],[1,11]],
+[[1,11],[0,1],[1,1],[1,1],[2,1],[1,11],[1,11],[1,11],[6,6],[8,8],[8,6],[1,11],[1,11],[1,11],[1,11],[1,11]],
+[[1,11],[0,1],[1,1],[0,3],[5,2],[1,11],[13,12],[13,12],[6,6],[7,6],[6,9],[1,11],[1,11],[1,11],[1,11],[1,11]],
+[[1,11],[0,1],[1,1],[2,1],[1,11],[1,11],[13,15],[13,15],[6,6],[7,6],[7,6],[6,9],[1,11],[1,11],[1,11],[1,11]],
+[[1,11],[0,2],[1,2],[2,2],[1,11],[1,11],[14,2],[15,2],[6,6],[7,6],[7,6],[7,6],[6,9],[8,5],[1,11],[1,11]],
+[[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[6,6],[8,8],[7,6],[7,6],[7,6],[8,6],[1,11],[1,11]],
+[[4,5],[2,5],[0,5],[1,5],[2,5],[1,11],[1,11],[1,11],[6,7],[7,8],[7,6],[7,6],[8,9],[6,9],[8,5],[1,11]],
+[[2,8],[3,9],[4,9],[4,6],[3,9],[5,0],[1,11],[1,11],[1,11],[6,7],[7,8],[7,6],[7,6],[8,8],[8,6],[1,11]],
+[[4,7],[4,7],[4,8],[5,8],[2,9],[3,9],[4,5],[2,5],[1,11],[1,11],[6,7],[7,8],[7,6],[7,6],[6,9],[8,5]],
+[[1,11],[1,11],[3,7],[4,7],[4,8],[5,9],[5,8],[0,9],[2,5],[1,11],[1,11],[6,7],[7,8],[7,6],[7,6],[6,9]],
+[[1,11],[1,11],[1,11],[1,11],[0,7],[4,8],[4,6],[4,6],[5,1],[1,11],[1,11],[1,11],[6,7],[7,8],[7,6],[7,6]],
+[[1,11],[9,0],[10,0],[8,0],[1,11],[3,7],[1,7],[1,7],[5,7],[1,11],[1,11],[1,11],[1,11],[6,7],[7,7],[7,7]],
+[[1,11],[9,1],[11,3],[11,1],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11]],
+[[1,11],[9,2],[7,2],[11,2],[1,11],[1,11],[1,11],[2,12],[1,13],[1,13],[1,13],[1,13],[1,13],[1,13],[0,12],[1,11]],
+[[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[2,10],[3,10],[3,10],[3,10],[3,10],[3,10],[3,10],[0,10],[1,11]]];
 
-function randn_bm() {
-  let u = 0, v = 0;
-  while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
-  while(v === 0) v = Math.random();
-  let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
-  num = num / 10.0 + 0.5; // Translate to 0 -> 1
-  if (num > 1 || num < 0) return randn_bm(); // resample between 0 and 1
-  return num;
+
+const parseMap = (map) =>
+{
+    var data = [];
+    let count = 0;
+
+    for (var i = 0; i < map.length; i++)
+    {
+        for (var j = 0; j < map[i].length; j++)
+        {
+            data[count++] = map[i][j][0];
+            data[count++] = 0
+            data[count++] = 0;
+            data[count++] = map[i][j][1];
+        }
+    }
+
+    return new Uint8Array( data )
 }
+const frag = `
+      precision mediump float;
+      uniform sampler2D map, tiles;
+      uniform vec2 mapSize, tileSize;
+      varying vec2 uv;
+      void main() {
+        vec2 tileCoord = floor(255.0 * texture2D(map, floor(uv) / mapSize).ra);
+        gl_FragColor = texture2D(tiles, (tileCoord + fract(uv)) / tileSize);
+      }`;
+
+const vert = `
+      precision mediump float;
+      attribute vec2 position;
+      uniform vec4 view;
+      varying vec2 uv;
+      void main() {
+        uv = mix(view.xw, view.zy, 0.5 * (1.0 + position));
+        gl_Position = vec4(position, 1, 1);
+      }`;
 
 export default function setup(app, level, devMode) {
-    let selected = null;
     const dat = window.dat || null;
     GUI.init(dat);
-    showGUI('camera', cameraConfig);
     showGUI('trace', traceConfig);
-    showGUI('dragging', dragConfig);
-    const candleGUI = GUI.addFolder('candle');
-    candleGUI.add(candleLightConfig, 'xOffset').min(-64).max(64);
-    candleGUI.add(candleLightConfig, 'yOffset').min(-64).max(64);
-    candleGUI.add(candleLightConfig, 'alpha').min(0.01).max(1.0);
+    showGUI('camera', cameraConfig);
 
     function beginLevel() {
+
+      const mapWidth = mapData[0].length;
+      const mapHeight =  mapData.length;
+      const map = PIXI.BaseTexture.fromBuffer(  parseMap(mapData) , mapWidth, mapHeight );
+      const tiles = PIXI.Texture.from(TILES_TEXTURE);
+      tiles.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+      tiles.baseTexture.mipmap = PIXI.MIPMAP_MODES.OFF;
+
+      const shader = PIXI.Shader.from(vert, frag, {
+        map,
+        tiles,
+        tileSize: [16.0, 16.0],
+        mapSize: [mapWidth, mapHeight],
+        view:[0,0,0,0]
+      })
+
+      const geometry = new PIXI.Geometry()
+      .addAttribute('position', [ -1, -1, 1, -1, -1, 1, 1, 1, -1, 1, 1, -1 ]);
+
+      const tileMesh = new PIXI.Mesh(geometry, shader);
+
+      app.stage.addChild(tileMesh);
+
+
+
+
       const camera = container(app.stage);
       camera.scale.set(cameraConfig.scale);
       camera.interactive = true;
 
-      const backgroundLayer = container(camera);
-      const spriteLayer = container(camera);
-      const knifeLayer = container(camera);
-      const lightLayer = container(camera);
-      const furnitureLayer = container(camera);
-      const localGuiLayer = container(camera);
+      const agentLayer = container(camera);
       const globalGuiLayer = container(app.stage);
-      const controls = new Controls(app.view, camera);
+      const entities = [];
+      const agents = [];
 
-      const getLayer = (layer) => {
-        switch(layer) {
-          case 'bg': return backgroundLayer;
-          case 'furniture': return furnitureLayer;
-          default: throw new Error(`unknown layer "${layer}" requested`);
-        }
+      let target = Sprite(TARGET_TEXTURE, { x: 100, y: 50, layer: globalGuiLayer, anchorX: 0.5, anchorY: 0.5 });
+
+      app.view.addEventListener('click', (event) => {
+        const bb = app.view.getBoundingClientRect();
+        target.x = event.clientX - bb.left;
+        target.y = event.clientY - bb.top;
+      });
+      
+      function makeAgent({ x, y }) {
+        const agent = Sprite(AGENT_TEXTURE, { x, y, layer: agentLayer, anchorX: 0.5, anchorY: 0.5 });
+        agents.push(agent);
       }
 
-      let pDir = 1;
-      let pFacing = 1;
-      let pKnives = 3;
-
-      // app.stage.worldTransform.scale(2, 2);
-      const entities = new Set();
-      let draggableCorpse = null;
-      let dragMode = false;
-
-      const steppables = [];
-      const collidables = [];
-
-      const dragPrompt = Sprite(INTERACT_TEXTURE);
-      localGuiLayer.addChild(dragPrompt);
-
-      let player;
+      makeAgent({ x: 20, y: 20 });
+      makeAgent({ x: 30, y: 20 });
 
       const resetBtn = new PIXI.Text('Reset');
       resetBtn.interactive = true;
@@ -138,7 +149,6 @@ export default function setup(app, level, devMode) {
       resetBtn.on('click', (event) => {
         app.stage.removeChild(camera);
         app.ticker.remove(step);
-        controls.destroy();
         beginLevel();
       });
 
@@ -158,84 +168,8 @@ export default function setup(app, level, devMode) {
         });
       }
 
-      const insertSprite = (item) => {
-        const { id, layer, x, y } = item;
-        const sprite = Sprite(`./assets/images/${id}.png`, { x, y });
-        if(layer === 'furniture') {
-          collidables.push(sprite);
-        }
-        getLayer(layer).addChild(sprite);
-        devMode && bindDrag(sprite, item);
-      }
-
-      for(const item of level.contents) {
-        const { x, y, type } = item;
-        switch(type) {
-          case 'sprite': {
-            insertSprite(item);
-            break;
-          }
-
-          case 'player': {
-            const ghost = Sprite(PLAYER_GHOST_TEXTURE, { x, y, layer: spriteLayer });
-            ghost.alpha = 0.5;
-            ghost.visible = devMode;
-            devMode && bindDrag(ghost, item);
-
-            player = new Player({ x, y, layer: spriteLayer });
-            entities.add(player);
-            break;
-          }
-
-          case 'candle': {
-            const candle = new Candle({ x, y, backgroundLayer, lightLayer, candleLightConfig });
-            steppables.push(candle);
-            devMode && bindDrag(candle.candle, item);
-            break;
-          }
-
-          case 'enemy': {
-            const ghost = Sprite(ENEMY_IDLE_TEXTURE, { x, y, speed: 0.2, layer: spriteLayer })
-            ghost.alpha = 0.5;
-            ghost.visible = devMode;
-            devMode && bindDrag(ghost, item);
-
-            const enemy = new Enemy({ x, y, layer: spriteLayer });
-            enemy.onDie(() => {
-              enemy.destroy();
-              entities.delete(enemy);
-              const corpseStates = {
-                dead: Sprite(ENEMY_CORPSE_TEXTURE),
-              }
-              const corpse = new Entity('corpse', corpseStates, 'dead', { x: enemy.state.x, layer: spriteLayer });
-              corpse.state.y = enemy.state.y + enemy.state.height - corpse.state.height;
-              const triggerZone = new Trigger({ localX: -15, localY: 0, width: 20, height: 20 },
-                {
-                  onEnter: () => {
-                      draggableCorpse = corpse;
-                  },
-                  onExit: () => {
-                    if(!dragMode) {
-                      draggableCorpse = null;
-                    }
-                  },
-              });
-              corpse.addTrigger(triggerZone);
-
-              entities.add(corpse);
-            });
-            entities.add(enemy);
-            break;
-          }
-          case 'oven': {
-            const oven = AnimatedSprite(OVEN_SHEET, { x, y, speed: 0.15, loop: false });
-            devMode && bindDrag(oven, item);
-            collidables.push(oven);
-            furnitureLayer.addChild(oven);
-            break;
-          }
-        }
-      }
+      const draw = new PIXI.Graphics();
+      globalGuiLayer.addChild(draw);
 
       function traceBB(bb, color = 0xff0000) {
         if(traceConfig.collision) {
@@ -248,209 +182,17 @@ export default function setup(app, level, devMode) {
         }
       }
 
-      const charger = player.charger = container(localGuiLayer);
-      const chargerAnim = charger.cone = AnimatedSprite(CHARGER_SHEET, { x: 10, visible: false, speed: 0.075, anchorX: 0, anchorY: 0.5, layer: charger });
-
-      if(devMode) {
-        const insertables = [
-          { type: 'sprite', id: 'cabin', layer: 'bg' },
-          { type: 'sprite', id: 'ground', layer: 'furniture' },
-        ];
-
-        let xInsert = 300;
-        const yInsert = app.view.height - 40;
-        for(const i of insertables) {
-          switch(i.type) {
-            case 'sprite': {
-              const sprite = Sprite(`./assets/images/${i.id}.png`, { x: xInsert, y: yInsert, layer: globalGuiLayer });
-              const scale = sprite.width > sprite.height ? sprite.width / 50 : sprite.height / 50;
-              sprite.width /= scale;
-              sprite.height /= scale;
-              sprite.y -= sprite.height / 2;
-              xInsert += 75;
-              sprite.interactive = true;
-              sprite.on('click', () => {
-                const x = (-camera.x + app.view.width / 2) / camera.scale.y;
-                const y = app.view.height / 2 / camera.scale.x;
-                const dupe = Sprite(`./assets/images/${i.id}.png`, { x, y, layer: getLayer(i.layer) });
-                dupe.y -= dupe.height / 2;
-                if(i.layer === 'furniture') {
-                  collidables.push(dupe);
-                }
-                const levelItem = { ...i, x, y };
-                bindDrag(dupe, levelItem);
-                level.contents.push(levelItem);
-              });
-            }
-          }
+      function traceAgent(el, color = 0xff0000) {
+        if(traceConfig.collision) {
+          draw.lineStyle(1, color).drawCircle(el.x, el.y, AGENT_RADIUS);
         }
       }
-
-      const pKnifeSprites = [];
-      for(let i = 0; i < pKnives; i++) {
-        const knifeTally = Sprite(KNIFE_TEXTURE);
-        knifeTally.scale.set(4);
-        globalGuiLayer.addChild(knifeTally);
-        knifeTally.angle = 45;
-        knifeTally.x = app.view.width - 100 + (i * (knifeTally.width + 20));
-        knifeTally.y = app.view.height - 50;
-        pKnifeSprites.push(knifeTally);
-      }
-
-      const draw = new PIXI.Graphics();
-      localGuiLayer.addChild(draw);
-
-      let aiming = false;
-
-      const knives = new Set();
 
       const step = delta => {
         camera.scale.set(cameraConfig.scale);
-        const groundBBs = collidables.map(x => ({...getBB(x), collidable: x}));
-
-        dragPrompt.visible = !!draggableCorpse && !dragMode;
-        if(dragPrompt.visible) {
-          dragPrompt.x = player.state.x + player.facing * -3;
-          dragPrompt.y = player.state.y - 45;
-        }
-
-        if(controls.interact && draggableCorpse && !dragMode) {
-          dragMode = true;
-          draggableCorpse.gravityEnabled = false;
-          pFacing = -pFacing;
-        }
-
-        if(controls.drop && dragMode) {
-          dragMode = false;
-          draggableCorpse.gravityEnabled = true;
-          player.velocity.x = 0;
-          player.setState(PS_IDLE);
-        }
-
-        if(dragMode) {
-          draggableCorpse.state.x = player.state.x -dragConfig.corpseOffsetX * pFacing;
-          draggableCorpse.state.y = player.state.y + player.state.height - draggableCorpse.state.height;
-          draggableCorpse.setFacing(-pFacing);
-        }
+        const groundBBs = []; //collidables.map(x => ({...getBB(x), collidable: x}));
 
         draw.clear();
-        const prevDir = pDir;
-
-        pDir = controls.getDirection();
-        if(pDir) {
-          pFacing = pDir;
-        }
-
-        player.velocity.x = pDir * 5;
-
-      if(controls.mouse) {
-        const mousePos = { x: controls.mouse.x / camera.scale.x - camera.x / camera.scale.x, y: controls.mouse.y / camera.scale.x - camera.y / camera.scale.x };
-        if(traceConfig.aim) {
-          draw.lineStyle(1, 0).moveTo(charger.x, charger.y).lineTo(mousePos.x, mousePos.y);
-        }
-        const v = { x: mousePos.x - charger.x, y: mousePos.y - charger.y };
-        const mag = Math.sqrt(v.x * v.x + v.y * v.y);
-        v.x /= mag;
-        v.y /= mag;
-        const theta = Math.atan2(v.y, v.x);
-        charger.angle = theta * 180 / Math.PI;
-
-        if(controls.aiming && !aiming && pKnives > 0) {
-          chargerAnim.gotoAndPlay(0);
-          chargerAnim.loop = false;
-          chargerAnim.visible = true;
-          aiming = true;
-        }
-
-        if(aiming && !controls.aiming) {
-          if(dragMode) {
-            dragMode = false;
-            draggableCorpse.velocity.x = (v.x * (chargerAnim.currentFrame + 1) * 3.5);
-            draggableCorpse.velocity.y = (v.y * (chargerAnim.currentFrame + 1) * 3.5);
-            draggableCorpse.gravityEnabled = true;
-            draggableCorpse = null;
-
-          } else {
-            pKnives--;
-            pKnifeSprites[pKnives].alpha = 0.25;
-            const knife = new Knife({ player, layer: knifeLayer, vector: v });
-            knives.add(knife);
-          }
-
-          aiming = false;
-          chargerAnim.gotoAndStop(0);
-          chargerAnim.visible = false;
-        }
-      }
-
-      for(const steppable of steppables) {
-        steppable.step();
-      }
-
-        for(const knife of knives) {
-          if(knife.frozen || knife.embedded) {
-            const pickupBB = fakeBB(knife.state, 30, 30);
-            traceBB(pickupBB, 0xffff00);
-
-            if(anyCollide(pickupBB, [getBB(player)])) {
-              pKnifeSprites[pKnives].alpha = 1;
-              pKnives++;
-              knife.destroy();
-              knives.delete(knife);
-            }
-
-            if(knife.embedded) {
-              knife.state.x = knife.embedded.state.x + knife.hitPoint.x;
-              knife.state.y = knife.embedded.state.y + knife.hitPoint.y;
-            }
-
-            continue;
-          };
-
-          knife.velocity.y += GRAVITY / 3 * delta;
-          knife.state.x += knife.velocity.x * delta;
-          knife.state.y += knife.velocity.y * delta;
-          knife.state.angle = 90 + (Math.atan2(knife.velocity.y, knife.velocity.x) * 180 / Math.PI);
-
-          const nextPos = {
-            x: knife.state.x + knife.velocity.x * delta,
-            y: knife.state.y + knife.velocity.y * delta
-          };
-
-          let nextBB = fakeBB(nextPos, 10, 10);
-          traceBB(nextBB, 0xff0000);
-          const enemyBBs = Array.from(entities)
-            .filter(entity => entity.name === 'enemy')
-            .map(entity => ({ entity, ...getBB(entity) }));
-
-          const hit = entityCollides(nextBB, enemyBBs);
-          if(hit) {
-            const deadFella = hit.entity;
-            knife.embedded = deadFella;
-            knife.hitPoint = { x: knife.state.x - deadFella.state.x, y: knife.state.y - deadFella.state.y };
-            const initialRotation = knife.state.angle;
-            deadFella.setState(EN_DEATH);
-            deadFella.velocity.x = -5;
-
-            continue;
-          }
-
-          if(anyCollide(nextBB, groundBBs)) {
-            knife.frozen = true;
-
-            while(anyCollide(nextBB, groundBBs)) {
-              nextPos.x -= knife.velocity.x * delta / 5;
-              nextPos.y -= knife.velocity.y * delta / 5;
-              nextBB = fakeBB(nextPos, 10, 10);
-            }
-            nextPos.x += knife.velocity.x * delta / 3;
-            nextPos.y += knife.velocity.y * delta / 3;
-          }
-
-          knife.setState('wobble');
-          knife.state.x = nextPos.x;
-          knife.state.y = nextPos.y;
-        }
 
         if(traceConfig.collision) {
           for(const groundBB of groundBBs) {
@@ -458,21 +200,43 @@ export default function setup(app, level, devMode) {
           }
         }
 
-        for(const entity of entities) {
-          if(entity === player && entity.isGrounded && controls.jump) {
-            player.velocity.y = -JUMP_VELOCITY;
-            player.setState(PS_JUMPING);
+        for(let i = 0; i < agents.length; i++) {
+          const agent = agents[i];
+          traceAgent(agent);
+          agent.target = { x: target.x, y: target.y };
 
-          } else if(entity.gravityEnabled) {
-            entity.velocity.y += GRAVITY * delta;
+          const v = { x: agent.target.x - agent.x, y: agent.target.y - agent.y };
+          const mag = Math.sqrt(v.x * v.x + v.y * v.y);
+          v.x /= mag;
+          v.y /= mag;
+          const theta = Math.atan2(v.y, v.x);
+
+          if(mag > AGENT_RADIUS) {
+            agent.angle = (theta * 180 / Math.PI) + 90;
+            agent.x += v.x * delta;
+            agent.y += v.y * delta;
           }
 
-          entity.updateTriggers(traceBB, player);
+          for(let j = 0; j < i; j++) {
+            const dx = agents[j].x - agent.x;
+            const dy = agents[j].y - agent.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const overlap = AGENT_RADIUS * 2 - distance;
+            if(overlap > 0) {
+              agents[j].x += dx / distance * overlap / 2;
+              agents[j].y += dy / distance * overlap / 2;
+              agent.x -= dx / distance * overlap / 2;
+              agent.y -= dy / distance * overlap / 2;
+
+            }
+          }
+        }
+
+        for(const entity of entities) {
           const prevBB = getBB(entity);
           entity.state.x += entity.velocity.x * delta;
           entity.state.y += entity.velocity.y * delta;
           let nextBB = getBB(entity);
-          entity.isGrounded = false;
           let collided = entityCollides(nextBB, groundBBs);
           let i = 0;
           while(collided) {
@@ -482,102 +246,35 @@ export default function setup(app, level, devMode) {
               console.log(entity.name, collided.name);
               break;
             }
-            if(entity.name === 'corpse' && collided.name === 'oven') {
-              console.log("Corpse Oven");
-              const oven = collided.collidable;
-              oven.play();
-              oven.onComplete = () => {
-                for(let i = 0; i < 5; i++) {
-                    const meatStates = {
-                      meaty: Sprite(randomMeatTexture()),
-                    }
-                    const meat = new Entity('meat', meatStates, 'meaty', { x: oven.x, y: oven.y, layer: spriteLayer });
-                    meat.setVelocity({ x: 10 + randn_bm()*10.0 });
-                    entities.add(meat);
-                }
-              }
-              const corpse = entity;
-              dragMode = false;
-              corpse.destroy();
-              entities.delete(corpse);
-              break;
-            }
-
-            let fixed = false;
 
             // come from above
             if(nextBB.bottom > collided.top && prevBB.bottom <= collided.top) {
-              entity.state.y = collided.top - entity.state.height;
-              nextBB = getBB(entity);
-              entity.velocity.y = 0;
-              entity.isGrounded = true;
-              fixed = true;
-              if(entity !== player) {
-                entity.velocity.x *= 0.9;
-              }
-
 
             // come from below
             } else if(nextBB.top < collided.bottom && prevBB.top >= collided.bottom) {
-              entity.state.y = collided.bottom;
-              nextBB = getBB(entity);
-              entity.velocity.y = 0;
-              entity.isGrounded = true;
-              fixed = true;
 
             } else if(nextBB.right > collided.left && prevBB.right <= collided.left) {
-              entity.state.x = collided.left - entity.state.width / 2;
-              nextBB = getBB(entity);
-              entity.velocity.x = 0;
-              fixed = true;
 
             } else if(nextBB.left < collided.right && prevBB.left >= collided.right) {
-              entity.state.x = collided.right + entity.state.width / 2;
-              nextBB = getBB(entity);
-              entity.velocity.x = 0;
-              fixed = true;
+
             }
 
             nextBB = getBB(entity);
-            collided = fixed ? entityCollides(nextBB, groundBBs) : null;
+            collided = entityCollides(nextBB, groundBBs);
           }
           traceBB(nextBB, 0x00ff00);
         }
 
-        if(!player.isGrounded && player.stateName !== PS_JUMPING && player.stateName != PS_DRAGGING) {
-          player.setState(PS_JUMPING);
+        const boxX = mapWidth / app.screen.width;
+        const boxY = mapHeight / app.screen.height;
+        const boxH = 10;
+        const boxW = app.screen.width / app.screen.height * boxH;
 
-        } else if(player.isGrounded && player.stateName === PS_JUMPING) {
-          if(pDir === 0) {
-            player.setState(PS_IDLE);
+        shader.uniforms.view = [boxX - 0.5 * boxW,
+                                boxY - 0.5 * boxH,
+                                boxX + 0.5 * boxW,
+                                boxY + 0.5 * boxH];
 
-          } else {
-            player.setState(dragMode ? PS_DRAGGING : PS_WALKING);
-          }
-        } else if(pDir !== prevDir) {
-          if(pDir === 0) {
-            player.setState(PS_IDLE);
-
-          } else {
-            player.setState(dragMode ? PS_DRAGGING : PS_WALKING);
-          }
-        }
-
-        // Camera
-        const playerOffset = player.state.x + camera.x / camera.scale.x;
-        const moveRightAmount = playerOffset - (app.view.width / camera.scale.x * cameraConfig.panRightBound);
-        if(moveRightAmount > 0) {
-          camera.x -= moveRightAmount * camera.scale.x;
-        }
-
-        const moveLeftAmount = playerOffset - (app.view.width / camera.scale.x * cameraConfig.panLeftBound);
-        if(moveLeftAmount < 0 && camera.x < 0) {
-          camera.x = Math.min(0, camera.x - moveLeftAmount * camera.scale.x);
-        }
-
-        player.setFacing(pFacing);
-        charger.x = player.state.x;
-        charger.y = player.state.y + 20;
       };
 
       app.ticker.add(step);
