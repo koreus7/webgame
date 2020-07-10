@@ -138,8 +138,9 @@ export default function setup(app, level, devMode) {
         agents.push(agent);
       }
 
-      makeAgent({ x: 20, y: 20 });
-      makeAgent({ x: 30, y: 20 });
+      for(let i = 0; i < 10; i++) {
+        makeAgent({ x: 20 * i, y: 20 * i });
+      }
 
       const resetBtn = new PIXI.Text('Reset');
       resetBtn.interactive = true;
