@@ -2,7 +2,8 @@ import GUI, { showGUI } from './gui.js';
 import { loadAssets, getTexture, getSheet, getAnim, bindDrag } from './lib.js';
 import { getBB, fakeBB, entityCollides, anyCollide } from './collision.js';
 import {
-  AGENT_TEXTURE
+  AGENT_TEXTURE,
+  TARGET_TEXTURE
 } from './assets.js';
 import * as assets from './assets.js';
 import { Sprite, AnimatedSprite } from './lib.js';
@@ -18,7 +19,7 @@ const traceConfig = {
 }
 
 const cameraConfig = {
-  scale: 2,
+  scale: 1,
 }
 
 function container(parent) {
@@ -37,8 +38,26 @@ export default function setup(app, level, devMode) {
       camera.scale.set(cameraConfig.scale);
       camera.interactive = true;
 
+      
+      const agentLayer = container(camera);
       const globalGuiLayer = container(app.stage);
       const entities = [];
+      const agents = [];
+
+      let target = Sprite(TARGET_TEXTURE, { x: 100, y: 50, layer: globalGuiLayer, anchorX: 0.5, anchorY: 0.5 });
+
+      app.view.addEventListener('click', (event) => {
+        const bb = app.view.getBoundingClientRect();
+        target.x = event.clientX - bb.left;
+        target.y = event.clientY - bb.top;
+      });
+      
+      function makeAgent({ x, y }) {
+        const agent = Sprite(AGENT_TEXTURE, { x, y, layer: agentLayer, anchorX: 0.5, anchorY: 0.5 });
+        agents.push(agent);
+      }
+
+      makeAgent({ x: 20, y: 20 });
 
       const resetBtn = new PIXI.Text('Reset');
       resetBtn.interactive = true;
@@ -91,6 +110,19 @@ export default function setup(app, level, devMode) {
           for(const groundBB of groundBBs) {
             traceBB(groundBB, 0x00FFFF);
           }
+        }
+
+        for(const agent of agents) {
+          agent.target = { x: target.x, y: target.y };
+
+          const v = { x: agent.target.x - agent.x, y: agent.target.y - agent.y };
+          const mag = Math.sqrt(v.x * v.x + v.y * v.y);
+          v.x /= mag;
+          v.y /= mag;
+          const theta = Math.atan2(v.y, v.x);
+          agent.angle = (theta * 180 / Math.PI) + 90;
+          agent.x += v.x * delta;
+          agent.y += v.y * delta;
         }
 
         for(const entity of entities) {
