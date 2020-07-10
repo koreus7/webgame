@@ -2,15 +2,13 @@ import GUI, { showGUI } from './gui.js';
 import { loadAssets, getTexture, getSheet, getAnim, bindDrag } from './lib.js';
 import { getBB, fakeBB, entityCollides, anyCollide } from './collision.js';
 import {
-  AGENT_TEXTURE
+  AGENT_TEXTURE,
+  TILES_TEXTURE,
 } from './assets.js';
 import * as assets from './assets.js';
 import { Sprite, AnimatedSprite } from './lib.js';
 import Entity from './Entity.js';
 
-const PLAYER_VELOCITY = 1.5;
-const JUMP_VELOCITY = 10;
-const GRAVITY = 1;
 
 const traceConfig = {
   aim: false,
@@ -27,12 +25,94 @@ function container(parent) {
   return layer;
 }
 
+let mapData = [[[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[6,6],[7,6],[8,6],[1,11],[1,11],[1,11],[1,11],[1,11]],
+[[1,11],[0,0],[1,0],[1,0],[2,0],[1,11],[1,11],[1,11],[6,6],[7,6],[8,6],[1,11],[1,11],[1,11],[1,11],[1,11]],
+[[1,11],[0,1],[1,1],[1,1],[2,1],[1,11],[1,11],[1,11],[6,6],[8,8],[8,6],[1,11],[1,11],[1,11],[1,11],[1,11]],
+[[1,11],[0,1],[1,1],[0,3],[5,2],[1,11],[13,12],[13,12],[6,6],[7,6],[6,9],[1,11],[1,11],[1,11],[1,11],[1,11]],
+[[1,11],[0,1],[1,1],[2,1],[1,11],[1,11],[13,15],[13,15],[6,6],[7,6],[7,6],[6,9],[1,11],[1,11],[1,11],[1,11]],
+[[1,11],[0,2],[1,2],[2,2],[1,11],[1,11],[14,2],[15,2],[6,6],[7,6],[7,6],[7,6],[6,9],[8,5],[1,11],[1,11]],
+[[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[6,6],[8,8],[7,6],[7,6],[7,6],[8,6],[1,11],[1,11]],
+[[4,5],[2,5],[0,5],[1,5],[2,5],[1,11],[1,11],[1,11],[6,7],[7,8],[7,6],[7,6],[8,9],[6,9],[8,5],[1,11]],
+[[2,8],[3,9],[4,9],[4,6],[3,9],[5,0],[1,11],[1,11],[1,11],[6,7],[7,8],[7,6],[7,6],[8,8],[8,6],[1,11]],
+[[4,7],[4,7],[4,8],[5,8],[2,9],[3,9],[4,5],[2,5],[1,11],[1,11],[6,7],[7,8],[7,6],[7,6],[6,9],[8,5]],
+[[1,11],[1,11],[3,7],[4,7],[4,8],[5,9],[5,8],[0,9],[2,5],[1,11],[1,11],[6,7],[7,8],[7,6],[7,6],[6,9]],
+[[1,11],[1,11],[1,11],[1,11],[0,7],[4,8],[4,6],[4,6],[5,1],[1,11],[1,11],[1,11],[6,7],[7,8],[7,6],[7,6]],
+[[1,11],[9,0],[10,0],[8,0],[1,11],[3,7],[1,7],[1,7],[5,7],[1,11],[1,11],[1,11],[1,11],[6,7],[7,7],[7,7]],
+[[1,11],[9,1],[11,3],[11,1],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11]],
+[[1,11],[9,2],[7,2],[11,2],[1,11],[1,11],[1,11],[2,12],[1,13],[1,13],[1,13],[1,13],[1,13],[1,13],[0,12],[1,11]],
+[[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[1,11],[2,10],[3,10],[3,10],[3,10],[3,10],[3,10],[3,10],[0,10],[1,11]]];
+
+
+const parseMap = (map) =>
+{
+    var data = [];
+    let count = 0;
+
+    for (var i = 0; i < map.length; i++)
+    {
+        for (var j = 0; j < map[i].length; j++)
+        {
+            data[count++] = map[i][j][0];
+            data[count++] = 0
+            data[count++] = 0;
+            data[count++] = map[i][j][1];
+        }
+    }
+
+    return new Uint8Array( data )
+}
+const frag = `
+      precision mediump float;
+      uniform sampler2D map, tiles;
+      uniform vec2 mapSize, tileSize;
+      varying vec2 uv;
+      void main() {
+        vec2 tileCoord = floor(255.0 * texture2D(map, floor(uv) / mapSize).ra);
+        gl_FragColor = texture2D(tiles, (tileCoord + fract(uv)) / tileSize);
+      }`;
+
+const vert = `
+      precision mediump float;
+      attribute vec2 position;
+      uniform vec4 view;
+      varying vec2 uv;
+      void main() {
+        uv = mix(view.xw, view.zy, 0.5 * (1.0 + position));
+        gl_Position = vec4(position, 1, 1);
+      }`;
+
 export default function setup(app, level, devMode) {
     const dat = window.dat || null;
     GUI.init(dat);
     showGUI('camera', cameraConfig);
 
     function beginLevel() {
+
+      const mapWidth = mapData[0].length;
+      const mapHeight =  mapData.length;
+      const map = PIXI.BaseTexture.fromBuffer(  parseMap(mapData) , mapWidth, mapHeight );
+      const tiles = PIXI.Texture.from(TILES_TEXTURE);
+      tiles.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+      tiles.baseTexture.mipmap = PIXI.MIPMAP_MODES.OFF;
+
+      const shader = PIXI.Shader.from(vert, frag, {
+        map,
+        tiles,
+        tileSize: [16.0, 16.0],
+        mapSize: [mapWidth, mapHeight],
+        view:[0,0,0,0]
+      })
+
+      const geometry = new PIXI.Geometry()
+      .addAttribute('position', [ -1, -1, 1, -1, -1, 1, 1, 1, -1, 1, 1, -1 ]);
+
+      const tileMesh = new PIXI.Mesh(geometry, shader);
+
+      app.stage.addChild(tileMesh);
+
+
+
+
       const camera = container(app.stage);
       camera.scale.set(cameraConfig.scale);
       camera.interactive = true;
@@ -125,6 +205,17 @@ export default function setup(app, level, devMode) {
           }
           traceBB(nextBB, 0x00ff00);
         }
+
+        const boxX = mapWidth / app.screen.width;
+        const boxY = mapHeight / app.screen.height;
+        const boxH = 10;
+        const boxW = app.screen.width / app.screen.height * boxH;
+
+        shader.uniforms.view = [boxX - 0.5 * boxW,
+                                boxY - 0.5 * boxH,
+                                boxX + 0.5 * boxW,
+                                boxY + 0.5 * boxH];
+
       };
 
       app.ticker.add(step);
