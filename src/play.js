@@ -9,12 +9,9 @@ import * as assets from './assets.js';
 import { Sprite, AnimatedSprite } from './lib.js';
 import Entity from './Entity.js';
 
-const PLAYER_VELOCITY = 1.5;
-const JUMP_VELOCITY = 10;
-const GRAVITY = 1;
+const AGENT_RADIUS = 16;
 
 const traceConfig = {
-  aim: false,
   collision: false
 }
 
@@ -31,6 +28,7 @@ function container(parent) {
 export default function setup(app, level, devMode) {
     const dat = window.dat || null;
     GUI.init(dat);
+    showGUI('trace', traceConfig);
     showGUI('camera', cameraConfig);
 
     function beginLevel() {
@@ -38,7 +36,6 @@ export default function setup(app, level, devMode) {
       camera.scale.set(cameraConfig.scale);
       camera.interactive = true;
 
-      
       const agentLayer = container(camera);
       const globalGuiLayer = container(app.stage);
       const entities = [];
@@ -58,6 +55,7 @@ export default function setup(app, level, devMode) {
       }
 
       makeAgent({ x: 20, y: 20 });
+      makeAgent({ x: 30, y: 20 });
 
       const resetBtn = new PIXI.Text('Reset');
       resetBtn.interactive = true;
@@ -100,6 +98,12 @@ export default function setup(app, level, devMode) {
         }
       }
 
+      function traceAgent(el, color = 0xff0000) {
+        if(traceConfig.collision) {
+          draw.lineStyle(1, color).drawCircle(el.x, el.y, AGENT_RADIUS);
+        }
+      }
+
       const step = delta => {
         camera.scale.set(cameraConfig.scale);
         const groundBBs = []; //collidables.map(x => ({...getBB(x), collidable: x}));
@@ -112,7 +116,9 @@ export default function setup(app, level, devMode) {
           }
         }
 
-        for(const agent of agents) {
+        for(let i = 0; i < agents.length; i++) {
+          const agent = agents[i];
+          traceAgent(agent);
           agent.target = { x: target.x, y: target.y };
 
           const v = { x: agent.target.x - agent.x, y: agent.target.y - agent.y };
@@ -120,9 +126,26 @@ export default function setup(app, level, devMode) {
           v.x /= mag;
           v.y /= mag;
           const theta = Math.atan2(v.y, v.x);
-          agent.angle = (theta * 180 / Math.PI) + 90;
-          agent.x += v.x * delta;
-          agent.y += v.y * delta;
+
+          if(mag > AGENT_RADIUS) {
+            agent.angle = (theta * 180 / Math.PI) + 90;
+            agent.x += v.x * delta;
+            agent.y += v.y * delta;
+          }
+
+          for(let j = 0; j < i; j++) {
+            const dx = agents[j].x - agent.x;
+            const dy = agents[j].y - agent.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const overlap = AGENT_RADIUS * 2 - distance;
+            if(overlap > 0) {
+              agents[j].x += dx / distance * overlap / 2;
+              agents[j].y += dy / distance * overlap / 2;
+              agent.x -= dx / distance * overlap / 2;
+              agent.y -= dy / distance * overlap / 2;
+
+            }
+          }
         }
 
         for(const entity of entities) {
