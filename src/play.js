@@ -211,7 +211,7 @@ export default function setup(app, level, devMode) {
         }
 
         const agent = Sprite(AGENT_TEXTURE, { x, y, layer: agentLayer, anchorX: 0.5, anchorY: 0.5 });
-        agent.spooked = true;
+        agent.spooked = false;
         agents.push(agent);
       }
 
@@ -402,10 +402,16 @@ export default function setup(app, level, devMode) {
             if(mag < TARGET_MET_DISTANCE) {
               agent.currentNode = agent.target;
               agent.target = null;
-              // agent.spooked = false;
+              agent.spooked = false;
             }
           }
           //#endregion
+
+          if(agents.every(agent => !agent.spooked)) {
+            for(const agent of agents) {
+              agent.spooked = true;
+            }
+          }
 
           //#region Jostle mechanics
           for(let j = 0; j < i; j++) {

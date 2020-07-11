@@ -33,6 +33,44 @@
       "id": "lme95s2y2",
       "x": 436,
       "y": 71
+    },
+    {
+      "type": "node",
+      "id": "t9p8uyudw",
+      "x": 608,
+      "y": 114
+    },
+    {
+      "type": "node",
+      "id": "vim0ryiuj",
+      "x": 787,
+      "y": 273
+    },
+    {
+      "type": "node",
+      "id": "ucv9ghh6y",
+      "x": 825,
+      "y": 62
+    },
+    {
+      "type": "agent",
+      "x": 159,
+      "y": 146
+    },
+    {
+      "type": "agent",
+      "x": 173,
+      "y": 123
+    },
+    {
+      "type": "agent",
+      "x": 131,
+      "y": 162
+    },
+    {
+      "type": "agent",
+      "x": 82,
+      "y": 177
     }
   ],
   "mapStuff": {
@@ -289,6 +327,18 @@
     {
       "from": "asdf",
       "to": "lme95s2y2"
+    },
+    {
+      "from": "lme95s2y2",
+      "to": "t9p8uyudw"
+    },
+    {
+      "from": "t9p8uyudw",
+      "to": "vim0ryiuj"
+    },
+    {
+      "from": "t9p8uyudw",
+      "to": "ucv9ghh6y"
     }
   ]
 }
