@@ -44,7 +44,7 @@ export function anyCollide(entityBB, wallBBs) {
 };
 
 
-export function entityCollides(entityBB, wallBBs) {
+export function entityCollides(entityBB, wallBBs, circleBBs) {
   const collisions = [];
   for(let i = 0; i < wallBBs.length; i++) {
     const wallBB = wallBBs[i];

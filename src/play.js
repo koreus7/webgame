@@ -472,6 +472,7 @@ export default function setup(app, level, devMode) {
             if(mag < TARGET_MET_DISTANCE) {
               agent.currentNode = agent.target;
               agent.target = null;
+              agent.spooked = false;
             }
           }
           //#endregion
@@ -488,11 +489,13 @@ export default function setup(app, level, devMode) {
               agent.y -= d.y / distance * overlap / 2;
             }
           }
+
+          const circleBBs = agents.slice(0, i - 1);
           //#endregion
 
           //#region Wall collision
           let nextBB = getBB(agent);
-          let collided = entityCollides(nextBB, colliders);
+          let collided = entityCollides(nextBB, colliders, circleBBs);
           let c = 0;
           while(collided) {
             c++;
@@ -501,19 +504,32 @@ export default function setup(app, level, devMode) {
               break;
             }
 
-            // come from above
-            if(nextBB.bottom > collided.top && prevBB.bottom <= collided.top) {
-              agent.y = collided.top - (agent.height * agent.scale.y) / 2;
+            if(collided.type === 'circle') {
+              const { d } = collided;
+              const distance = magnitude(d);
+              const overlap = AGENT_RADIUS * 2 - distance;
+              if(overlap > 0) {
+                agents[j].x += d.x / distance * overlap / 2;
+                agents[j].y += d.y / distance * overlap / 2;
+                agent.x -= d.x / distance * overlap / 2;
+                agent.y -= d.y / distance * overlap / 2;
+              }
 
-            // come from below
-            } else if(nextBB.top < collided.bottom && prevBB.top >= collided.bottom) {
-              agent.y = collided.bottom + (agent.height * agent.scale.y) / 2;
+            } else {
+              // come from above
+              if(nextBB.bottom > collided.top && prevBB.bottom <= collided.top) {
+                agent.y = collided.top - (agent.height * agent.scale.y) / 2;
 
-            } else if(nextBB.right > collided.left && prevBB.right <= collided.left) {
-              agent.x = collided.left - (agent.width * agent.scale.x) / 2;
+              // come from below
+              } else if(nextBB.top < collided.bottom && prevBB.top >= collided.bottom) {
+                agent.y = collided.bottom + (agent.height * agent.scale.y) / 2;
 
-            } else if(nextBB.left < collided.right && prevBB.left >= collided.right) {
-              agent.x = collided.right + (agent.width * agent.scale.x) / 2;
+              } else if(nextBB.right > collided.left && prevBB.right <= collided.left) {
+                agent.x = collided.left - (agent.width * agent.scale.x) / 2;
+
+              } else if(nextBB.left < collided.right && prevBB.left >= collided.right) {
+                agent.x = collided.right + (agent.width * agent.scale.x) / 2;
+              }
             }
 
             nextBB = getBB(agent);
