@@ -62,8 +62,8 @@ export default function setup(app, level, devMode) {
 
       const mapLayer = container(camera);
       const agentLayer = container(camera);
-      const globalGuiLayer = container(app.stage);
       const localGuiLayer = container(camera);
+      const globalGuiLayer = container(app.stage);
       const entities = [];
       const agents = [];
       const nodes = {};
@@ -177,16 +177,29 @@ export default function setup(app, level, devMode) {
       //#region Edge design
       let nodeFrom = null;
       function addEdge(target) {
+        console.log('add edge');
         if(!nodeFrom) {
+          console.log('first');
           nodeFrom = target;
         } else {
+          console.log('second');
           const nodeTo = target;
-          level.edges.push({ from: nodeFrom, to: nodeTo });
+          const edge = { from: nodeFrom, to: nodeTo };
+          level.edges.push(edge);
+          insertEdge(edge);
+          nodeFrom = null;
         }
       }
       //#endregion
 
       //#region Level initialisation
+      function insertEdge(edge) {
+        // const nodeFrom = nodes[edge.from];
+        // const nodeTo = nodes[edge.to];
+        // nodeFrom.edges = nodeFrom.edges || [];
+        // nodeFrom.edges.push(edge.to);
+      }
+
       function insertAgent(item) {
         const { x, y } = item;
         if(devMode) {
@@ -205,8 +218,9 @@ export default function setup(app, level, devMode) {
         if(devMode) {
           const dupe = Sprite(NODE_TEXTURE, { x, y, layer: localGuiLayer, anchorY: 0.5, anchorX: 0.5 });
           dupe.on('click', (event) => {
-            if(event.data.originalEvent.ctrlKey) {
-              addEdge(dupe);
+            console.log(event.data.originalEvent);
+            if(event.data.originalEvent.altKey) {
+              addEdge(item.id);
             }
           });
 
@@ -279,6 +293,17 @@ export default function setup(app, level, devMode) {
           draw.lineStyle(1, color).drawCircle(el.x, el.y, AGENT_RADIUS);
         }
       }
+
+      function traceEdge({ from, to }, color = 0x0000ff) {
+        const nodeFrom = nodes[from];
+        const nodeTo = nodes[to];
+        draw.beginFill(color).drawCircle(nodeTo.x, nodeTo.y, 4).endFill();
+        draw
+          .moveTo(nodeFrom.x, nodeFrom.y)
+          .lineStyle(2, color)
+          .lineTo(nodeTo.x, nodeTo.y);
+      }
+
       //#endregion
 
       //#region Draw Insertable Entities
@@ -336,6 +361,10 @@ export default function setup(app, level, devMode) {
           for(const groundBB of groundBBs) {
             traceBB(groundBB, 0x00FFFF);
           }
+        }
+
+        for(const edge of level.edges) {
+          traceEdge(edge);
         }
 
         for(let i = 0; i < agents.length; i++) {
