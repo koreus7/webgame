@@ -7,7 +7,7 @@ import {
   TARGET_TEXTURE,
   NODE_TEXTURE
 } from './assets.js';
-import { Sprite, AnimatedSprite, bindClick } from './lib.js';
+import { Sprite, AnimatedSprite, bindClick, ID } from './lib.js';
 import { HSV } from './color.js';
 import Entity from './Entity.js';
 
@@ -124,19 +124,21 @@ export default function setup(app, level, devMode) {
       }
 
       app.view.addEventListener('mousedown', (event) => {
-        mapMouseDown = true;
-        const { tileX, tileY } = mouseEventToTile(event);
-        if(inBounds(tileX, tileY)) {
-          if(event.altKey) {
-            tileBrush = mapData[tileY][tileX];
-          } else {
-            paintTile(tileX, tileY);
+        if(!event.shiftKey) {
+          mapMouseDown = true;
+          const { tileX, tileY } = mouseEventToTile(event);
+          if(inBounds(tileX, tileY)) {
+            if(event.altKey) {
+              tileBrush = mapData[tileY][tileX];
+            } else {
+              paintTile(tileX, tileY);
+            }
           }
         }
       });
 
       app.view.addEventListener('mousemove', (event) => {
-        if(mapMouseDown) {
+        if(!event.shiftKey && mapMouseDown) {
           const { tileX, tileY } = mouseEventToTile(event);
           if(inBounds(tileX, tileY)) {
             if(event.altKey) {
@@ -171,21 +173,56 @@ export default function setup(app, level, devMode) {
         });
       }
       //#endregion
-
-      //#region Level initialisation
-      for(const item of level.contents) {
-        switch(item.type) {
-          case 'node':
-            break;
+      
+      //#region Edge design
+      let nodeFrom = null;
+      function addEdge(target) {
+        if(!nodeFrom) {
+          nodeFrom = target;
+        } else {
+          const nodeTo = target;
+          level.edges.push({ from: nodeFrom, to: nodeTo });
         }
       }
-      function makeAgent({ x, y }) {
+      //#endregion
+
+      //#region Level initialisation
+      function insertAgent(item) {
+        const { x, y } = item;
+        if(devMode) {
+          const ghost = Sprite(AGENT_TEXTURE, { x, y, layer: agentLayer });
+          ghost.alpha = 0.5;
+          bindDrag(ghost, item);
+        }
+
         const agent = Sprite(AGENT_TEXTURE, { x, y, layer: agentLayer, anchorX: 0.5, anchorY: 0.5 });
         agents.push(agent);
       }
 
-      for(let i = 0; i < 10; i++) {
-        makeAgent({ x: 20 * i, y: 20 * i });
+      function insertNode(item) {
+        const { id, x, y } = item;
+        nodes[item.id] = item;
+        if(devMode) {
+          const dupe = Sprite(NODE_TEXTURE, { x, y, layer: localGuiLayer, anchorY: 0.5, anchorX: 0.5 });
+          dupe.on('click', (event) => {
+            if(event.data.originalEvent.ctrlKey) {
+              addEdge(dupe);
+            }
+          });
+
+          bindDrag(dupe, item);
+        }
+      }
+
+      for(const item of level.contents) {
+        switch(item.type) {
+          case 'node':
+            insertNode(item);
+            break;
+          case 'agent':
+            insertAgent(item);
+            break;
+        }
       }
       //#endregion
 
@@ -250,6 +287,7 @@ export default function setup(app, level, devMode) {
 
         const insertables = [
           { type: 'node' },
+          { type: 'agent' },
         ];
 
         let xInsert = 300;
@@ -261,18 +299,27 @@ export default function setup(app, level, devMode) {
               xInsert += 75;
               sprite.interactive = true;
               sprite.on('click', (event) => {
+                const id = ID();
                 const x = (-camera.x + app.view.width / 2) / camera.scale.y;
                 const y = app.view.height / 2 / camera.scale.x;
-                const dupe = Sprite(NODE_TEXTURE, { x, y, layer: localGuiLayer, anchorY: 0.5, anchorX: 0.5 });
-                const levelItem = { ...i, x, y };
-                bindDrag(dupe, levelItem);
-                level.contents.push(levelItem);
-                dupe.on('click', (event) => {
-                  if(event.data.originalEvent.ctrlKey) {
-                    addEdge(dupe);
-                  }
-                });
+                const item = { ...i, id, x, y };
+                level.contents.push(item);
+                insertNode(item);
               });
+              break;
+            };
+            case 'agent': {
+              const sprite = Sprite(AGENT_TEXTURE, { x: xInsert, y: yInsert, layer: globalGuiLayer, anchorY: 0.5, anchorX: 0.5 });
+              xInsert += 75;
+              sprite.interactive = true;
+              sprite.on('click', (event) => {
+                const x = (-camera.x + app.view.width / 2) / camera.scale.y;
+                const y = app.view.height / 2 / camera.scale.x;
+                const item = { ...i, x, y };
+                level.contents.push(item);
+                insertAgent(item);
+              });
+              break;
             }
           }
         }
