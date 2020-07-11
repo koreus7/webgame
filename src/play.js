@@ -5,7 +5,8 @@ import {
   AGENT_TEXTURE,
   TILES_TEXTURE,
   TARGET_TEXTURE,
-  NODE_TEXTURE
+  NODE_TEXTURE,
+  FIRE_TEXTURE,
 } from './assets.js';
 import { Sprite, AnimatedSprite, bindClick, ID, between, magnitude } from './lib.js';
 import { HSV } from './color.js';
@@ -39,15 +40,34 @@ let mapData = [
   [1,1,1,1,1,1,1,1,1,],
 ];
 
+const tileProps = {
+  0: {
+    flamable: false,
+  },
+  1: {
+    flamable: false,
+  },
+  2: {
+    flamable: true,
+  },
+};
+
 let mapMetaData = mapData.map(x => x.map(y => ({
   onFire: false,
 })));
 
 let mapLiveData = mapData.map(x => x.map(y => ({
   sprite: null,
+  fireSprite: null,
+  onFire: false,
 })));
 
+let fireIndex = {};
+
 let tileBrush = 0;
+
+let fireSpreadTimer = 0;
+let fireSpreadRate = 20;
 
 export default function setup(app, level, devMode) {
     const dat = window.dat || null;
@@ -62,6 +82,7 @@ export default function setup(app, level, devMode) {
 
       const mapLayer = container(camera);
       const agentLayer = container(camera);
+      const fireLayer = container(camera);
       const localGuiLayer = container(camera);
       const globalGuiLayer = container(app.stage);
       const entities = [];
@@ -96,8 +117,26 @@ export default function setup(app, level, devMode) {
         return s;
       }
 
+      function genFireSprite(x, y) {
+        const s = AnimatedSprite(FIRE_TEXTURE, { x: x * tileSize + tileSize/2, y: y * tileSize, layer: fireLayer, drag: false, speed: 0.12 });
+        s.scale.x = 1;
+        s.scale.y = 1;
+        s.play();
+        return s;
+      }
+
+      function setFire(x, y) {
+        mapLiveData[y][x].onFire = true;
+        mapLiveData[y][x].fireSprite = genFireSprite(x, y);
+        fireIndex[y + '-' + x] = { x, y };
+      }
+
       for(let y = 0; y < mapData.length; y++) {
         for(let x = 0; x < mapData[y].length; x++) {
+          const { onFire } = mapMetaData[y][x];
+          if(onFire) {
+            setFire(x,y )
+          }
           mapLiveData[y][x].sprite = genMapSprite(x, y);
         }
       }
@@ -117,36 +156,76 @@ export default function setup(app, level, devMode) {
         return tileY < mapData.length && tileX < mapData[tileY].length;
       }
 
-      function paintTile(tileX, tileY) {
-        mapLayer.removeChild(mapLiveData[tileY][tileX].sprite);
-        mapData[tileY][tileX] = tileBrush;
+      function paintTile(tileX, tileY, brush = tileBrush) {
+        const existingSprite = mapLiveData[tileY][tileX].sprite;
+        if(existingSprite) {
+          mapLayer.removeChild(existingSprite);
+        }
+        mapData[tileY][tileX] = brush;
         mapLiveData[tileY][tileX].sprite = genMapSprite(tileX, tileY);
       }
 
-      app.view.addEventListener('mousedown', (event) => {
-        if(!event.shiftKey) {
-          mapMouseDown = true;
-          const { tileX, tileY } = mouseEventToTile(event);
-          if(inBounds(tileX, tileY)) {
-            if(event.altKey) {
-              tileBrush = mapData[tileY][tileX];
-            } else {
-              paintTile(tileX, tileY);
+      function paintEvent(event) {
+        const { tileX, tileY } = mouseEventToTile(event);
+        const defaultLive = {
+          sprite: null,
+          fireSprite: null,
+          onFire: false,
+        };
+        const defaultMeta = {
+          onFire: false,
+        };
+        if(!inBounds(tileX, tileY)) {
+          const yOff = tileY + 1 - mapData.length;
+          for(let i = 0; i < yOff; i++) {
+            const row = new Array(mapData[0].length).fill(1);
+            const liveRow = new Array(mapData[0].length).fill(null).map(x => ({...defaultLive}));
+            const metaRow = new Array(mapData[0].length).fill(null).map(x => ({...defaultMeta}));
+            mapData.push(row);
+            mapLiveData.push(liveRow);
+            mapMetaData.push(metaRow);
+          }
+          let xOff = tileX + 1 - mapData[0].length;
+          if(xOff > 0) {
+            for(let y  = 0; y < mapData.length; y++) {
+              for(let i = 0; i < xOff; i++) {
+                mapData[y].push(1);
+                mapLiveData[y].push({...defaultLive});
+                mapMetaData[y].push({...defaultMeta});
+              }
             }
           }
+          mapData[tileY][tileX] = tileBrush;
+          for(let y = 0; y < mapData.length; y++) {
+            for(let x = 0; x < mapData[y].length; x++) {
+              paintTile(x, y, mapData[y][x]);
+            }
+          }
+        } else {
+          if(event.altKey) {
+            tileBrush = mapData[tileY][tileX];
+          } else {
+            paintTile(tileX, tileY);
+          }
+        }
+      }
+
+      app.view.addEventListener('mousedown', (event) => {
+        if(event.altKey && event.shiftKey) {
+          const { tileX, tileY } = mouseEventToTile(event);
+          if(inBounds(tileX, tileY)) {
+            setFire(tileX, tileY);
+          }
+        } else if(!event.shiftKey) {
+          mapMouseDown = true;
+          paintEvent(event);
+
         }
       });
 
       app.view.addEventListener('mousemove', (event) => {
         if(!event.shiftKey && mapMouseDown) {
-          const { tileX, tileY } = mouseEventToTile(event);
-          if(inBounds(tileX, tileY)) {
-            if(event.altKey) {
-              tileBrush = mapData[tileY][tileX];
-            } else {
-              paintTile(tileX, tileY);
-            }
-          }
+          paintEvent(event);
         }
       });
 
@@ -175,7 +254,7 @@ export default function setup(app, level, devMode) {
         }, 1000);
       }
       //#endregion
-      
+
       //#region Edge design
       let nodeFrom = null;
       function addEdge(target) {
@@ -428,6 +507,27 @@ export default function setup(app, level, devMode) {
           }
           //#endregion
         }
+
+        //#region Fire
+        fireSpreadTimer += delta;
+        if(fireSpreadTimer > fireSpreadRate) {
+          fireSpreadTimer = 0;
+          Object.keys(fireIndex).forEach(k => {
+            const { x, y } = fireIndex[k];
+            const adjacent = [
+              { x: x - 1, y },
+              { x: x + 1, y },
+              { x, y: y + 1 },
+              { x, y: y - 1 },
+            ];
+            adjacent.forEach(({x, y}) => {
+              if(inBounds(x,y) && !fireIndex[x + '-' + y] && tileProps[mapData[y][x]].flamable) {
+                setFire(x, y);
+              }
+            });
+          })
+        }
+        //#endregion
 
         for(const entity of entities) {
           const prevBB = getBB(entity);
