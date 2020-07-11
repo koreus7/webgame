@@ -512,7 +512,8 @@ export default function setup(app, level, devMode) {
         fireSpreadTimer += delta;
         if(fireSpreadTimer > fireSpreadRate) {
           fireSpreadTimer = 0;
-          Object.keys(fireIndex).forEach(k => {
+          const keys = Object.keys(fireIndex);
+          keys.forEach(k => {
             const { x, y } = fireIndex[k];
             const adjacent = [
               { x: x - 1, y },
@@ -521,10 +522,13 @@ export default function setup(app, level, devMode) {
               { x, y: y - 1 },
             ];
             adjacent.forEach(({x, y}) => {
-              if(inBounds(x,y) && !fireIndex[x + '-' + y] && tileProps[mapData[y][x]].flamable) {
+              if(inBounds(x,y) && !mapLiveData[y][x].onFire && tileProps[mapData[y][x]].flamable) {
                 setFire(x, y);
               }
             });
+          });
+          keys.forEach(k => {
+            delete fireIndex[k];
           })
         }
         //#endregion
