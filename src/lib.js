@@ -63,6 +63,16 @@ export function bindClick(sprite, onClick) {
   });
 }
 
+export function between(v1, v2) {
+  const dx = v1.x - v2.x;
+  const dy = v1.y - v2.y;
+  return { x: dx, y: dy };
+}
+
+export function magnitude(v) {
+  return Math.sqrt(v.x * v.x + v.y * v.y);
+}
+
 export function ID() {
     return Math.random().toString(36).substr(2, 9);
 }

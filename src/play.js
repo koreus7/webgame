@@ -7,7 +7,7 @@ import {
   TARGET_TEXTURE,
   NODE_TEXTURE
 } from './assets.js';
-import { Sprite, AnimatedSprite, bindClick, ID } from './lib.js';
+import { Sprite, AnimatedSprite, bindClick, ID, between, magnitude } from './lib.js';
 import { HSV } from './color.js';
 import Entity from './Entity.js';
 
@@ -159,18 +159,20 @@ export default function setup(app, level, devMode) {
       if(devMode) {
         let target = Sprite(TARGET_TEXTURE, { x: -100, y: -100, layer: globalGuiLayer, anchorX: 0.5, anchorY: 0.5 });
 
-        app.view.addEventListener('click', (event) => {
-          if(event.shiftKey) {
+        setTimeout(() => {
+          app.view.addEventListener('click', (event) => {
+            if(event.shiftKey) {
 
-          } else {
-            const bb = app.view.getBoundingClientRect();
-            target.x = event.clientX - bb.left;
-            target.y = event.clientY - bb.top;
-            for(let i = 0; i < agents.length; i++) {
-              agents[i].target = { x: target.x, y: target.y };
+            } else {
+              const bb = app.view.getBoundingClientRect();
+              target.x = event.clientX - bb.left;
+              target.y = event.clientY - bb.top;
+              for(let i = 0; i < agents.length; i++) {
+                agents[i].target = { x: target.x, y: target.y };
+              }
             }
-          }
-        });
+          });
+        }, 1000);
       }
       //#endregion
       
@@ -209,6 +211,7 @@ export default function setup(app, level, devMode) {
         }
 
         const agent = Sprite(AGENT_TEXTURE, { x, y, layer: agentLayer, anchorX: 0.5, anchorY: 0.5 });
+        agent.spooked = true;
         agents.push(agent);
       }
 
@@ -321,7 +324,6 @@ export default function setup(app, level, devMode) {
           switch(i.type) {
             case 'node': {
               const sprite = Sprite(NODE_TEXTURE, { x: xInsert, y: yInsert, layer: globalGuiLayer, anchorY: 0.5, anchorX: 0.5 });
-              xInsert += 75;
               sprite.interactive = true;
               sprite.on('click', (event) => {
                 const id = ID();
@@ -335,7 +337,6 @@ export default function setup(app, level, devMode) {
             };
             case 'agent': {
               const sprite = Sprite(AGENT_TEXTURE, { x: xInsert, y: yInsert, layer: globalGuiLayer, anchorY: 0.5, anchorX: 0.5 });
-              xInsert += 75;
               sprite.interactive = true;
               sprite.on('click', (event) => {
                 const x = (-camera.x + app.view.width / 2) / camera.scale.y;
@@ -347,6 +348,8 @@ export default function setup(app, level, devMode) {
               break;
             }
           }
+
+          xInsert += 50;
         }
       }
       //#endregion
@@ -371,10 +374,24 @@ export default function setup(app, level, devMode) {
           const agent = agents[i];
           traceAgent(agent);
 
+          if(agent.spooked && !agent.target) {
+            if(!agent.currentNode) {
+              const nearestNode = Object.values(nodes).reduce((a, b) => magnitude(between(a, agent)) < magnitude(between(b, agent)) ? a : b);
+              agent.target = nearestNode;
+
+            } else {
+              const edgesOut = level.edges.filter(e => e.from === agent.currentNode.id);
+              if(edgesOut.length) {
+                const target = edgesOut[Math.floor(Math.random() * edgesOut.length)];
+                agent.target = nodes[target.to];
+              }
+            }
+          }
+
           //#region Move agents towards target
           if(agent.target) {
-            const v = { x: agent.target.x - agent.x, y: agent.target.y - agent.y };
-            const mag = Math.sqrt(v.x * v.x + v.y * v.y);
+            const v = between(agent.target, agent);
+            const mag = magnitude(v);
             v.x /= mag;
             v.y /= mag;
             const theta = Math.atan2(v.y, v.x);
@@ -383,22 +400,23 @@ export default function setup(app, level, devMode) {
             agent.x += v.x * delta * AGENT_SPEED;
             agent.y += v.y * delta * AGENT_SPEED;
             if(mag < TARGET_MET_DISTANCE) {
+              agent.currentNode = agent.target;
               agent.target = null;
+              // agent.spooked = false;
             }
           }
           //#endregion
 
           //#region Jostle mechanics
           for(let j = 0; j < i; j++) {
-            const dx = agents[j].x - agent.x;
-            const dy = agents[j].y - agent.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
+            const d = between(agents[j], agent);
+            const distance = magnitude(d);
             const overlap = AGENT_RADIUS * 2 - distance;
             if(overlap > 0) {
-              agents[j].x += dx / distance * overlap / 2;
-              agents[j].y += dy / distance * overlap / 2;
-              agent.x -= dx / distance * overlap / 2;
-              agent.y -= dy / distance * overlap / 2;
+              agents[j].x += d.x / distance * overlap / 2;
+              agents[j].y += d.y / distance * overlap / 2;
+              agent.x -= d.x / distance * overlap / 2;
+              agent.y -= d.y / distance * overlap / 2;
 
             }
           }

@@ -3,6 +3,7 @@
   "contents": [
     {
       "type": "node",
+      "id": "asdf",
       "x": 259,
       "y": 41
     },
@@ -26,6 +27,12 @@
       "id": "fxloygmti",
       "x": 129,
       "y": 97
+    },
+    {
+      "type": "node",
+      "id": "lme95s2y2",
+      "x": 436,
+      "y": 71
     }
   ],
   "mapStuff": {
@@ -276,7 +283,12 @@
   },
   "edges": [
     {
-      "from": "fxloygmti"
+      "from": "fxloygmti",
+      "to": "asdf"
+    },
+    {
+      "from": "asdf",
+      "to": "lme95s2y2"
     }
   ]
 }
