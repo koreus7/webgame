@@ -77,7 +77,7 @@ export function ID() {
     return Math.random().toString(36).substr(2, 9);
 }
 
-export function Sprite(texture, { x, y, visible = true, anchorX = 0.5, anchorY = 0, layer, drag } = {}) {
+export function Sprite(texture, { x, y, visible = true, anchorX = 0.5, anchorY = 0.5, layer, drag, scale = 1 } = {}) {
   const sprite = new PIXI.Sprite(texture instanceof PIXI.Texture ? texture : getTexture(texture));
   const toMatch = texture instanceof PIXI.Texture && texture.textureCacheIds && texture.textureCacheIds.length? texture.textureCacheIds[0] : texture;
   sprite.name =  toMatch.match(/\/?([a-z-]+[0-9]*)\.png$/)[1];
@@ -86,12 +86,13 @@ export function Sprite(texture, { x, y, visible = true, anchorX = 0.5, anchorY =
   sprite.visible = visible;
   sprite.anchor.x = anchorX;
   sprite.anchor.y = anchorY;
+  sprite.scale.set(scale, scale);
   layer && layer.addChild(sprite);
 
   return sprite;
 }
 
-export function AnimatedSprite(sheet, { x, y, visible = true, anchorX = 0.5, anchorY = 0, speed = 1, loop = true, layer, drag } = {}) {
+export function AnimatedSprite(sheet, { x, y, visible = true, anchorX = 0.5, anchorY = 0.5, speed = 1, loop = true, layer, drag } = {}) {
   const anim = sheet.match(/\/([a-z-]+)\.json$/)[1];
   const sprite = new PIXI.AnimatedSprite(getAnim(getSheet(sheet), anim));
   sprite.name = anim;

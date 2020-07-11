@@ -17,8 +17,7 @@ const TARGET_MET_DISTANCE = AGENT_RADIUS * 2;
 const AGENT_SPEED = 3;
 
 const traceConfig = {
-  aim: false,
-  collision: false
+  collision: true
 }
 
 const cameraConfig = {
@@ -31,36 +30,19 @@ function container(parent) {
   return layer;
 }
 
-let mapData = [
-  [1,1,1,1,1,1,1,1,1,],
-  [1,1,2,2,2,2,1,1,1,],
-  [1,1,2,1,1,2,1,1,1,],
-  [1,1,0,1,1,2,1,1,1,],
-  [1,1,2,2,2,2,1,1,1,],
-  [1,1,1,1,1,1,1,1,1,],
-];
-
 const tileProps = {
   0: {
     flamable: false,
+    collides: true,
   },
   1: {
     flamable: false,
   },
   2: {
     flamable: true,
+    collides: true,
   },
 };
-
-let mapMetaData = mapData.map(x => x.map(y => ({
-  onFire: false,
-})));
-
-let mapLiveData = mapData.map(x => x.map(y => ({
-  sprite: null,
-  fireSprite: null,
-  onFire: false,
-})));
 
 let fireIndex = {};
 
@@ -88,13 +70,18 @@ export default function setup(app, level, devMode) {
       const entities = [];
       const agents = [];
       const nodes = {};
+      const colliders = [];
 
       //#region Map
 
-      if(level.mapStuff) {
-        mapData = level.mapStuff.mapData;
-        mapMetaData = level.mapStuff.mapMetaData;
-      }
+      let mapData = level.mapStuff.mapData;
+      let mapMetaData = level.mapStuff.mapMetaData;
+
+      let mapLiveData = mapData.map(x => x.map(y => ({
+        sprite: null,
+        fireSprite: null,
+        onFire: false,
+      })));
 
       const res = app.loader.resources[TILES_TEXTURE];
       const tileNames = Object.keys(res.data.frames);
@@ -104,7 +91,7 @@ export default function setup(app, level, devMode) {
 
       tileNames.forEach((tileName, i) => {
         const tex = res.textures[tileName];
-        const s = Sprite(tex, { x: appBB.right -i*tileSize - tileSize, y: appBB.bottom - tileSize - tileSize/2, layer: globalGuiLayer, drag: false });
+        const s = Sprite(tex, { x: appBB.right -i*tileSize - tileSize, y: appBB.bottom - tileSize - tileSize/2, layer: globalGuiLayer, drag: false, anchorY: 0.5, anchorX: 0.5 });
         s.tint = 0x55ff55;
         bindClick(s, () => {
           tileBrush = i;
@@ -113,12 +100,12 @@ export default function setup(app, level, devMode) {
 
       function genMapSprite(x, y) {
         const tex = res.textures[tileNames[mapData[y][x]]];
-        const s = Sprite(tex, { x: x * tileSize + tileSize/2, y: y * tileSize, layer: mapLayer, drag: false });
+        const s = Sprite(tex, { x: x * tileSize + tileSize/2, y: y * tileSize + tileSize/2, layer: mapLayer, drag: false, anchorX: 0.5, anchorY: 0.5 });
         return s;
       }
 
       function genFireSprite(x, y) {
-        const s = AnimatedSprite(FIRE_TEXTURE, { x: x * tileSize + tileSize/2, y: y * tileSize, layer: fireLayer, drag: false, speed: 0.12 });
+        const s = AnimatedSprite(FIRE_TEXTURE, { x: x * tileSize + tileSize/2, y: y * tileSize + tileSize/2, layer: fireLayer, drag: false, speed: 0.12, anchorY: 0.5, anchorX: 0.5 });
         s.scale.x = 1;
         s.scale.y = 1;
         s.play();
@@ -138,6 +125,9 @@ export default function setup(app, level, devMode) {
             setFire(x,y )
           }
           mapLiveData[y][x].sprite = genMapSprite(x, y);
+          if(tileProps[mapData[y][x]].collides) {
+            colliders.push(getBB(mapLiveData[y][x].sprite));
+          }
         }
       }
 
@@ -284,12 +274,12 @@ export default function setup(app, level, devMode) {
       function insertAgent(item) {
         const { x, y } = item;
         if(devMode) {
-          const ghost = Sprite(AGENT_TEXTURE, { x, y, layer: agentLayer });
+          const ghost = Sprite(AGENT_TEXTURE, { x, y, layer: agentLayer, anchorX: 0.5, anchorY: 0.5, scale: 0.75 });
           ghost.alpha = 0.5;
           bindDrag(ghost, item);
         }
 
-        const agent = Sprite(AGENT_TEXTURE, { x, y, layer: agentLayer, anchorX: 0.5, anchorY: 0.5 });
+        const agent = Sprite(AGENT_TEXTURE, { x, y, layer: agentLayer, anchorX: 0.5, anchorY: 0.5, scale: 0.75 });
         agent.spooked = false;
         agents.push(agent);
       }
@@ -435,12 +425,11 @@ export default function setup(app, level, devMode) {
 
       const step = delta => {
         camera.scale.set(cameraConfig.scale);
-        const groundBBs = []; //collidables.map(x => ({...getBB(x), collidable: x}));
 
         draw.clear();
 
         if(traceConfig.collision) {
-          for(const groundBB of groundBBs) {
+          for(const groundBB of colliders) {
             traceBB(groundBB, 0x00FFFF);
           }
         }
@@ -451,7 +440,9 @@ export default function setup(app, level, devMode) {
 
         for(let i = 0; i < agents.length; i++) {
           const agent = agents[i];
-          traceAgent(agent);
+          let prevBB = getBB(agent);
+          // traceAgent(agent);
+          traceBB(prevBB);
 
           if(agent.spooked && !agent.target) {
             if(!agent.currentNode) {
@@ -481,16 +472,9 @@ export default function setup(app, level, devMode) {
             if(mag < TARGET_MET_DISTANCE) {
               agent.currentNode = agent.target;
               agent.target = null;
-              agent.spooked = false;
             }
           }
           //#endregion
-
-          if(agents.every(agent => !agent.spooked)) {
-            for(const agent of agents) {
-              agent.spooked = true;
-            }
-          }
 
           //#region Jostle mechanics
           for(let j = 0; j < i; j++) {
@@ -502,10 +486,45 @@ export default function setup(app, level, devMode) {
               agents[j].y += d.y / distance * overlap / 2;
               agent.x -= d.x / distance * overlap / 2;
               agent.y -= d.y / distance * overlap / 2;
-
             }
           }
           //#endregion
+
+          //#region Wall collision
+          let nextBB = getBB(agent);
+          let collided = entityCollides(nextBB, colliders);
+          let c = 0;
+          while(collided) {
+            c++;
+            if(c > 5) {
+              console.log('TOO MANY COLLISIONS');
+              break;
+            }
+
+            // come from above
+            if(nextBB.bottom > collided.top && prevBB.bottom <= collided.top) {
+              agent.y = collided.top - (agent.height * agent.scale.y) / 2;
+
+            // come from below
+            } else if(nextBB.top < collided.bottom && prevBB.top >= collided.bottom) {
+              agent.y = collided.bottom + (agent.height * agent.scale.y) / 2;
+
+            } else if(nextBB.right > collided.left && prevBB.right <= collided.left) {
+              agent.x = collided.left - (agent.width * agent.scale.x) / 2;
+
+            } else if(nextBB.left < collided.right && prevBB.left >= collided.right) {
+              agent.x = collided.right + (agent.width * agent.scale.x) / 2;
+            }
+
+            nextBB = getBB(agent);
+            collided = entityCollides(nextBB, colliders);
+          }
+        }
+
+        if(agents.every(agent => !agent.spooked)) {
+          for(const agent of agents) {
+            agent.spooked = true;
+          }
         }
 
         //#region Fire
@@ -532,40 +551,6 @@ export default function setup(app, level, devMode) {
           })
         }
         //#endregion
-
-        for(const entity of entities) {
-          const prevBB = getBB(entity);
-          entity.state.x += entity.velocity.x * delta;
-          entity.state.y += entity.velocity.y * delta;
-          let nextBB = getBB(entity);
-          let collided = entityCollides(nextBB, groundBBs);
-          let i = 0;
-          while(collided) {
-            i++;
-            if(i > 5) {
-              console.log('TOO MANY COLLISIONS');
-              console.log(entity.name, collided.name);
-              break;
-            }
-
-            // come from above
-            if(nextBB.bottom > collided.top && prevBB.bottom <= collided.top) {
-
-            // come from below
-            } else if(nextBB.top < collided.bottom && prevBB.top >= collided.bottom) {
-
-            } else if(nextBB.right > collided.left && prevBB.right <= collided.left) {
-
-            } else if(nextBB.left < collided.right && prevBB.left >= collided.right) {
-
-            }
-
-            nextBB = getBB(entity);
-            collided = entityCollides(nextBB, groundBBs);
-          }
-          traceBB(nextBB, 0x00ff00);
-        }
-
       };
 
       app.ticker.add(step);

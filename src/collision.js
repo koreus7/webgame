@@ -1,18 +1,17 @@
 import Entity from "./Entity.js";
 
 export function getBB(obj) {
-  if(obj instanceof Entity) {
-    return {
-      ...getBB(obj.state),
-      name: obj.name
-    };
-  }
+  console.log(obj.scale.x);
+  const width = obj.width * obj.scale.x;
+  const height = obj.height * obj.scale.y;
+  const xOffs = obj.anchor.x * width;
+  const yOffs = obj.anchor.y * height;
   return {
     name: obj.name,
-    left: obj.x - (obj.width / 2),
-    top: obj.y,
-    right: obj.x + (obj.width / 2),
-    bottom: obj.y + obj.height
+    left: obj.x - xOffs,
+    top: obj.y - yOffs,
+    right: obj.x + (width - xOffs),
+    bottom: obj.y + (height - yOffs)
   };
 }
 

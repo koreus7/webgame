@@ -4,23 +4,13 @@
     {
       "type": "node",
       "id": "asdf",
-      "x": 259,
-      "y": 41
+      "x": 305,
+      "y": 177
     },
     {
       "type": "agent",
       "x": 96,
       "y": 139
-    },
-    {
-      "type": "agent",
-      "x": 121,
-      "y": 127
-    },
-    {
-      "type": "agent",
-      "x": 103,
-      "y": 105
     },
     {
       "type": "node",
@@ -54,23 +44,118 @@
     },
     {
       "type": "agent",
-      "x": 159,
-      "y": 146
-    },
-    {
-      "type": "agent",
-      "x": 173,
+      "x": 124,
       "y": 123
     },
     {
       "type": "agent",
-      "x": 131,
-      "y": 162
+      "x": 126,
+      "y": 156
     },
     {
       "type": "agent",
-      "x": 82,
-      "y": 177
+      "x": 151,
+      "y": 135
+    },
+    {
+      "type": "agent",
+      "x": 173,
+      "y": 104
+    },
+    {
+      "type": "agent",
+      "x": 820,
+      "y": 302
+    },
+    {
+      "type": "agent",
+      "x": 238,
+      "y": 238
+    },
+    {
+      "type": "agent",
+      "x": 105,
+      "y": 218
+    },
+    {
+      "type": "agent",
+      "x": 170,
+      "y": 231
+    },
+    {
+      "type": "agent",
+      "x": 210,
+      "y": 145
+    },
+    {
+      "type": "agent",
+      "x": 253,
+      "y": 199
+    },
+    {
+      "type": "agent",
+      "x": 191,
+      "y": 171
+    },
+    {
+      "type": "agent",
+      "x": 231,
+      "y": 166
+    },
+    {
+      "type": "agent",
+      "x": 208,
+      "y": 201
+    },
+    {
+      "type": "agent",
+      "x": 216,
+      "y": 223
+    },
+    {
+      "type": "agent",
+      "x": 148,
+      "y": 207
+    },
+    {
+      "type": "agent",
+      "x": 117,
+      "y": 236
+    },
+    {
+      "type": "agent",
+      "x": 175,
+      "y": 203
+    },
+    {
+      "type": "agent",
+      "x": 113,
+      "y": 193
+    },
+    {
+      "type": "agent",
+      "x": 242,
+      "y": 90
+    },
+    {
+      "type": "agent",
+      "x": 211,
+      "y": 188
+    },
+    {
+      "type": "agent",
+      "x": 211,
+      "y": 108
+    },
+    {
+      "type": "agent",
+      "x": 173,
+      "y": 145
+    },
+    {
+      "type": "agent",
+      "x": 153,
+      "y": 172
     }
   ],
   "mapStuff": {
@@ -84,54 +169,204 @@
         1,
         1,
         1,
-        1
-      ],
-      [
-        1,
-        1,
-        2,
-        2,
-        2,
-        2,
-        1,
         1,
         1
       ],
       [
         1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      [
         1,
         2,
         1,
         1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2
+      ],
+      [
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2
+      ],
+      [
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2
+      ],
+      [
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2
+      ],
+      [
+        1,
+        2,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2
+      ],
+      [
+        1,
+        2,
+        2,
         2,
         0,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
         1,
         1
       ],
       [
         1,
         1,
-        0,
         1,
         1,
-        2,
         1,
-        0,
+        1,
+        1,
+        1,
+        1,
         1
       ],
       [
         1,
         1,
-        2,
-        2,
-        2,
-        2,
         1,
-        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
         1
       ],
       [
         1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      [
+        1,
+        0,
         1,
         1,
         1,
@@ -170,32 +405,6 @@
         },
         {
           "onFire": false
-        }
-      ],
-      [
-        {
-          "onFire": false
-        },
-        {
-          "onFire": false
-        },
-        {
-          "onFire": false
-        },
-        {
-          "onFire": false
-        },
-        {
-          "onFire": false
-        },
-        {
-          "onFire": false
-        },
-        {
-          "onFire": false
-        },
-        {
-          "onFire": false
         },
         {
           "onFire": false
@@ -205,32 +414,6 @@
         {
           "onFire": false
         },
-        {
-          "onFire": false
-        },
-        {
-          "onFire": false
-        },
-        {
-          "onFire": false
-        },
-        {
-          "onFire": false
-        },
-        {
-          "onFire": false
-        },
-        {
-          "onFire": false
-        },
-        {
-          "onFire": false
-        },
-        {
-          "onFire": false
-        }
-      ],
-      [
         {
           "onFire": false
         },
@@ -286,9 +469,463 @@
         },
         {
           "onFire": false
+        },
+        {
+          "onFire": false
         }
       ],
       [
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        }
+      ],
+      [
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        }
+      ],
+      [
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        }
+      ],
+      [
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        }
+      ],
+      [
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        }
+      ],
+      [
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        }
+      ],
+      [
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        }
+      ],
+      [
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        }
+      ],
+      [
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        }
+      ],
+      [
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        }
+      ],
+      [
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        }
+      ],
+      [
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        }
+      ],
+      [
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        }
+      ],
+      [
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        },
+        {
+          "onFire": false
+        }
+      ],
+      [
+        {
+          "onFire": false
+        },
         {
           "onFire": false
         },
