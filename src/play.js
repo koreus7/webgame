@@ -58,6 +58,7 @@ export default function setup(app, level, devMode) {
       const agents = [];
       const nodes = {};
 
+      //#region Map rendering
       const res = app.loader.resources[TILES_TEXTURE];
       const tileNames = Object.keys(res.data.frames);
       const tileSize = 32;
@@ -68,7 +69,9 @@ export default function setup(app, level, devMode) {
         }
       }
 
+      //#endregion
 
+      //#region Draw Target
       if(devMode) {
         let target = Sprite(TARGET_TEXTURE, { x: -100, y: -100, layer: globalGuiLayer, anchorX: 0.5, anchorY: 0.5 });
 
@@ -85,7 +88,15 @@ export default function setup(app, level, devMode) {
           }
         });
       }
+      //#endregion
       
+      //#region Level initialisation
+      for(const item of level.contents) {
+        switch(item.type) {
+          case 'node':
+            break;
+        }
+      }
       function makeAgent({ x, y }) {
         const agent = Sprite(AGENT_TEXTURE, { x, y, layer: agentLayer, anchorX: 0.5, anchorY: 0.5 });
         agents.push(agent);
@@ -94,7 +105,9 @@ export default function setup(app, level, devMode) {
       for(let i = 0; i < 10; i++) {
         makeAgent({ x: 20 * i, y: 20 * i });
       }
+      //#endregion
 
+      //#region Level Reset/Save Buttons
       const resetBtn = new PIXI.Text('Reset');
       resetBtn.interactive = true;
       resetBtn.x = 10;
@@ -121,10 +134,12 @@ export default function setup(app, level, devMode) {
           }).then(() => alert('saved'));
         });
       }
+      //#endregion
 
       const draw = new PIXI.Graphics();
       globalGuiLayer.addChild(draw);
 
+      //#region Collision Tracers
       function traceBB(bb, color = 0xff0000) {
         if(traceConfig.collision) {
           draw.moveTo(bb.left, bb.top)
@@ -141,7 +156,9 @@ export default function setup(app, level, devMode) {
           draw.lineStyle(1, color).drawCircle(el.x, el.y, AGENT_RADIUS);
         }
       }
+      //#endregion
 
+      //#region Draw Insertable Entities
       if(devMode) {
         let drawingEdgeFrom = null;
 
@@ -166,11 +183,7 @@ export default function setup(app, level, devMode) {
                 level.contents.push(levelItem);
                 dupe.on('click', (event) => {
                   if(event.data.originalEvent.ctrlKey) {
-                    if(!drawingEdgeFrom) {
-                      drawingEdgeFrom = dupe;
-                    } else {
-
-                    }
+                    addEdge(dupe);
                   }
                 });
               });
@@ -178,7 +191,7 @@ export default function setup(app, level, devMode) {
           }
         }
       }
-
+      //#endregion
 
       const step = delta => {
         camera.scale.set(cameraConfig.scale);
@@ -196,6 +209,7 @@ export default function setup(app, level, devMode) {
           const agent = agents[i];
           traceAgent(agent);
 
+          //#region Move agents towards target
           if(agent.target) {
             const v = { x: agent.target.x - agent.x, y: agent.target.y - agent.y };
             const mag = Math.sqrt(v.x * v.x + v.y * v.y);
@@ -210,7 +224,9 @@ export default function setup(app, level, devMode) {
               agent.target = null;
             }
           }
+          //#endregion
 
+          //#region Jostle mechanics
           for(let j = 0; j < i; j++) {
             const dx = agents[j].x - agent.x;
             const dy = agents[j].y - agent.y;
@@ -224,6 +240,7 @@ export default function setup(app, level, devMode) {
 
             }
           }
+          //#endregion
         }
 
         for(const entity of entities) {
