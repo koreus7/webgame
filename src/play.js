@@ -7,7 +7,7 @@ import {
   TARGET_TEXTURE,
   NODE_TEXTURE
 } from './assets.js';
-import { Sprite, AnimatedSprite } from './lib.js';
+import { Sprite, AnimatedSprite, bindClick } from './lib.js';
 import { HSV } from './color.js';
 import Entity from './Entity.js';
 
@@ -39,6 +39,16 @@ let mapData = [
   [1,1,1,1,1,1,1,1,1,],
 ];
 
+let mapMetaData = mapData.map(x => x.map(y => ({
+  onFire: false,
+})));
+
+let mapLiveData = mapData.map(x => x.map(y => ({
+  sprite: null,
+})));
+
+let tileBrush = 0;
+
 export default function setup(app, level, devMode) {
     const dat = window.dat || null;
     GUI.init(dat);
@@ -58,17 +68,89 @@ export default function setup(app, level, devMode) {
       const agents = [];
       const nodes = {};
 
-      //#region Map rendering
+      //#region Map
+
+      if(level.mapStuff) {
+        mapData = level.mapStuff.mapData;
+        mapMetaData = level.mapStuff.mapMetaData;
+      }
+
       const res = app.loader.resources[TILES_TEXTURE];
       const tileNames = Object.keys(res.data.frames);
       const tileSize = 32;
-      for(let i = 0; i < mapData.length; i++) {
-        for(let j = 0; j < mapData[i].length; j++) {
-          const tex = res.textures[tileNames[mapData[i][j]]];
-          Sprite(tex, { x: i * tileSize + tileSize/2, y: j * tileSize, layer: mapLayer, drag: false });
+
+      const appBB = app.view.getBoundingClientRect();
+
+      tileNames.forEach((tileName, i) => {
+        const tex = res.textures[tileName];
+        const s = Sprite(tex, { x: appBB.right -i*tileSize - tileSize, y: appBB.bottom - tileSize - tileSize/2, layer: globalGuiLayer, drag: false });
+        s.tint = 0x55ff55;
+        bindClick(s, () => {
+          tileBrush = i;
+        });
+      });
+
+      function genMapSprite(x, y) {
+        const tex = res.textures[tileNames[mapData[y][x]]];
+        const s = Sprite(tex, { x: x * tileSize + tileSize/2, y: y * tileSize, layer: mapLayer, drag: false });
+        return s;
+      }
+
+      for(let y = 0; y < mapData.length; y++) {
+        for(let x = 0; x < mapData[y].length; x++) {
+          mapLiveData[y][x].sprite = genMapSprite(x, y);
         }
       }
 
+      let mapMouseDown = false;
+
+      function mouseEventToTile(event) {
+        const bb = app.view.getBoundingClientRect();
+        const x = event.clientX - bb.left;
+        const y = event.clientY - bb.top;
+        const tileX = Math.floor(x/tileSize);
+        const tileY = Math.floor(y/tileSize);
+        return { tileX, tileY };
+      }
+
+      function inBounds(tileX, tileY) {
+        return tileY < mapData.length && tileX < mapData[tileY].length;
+      }
+
+      function paintTile(tileX, tileY) {
+        mapLayer.removeChild(mapMetaData[tileY][tileX].sprite);
+        mapData[tileY][tileX] = tileBrush;
+        mapLiveData[tileY][tileX].sprite = genMapSprite(tileX, tileY);
+      }
+
+      app.view.addEventListener('mousedown', (event) => {
+        mapMouseDown = true;
+        const { tileX, tileY } = mouseEventToTile(event);
+        if(inBounds(tileX, tileY)) {
+          if(event.altKey) {
+            tileBrush = mapData[tileY][tileX];
+          } else {
+            paintTile(tileX, tileY);
+          }
+        }
+      });
+
+      app.view.addEventListener('mousemove', (event) => {
+        if(mapMouseDown) {
+          const { tileX, tileY } = mouseEventToTile(event);
+          if(inBounds(tileX, tileY)) {
+            if(event.altKey) {
+              tileBrush = mapData[tileY][tileX];
+            } else {
+              paintTile(tileX, tileY);
+            }
+          }
+        }
+      });
+
+      app.view.addEventListener('mouseup', (event) => {
+        mapMouseDown = false;
+      });
       //#endregion
 
       //#region Draw Target
@@ -89,7 +171,7 @@ export default function setup(app, level, devMode) {
         });
       }
       //#endregion
-      
+
       //#region Level initialisation
       for(const item of level.contents) {
         switch(item.type) {
@@ -126,6 +208,10 @@ export default function setup(app, level, devMode) {
         saveBtn.y = document.body.clientHeight - 100;
         globalGuiLayer.addChild(saveBtn);
         saveBtn.on('click', (event) => {
+          level.mapStuff = {
+            mapData,
+            mapMetaData,
+          };
           console.log('LEVEL', level);
           fetch(`/levels/${level.id}`, {
             method: 'PUT',

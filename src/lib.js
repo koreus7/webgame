@@ -46,6 +46,23 @@ export function bindDrag(sprite, drag) {
   });
 }
 
+let lastDown = null;
+export function bindClick(sprite, onClick) {
+  sprite.interactive = true;
+  sprite.on('mousedown', (event) => {
+    event.dead = true;
+    lastDown = sprite;
+  });
+
+  sprite.on('mouseup', (event) => {
+    event.dead = false;
+    if(lastDown == sprite) {
+      onClick(event);
+      event.dead = true;
+    }
+  });
+}
+
 export function Sprite(texture, { x, y, visible = true, anchorX = 0.5, anchorY = 0, layer, drag } = {}) {
   const sprite = new PIXI.Sprite(texture instanceof PIXI.Texture ? texture : getTexture(texture));
   const toMatch = texture instanceof PIXI.Texture && texture.textureCacheIds && texture.textureCacheIds.length? texture.textureCacheIds[0] : texture;
