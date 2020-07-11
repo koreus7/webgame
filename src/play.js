@@ -4,14 +4,16 @@ import { getBB, fakeBB, entityCollides, anyCollide } from './collision.js';
 import {
   AGENT_TEXTURE,
   TILES_TEXTURE,
-  TARGET_TEXTURE
+  TARGET_TEXTURE,
+  NODE_TEXTURE
 } from './assets.js';
-import * as assets from './assets.js';
 import { Sprite, AnimatedSprite } from './lib.js';
 import { HSV } from './color.js';
 import Entity from './Entity.js';
 
-const AGENT_RADIUS = 16;
+const AGENT_RADIUS = 12;
+const TARGET_MET_DISTANCE = AGENT_RADIUS * 2;
+const AGENT_SPEED = 3;
 
 const traceConfig = {
   aim: false,
@@ -44,8 +46,6 @@ export default function setup(app, level, devMode) {
     showGUI('camera', cameraConfig);
 
     function beginLevel() {
-
-
       const camera = container(app.stage);
       camera.scale.set(cameraConfig.scale);
       camera.interactive = true;
@@ -53,9 +53,10 @@ export default function setup(app, level, devMode) {
       const mapLayer = container(camera);
       const agentLayer = container(camera);
       const globalGuiLayer = container(app.stage);
+      const localGuiLayer = container(camera);
       const entities = [];
       const agents = [];
-
+      const nodes = {};
 
       const res = app.loader.resources[TILES_TEXTURE];
       const tileNames = Object.keys(res.data.frames);
@@ -67,14 +68,24 @@ export default function setup(app, level, devMode) {
         }
       }
 
-      let target = Sprite(TARGET_TEXTURE, { x: 100, y: 50, layer: globalGuiLayer, anchorX: 0.5, anchorY: 0.5 });
 
-      app.view.addEventListener('click', (event) => {
-        const bb = app.view.getBoundingClientRect();
-        target.x = event.clientX - bb.left;
-        target.y = event.clientY - bb.top;
-      });
+      if(devMode) {
+        let target = Sprite(TARGET_TEXTURE, { x: -100, y: -100, layer: globalGuiLayer, anchorX: 0.5, anchorY: 0.5 });
 
+        app.view.addEventListener('click', (event) => {
+          if(event.shiftKey) {
+
+          } else {
+            const bb = app.view.getBoundingClientRect();
+            target.x = event.clientX - bb.left;
+            target.y = event.clientY - bb.top;
+            for(let i = 0; i < agents.length; i++) {
+              agents[i].target = { x: target.x, y: target.y };
+            }
+          }
+        });
+      }
+      
       function makeAgent({ x, y }) {
         const agent = Sprite(AGENT_TEXTURE, { x, y, layer: agentLayer, anchorX: 0.5, anchorY: 0.5 });
         agents.push(agent);
@@ -131,6 +142,44 @@ export default function setup(app, level, devMode) {
         }
       }
 
+      if(devMode) {
+        let drawingEdgeFrom = null;
+
+        const insertables = [
+          { type: 'node' },
+        ];
+
+        let xInsert = 300;
+        const yInsert = app.view.height - 40;
+        for(const i of insertables) {
+          switch(i.type) {
+            case 'node': {
+              const sprite = Sprite(NODE_TEXTURE, { x: xInsert, y: yInsert, layer: globalGuiLayer, anchorY: 0.5, anchorX: 0.5 });
+              xInsert += 75;
+              sprite.interactive = true;
+              sprite.on('click', (event) => {
+                const x = (-camera.x + app.view.width / 2) / camera.scale.y;
+                const y = app.view.height / 2 / camera.scale.x;
+                const dupe = Sprite(NODE_TEXTURE, { x, y, layer: localGuiLayer, anchorY: 0.5, anchorX: 0.5 });
+                const levelItem = { ...i, x, y };
+                bindDrag(dupe, levelItem);
+                level.contents.push(levelItem);
+                dupe.on('click', (event) => {
+                  if(event.data.originalEvent.ctrlKey) {
+                    if(!drawingEdgeFrom) {
+                      drawingEdgeFrom = dupe;
+                    } else {
+
+                    }
+                  }
+                });
+              });
+            }
+          }
+        }
+      }
+
+
       const step = delta => {
         camera.scale.set(cameraConfig.scale);
         const groundBBs = []; //collidables.map(x => ({...getBB(x), collidable: x}));
@@ -146,18 +195,20 @@ export default function setup(app, level, devMode) {
         for(let i = 0; i < agents.length; i++) {
           const agent = agents[i];
           traceAgent(agent);
-          agent.target = { x: target.x, y: target.y };
 
-          const v = { x: agent.target.x - agent.x, y: agent.target.y - agent.y };
-          const mag = Math.sqrt(v.x * v.x + v.y * v.y);
-          v.x /= mag;
-          v.y /= mag;
-          const theta = Math.atan2(v.y, v.x);
+          if(agent.target) {
+            const v = { x: agent.target.x - agent.x, y: agent.target.y - agent.y };
+            const mag = Math.sqrt(v.x * v.x + v.y * v.y);
+            v.x /= mag;
+            v.y /= mag;
+            const theta = Math.atan2(v.y, v.x);
 
-          if(mag > AGENT_RADIUS) {
             agent.angle = (theta * 180 / Math.PI) + 90;
-            agent.x += v.x * delta;
-            agent.y += v.y * delta;
+            agent.x += v.x * delta * AGENT_SPEED;
+            agent.y += v.y * delta * AGENT_SPEED;
+            if(mag < TARGET_MET_DISTANCE) {
+              agent.target = null;
+            }
           }
 
           for(let j = 0; j < i; j++) {

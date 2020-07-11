@@ -10,6 +10,7 @@ export function getTexture(texture) {
   return app.loader.resources[texture].texture;
 }
 
+const CAMERA_SCALE = 1;
 export function bindDrag(sprite, drag) {
   let handle = null;
   sprite.interactive = true;
@@ -18,8 +19,8 @@ export function bindDrag(sprite, drag) {
     event.dead = false;
     if(event.data.originalEvent.shiftKey) {
       handle = {
-        x: event.data.global.x / 2 - sprite.x,
-        y: event.data.global.y / 2 - sprite.y
+        x: event.data.global.x / CAMERA_SCALE - sprite.x,
+        y: event.data.global.y / CAMERA_SCALE - sprite.y
       };
       event.dead = true;
     }
@@ -38,8 +39,8 @@ export function bindDrag(sprite, drag) {
   sprite.on('mousemove', (event) => {
     event.dead = false;
     if(handle) {
-      sprite.x = Math.round(event.data.global.x / 2 - handle.x);
-      sprite.y = Math.round(event.data.global.y / 2 - handle.y);
+      sprite.x = Math.round(event.data.global.x / CAMERA_SCALE - handle.x);
+      sprite.y = Math.round(event.data.global.y / CAMERA_SCALE - handle.y);
       event.dead = true;
     }
   });
