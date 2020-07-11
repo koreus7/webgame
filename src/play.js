@@ -118,7 +118,7 @@ export default function setup(app, level, devMode) {
       }
 
       function paintTile(tileX, tileY) {
-        mapLayer.removeChild(mapMetaData[tileY][tileX].sprite);
+        mapLayer.removeChild(mapLiveData[tileY][tileX].sprite);
         mapData[tileY][tileX] = tileBrush;
         mapLiveData[tileY][tileX].sprite = genMapSprite(tileX, tileY);
       }
