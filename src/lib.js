@@ -47,7 +47,8 @@ export function bindDrag(sprite, drag) {
 
 export function Sprite(texture, { x, y, visible = true, anchorX = 0.5, anchorY = 0, layer, drag } = {}) {
   const sprite = new PIXI.Sprite(texture instanceof PIXI.Texture ? texture : getTexture(texture));
-  sprite.name = texture.match(/\/([a-z-]+[0-9]*)\.png$/)[1];
+  const toMatch = texture instanceof PIXI.Texture && texture.textureCacheIds && texture.textureCacheIds.length? texture.textureCacheIds[0] : texture;
+  sprite.name =  toMatch.match(/\/?([a-z-]+[0-9]*)\.png$/)[1];
   if(x) sprite.x = x;
   if(y) sprite.y = y;
   sprite.visible = visible;
