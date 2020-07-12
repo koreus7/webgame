@@ -720,11 +720,13 @@ export default function setup(app, level, devMode, exitGame) {
           const done = [];
           keys.forEach(k => {
             const { x, y } = fireIndex[k];
-            const absX = mapLiveData[y][x].fireSprite.x;
-            const absY = mapLiveData[y][x].fireSprite.y;
-            if(!mapLiveData[y][x].char) {
-                mapLiveData[y][x].char =  Sprite(CHAR_TEXTURE, { x: absX, y: absY, visible: true, anchorX: 0.5, anchorY: 0.5, layer: charLayer, drag: false });
-                mapLiveData[y][x].char.alpha = 0.0;
+            if(mapLiveData[y][x].fireSprite) {
+              const absX = mapLiveData[y][x].fireSprite.x;
+              const absY = mapLiveData[y][x].fireSprite.y;
+              if(!mapLiveData[y][x].char) {
+                  mapLiveData[y][x].char =  Sprite(CHAR_TEXTURE, { x: absX, y: absY, visible: true, anchorX: 0.5, anchorY: 0.5, layer: charLayer, drag: false });
+                  mapLiveData[y][x].char.alpha = 0.0;
+              }
             }
             mapLiveData[y][x].char.alpha += 0.1;
             let flameR = tileProps[mapData[y][x]].flameRetardation;
