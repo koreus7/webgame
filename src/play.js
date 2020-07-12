@@ -92,7 +92,7 @@ let fireSpreadRate = 20;
 let fireTicker = 0;
 let points = 0;
 
-export default function setup(app, level, devMode) {
+export default function setup(app, level, devMode, exitGame) {
   const controls = new Controls();
 
 
@@ -112,16 +112,6 @@ export default function setup(app, level, devMode) {
     let fc = 0;
     let dfc = 0;
     let paused = false;
-
-    document.addEventListener('keyup', (event) => {
-      if(event.which === 32) {
-        dfc += 1;
-      } else if(event.which === 80) {
-        paused = !paused;
-        fc = 0;
-        dfc = 0;
-      }
-    });
 
     function beginLevel() {
       fc = 0;
@@ -144,6 +134,21 @@ export default function setup(app, level, devMode) {
       const nodes = {};
       const colliders = [];
 
+      document.addEventListener('keyup', (event) => {
+        if(devMode) {
+          if(event.which === 32) {
+            dfc += 1;
+          } else if(event.which === 80) {
+            paused = !paused;
+            fc = 0;
+            dfc = 0;
+          }
+        }
+        if(event.which === 27) {
+          window.reload();
+        }
+      });
+
       //#region Map
 
       const mapData = level.mapStuff.mapData;
@@ -156,6 +161,16 @@ export default function setup(app, level, devMode) {
         onFire: false,
         doorOpen: false,
       })));
+
+    document.addEventListener('keyup', (event) => {
+      if(event.which === 27) {
+        console.log('exiting!');
+        app.stage.removeChild(camera);
+        app.stage.removeChild(globalGuiLayer);
+        app.ticker.remove(step);
+        exitGame();
+      }
+    });
 
 
       const res = app.loader.resources[TILES_TEXTURE];

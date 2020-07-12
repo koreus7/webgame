@@ -3,7 +3,7 @@ import * as assets from './assets.js';
 import startGame from './play.js';
 
 const app = window.app = new PIXI.Application({
-  backgroundColor: 0x00ffff,
+  backgroundColor: 0xffcccc,
   width: document.body.clientWidth - 40,
   height: document.body.clientHeight - 40,
 });
@@ -48,6 +48,7 @@ Promise.all([
   const menu = new PIXI.Container();
   app.stage.addChild(menu);
   let y = 50;
+  let started = false;
 
   const devModeButton = new PIXI.Text('EDIT');
   devModeButton.x = document.body.clientWidth - devModeButton.width - 100;
@@ -66,8 +67,12 @@ Promise.all([
     text.y = y;
     y += 50;
     text.on('click', () => {
+      started = true;
       menu.visible = false;
-      startGame(app, level, devMode);
+      startGame(app, level, devMode, () => {
+        started = false;
+        menu.visible = true;
+      });
     });
 
     menu.addChild(text);
