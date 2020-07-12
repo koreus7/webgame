@@ -432,6 +432,43 @@ export default function setup(app, level, devMode) {
         app.ticker.remove(step);
         beginLevel();
       });
+      if(devMode) {
+        const shiftDownBtn = new PIXI.Text('Shift Down');
+        shiftDownBtn.interactive = true;
+        shiftDownBtn.x = 10;
+        shiftDownBtn.y = document.body.clientHeight - 200;
+        globalGuiLayer.addChild(shiftDownBtn);
+        console.log('map', level.mapStuff);
+        shiftDownBtn.on('click', (event) => {
+          for(const item of level.contents) {
+            item.y += 32;
+          }
+          const cloneRow = level.mapStuff.mapData[0].slice();
+          const cloneMeta = level.mapStuff.mapMetaData[0].slice();
+          level.mapStuff.mapData.unshift(cloneRow);
+          level.mapStuff.mapMetaData.unshift(cloneMeta);
+          app.stage.removeChild(camera);
+          app.ticker.remove(step);
+          beginLevel();
+        });
+
+        const shiftRightBtn = new PIXI.Text('Shift Right');
+        shiftRightBtn.interactive = true;
+        shiftRightBtn.x = 150;
+        shiftRightBtn.y = document.body.clientHeight - 200;
+        globalGuiLayer.addChild(shiftRightBtn);
+        console.log('map', level.mapStuff);
+        shiftRightBtn.on('click', (event) => {
+          for(const item of level.contents) {
+            item.x += 32;
+          }
+          level.mapStuff.mapData.forEach(row => row.unshift(row[0]));
+          level.mapStuff.mapMetaData.forEach(row => row.unshift(row[0]));
+          app.stage.removeChild(camera);
+          app.ticker.remove(step);
+          beginLevel();
+        });
+      }
 
       const score = new PIXI.Text('Score: ');
       score.x = document.body.clientWidth - 200;
