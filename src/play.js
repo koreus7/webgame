@@ -325,27 +325,6 @@ export default function setup(app, level, devMode) {
       });
       //#endregion
 
-      //#region Draw Target
-      if(devMode) {
-        let target = Sprite(TARGET_TEXTURE, { x: -100, y: -100, layer: globalGuiLayer, anchorX: 0.5, anchorY: 0.5 });
-
-        setTimeout(() => {
-          app.view.addEventListener('click', (event) => {
-            if(event.shiftKey) {
-
-            } else {
-              const bb = app.view.getBoundingClientRect();
-              target.x = event.clientX - bb.left;
-              target.y = event.clientY - bb.top;
-              for(let i = 0; i < agents.length; i++) {
-                agents[i].target = { x: target.x, y: target.y };
-              }
-            }
-          });
-        }, 1000);
-      }
-      //#endregion
-
       //#region Edge design
       let nodeFrom = null;
       function addEdge(target) {
@@ -557,7 +536,16 @@ export default function setup(app, level, devMode) {
               agent.target = nearestNode;
 
             } else {
-              const edgesOut = level.edges.filter(e => e.from === agent.currentNode.id);
+              const edgesOut = level.edges.filter(e => {
+                if(!(e.from === agent.currentNode.id)) {
+                  return false;
+                }
+                const node = nodes[e.to];
+                const tileX = Math.floor(node.x / 32);
+                const tileY = Math.floor(node.y / 32);
+                const tile = mapLiveData[tileY][tileX];
+                return tile.doorSprite ? tile.doorOpen : true;
+              });
               if(edgesOut.length) {
                 const target = edgesOut[Math.floor(Math.random() * edgesOut.length)];
                 agent.target = nodes[target.to];
