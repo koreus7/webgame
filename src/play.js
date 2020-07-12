@@ -115,8 +115,8 @@ export default function setup(app, level, devMode) {
       camera.interactive = true;
 
       const mapLayer = container(camera);
-      const agentLayer = container(camera);
       const underDoorLayer = container(camera);
+      const agentLayer = container(camera);
       const doorLayer = container(camera);
       const fireLayer = container(camera);
       const localGuiLayer = container(camera);
