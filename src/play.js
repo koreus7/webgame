@@ -72,6 +72,12 @@ const tileProps = {
     flamable: true,
     collides: false,
     flameRetardation: 3,
+  },
+  7: {
+    flamable: false,
+    collides: false,
+    flameRetardation: 3,
+    safeZone: true,
   }
 };
 
@@ -82,9 +88,11 @@ let tileBrush = 0;
 let fireSpreadTimer = 0;
 let fireSpreadRate = 20;
 let fireTicker = 0;
+let points = 0;
 
 export default function setup(app, level, devMode) {
   const controls = new Controls();
+    points = 0;
     const dat = window.dat || null;
     GUI.init(dat);
     Keys.init(document);
@@ -206,6 +214,9 @@ export default function setup(app, level, devMode) {
           if(tileProps[mapData[y][x]].collides) {
             const { sprite } = mapLiveData[y][x];
             Matter.World.add(world, [Matter.Bodies.rectangle(sprite.x, sprite.y, sprite.width, sprite.height, { isStatic: true })]);
+          }
+          if(tileProps[mapData[y][x]].safeZone) {
+            colliders.push(getBB(mapLiveData[y][x].sprite));
           }
         }
       }
@@ -422,6 +433,11 @@ export default function setup(app, level, devMode) {
         beginLevel();
       });
 
+      const score = new PIXI.Text('Score: ');
+      score.x = document.body.clientWidth - 200;
+      score.y = document.body.clientHeight - 120;
+      globalGuiLayer.addChild(score);
+
       if(devMode) {
         const saveBtn = new PIXI.Text('Save');
         saveBtn.interactive = true;
@@ -537,10 +553,16 @@ export default function setup(app, level, devMode) {
 
         draw.clear();
 
+        if(traceConfig.collision) {
+          for(const groundBB of colliders) {
+            traceBB(groundBB, 0x00FFFF);
+          }
+        }
+
         for(const edge of level.edges) {
           traceEdge(edge);
         }
-      
+
         for(let i = 0; i < agents.length; i++) {
           const agent = agents[i];
           let prevBB = getBB(agent);
@@ -598,6 +620,18 @@ export default function setup(app, level, devMode) {
           agent.x = agent.body.position.x;
           agent.y = agent.body.position.y;
         }
+
+        for(const agent of agents) {
+          const agentBB = getBB(agent);
+          if(!agent.done) {
+            if(anyCollide(agentBB, colliders)) {
+              agent.done = true;
+              points += 1;
+            }
+          }
+        }
+
+        score.text = "Score: " + points;
 
         //#region Fire
         fireSpreadTimer += delta;
