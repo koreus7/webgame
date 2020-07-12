@@ -8,6 +8,7 @@ import {
   NODE_TEXTURE,
   FIRE_TEXTURE,
   DOOR_TEXTURE,
+  SKELETON_TEXTURE,
 } from './assets.js';
 import { Sprite, AnimatedSprite, bindClick, ID, between, magnitude } from './lib.js';
 import { HSV } from './color.js';
@@ -92,6 +93,9 @@ let points = 0;
 
 export default function setup(app, level, devMode) {
   const controls = new Controls();
+
+
+    let totalAgents = level.contents.filter(x => x.type == 'agent').length;
     points = 0;
     const dat = window.dat || null;
     GUI.init(dat);
@@ -158,14 +162,16 @@ export default function setup(app, level, devMode) {
 
       const appBB = app.view.getBoundingClientRect();
 
-      tileNames.forEach((tileName, i) => {
-        const tex = res.textures[tileName];
-        const s = Sprite(tex, { x: appBB.right -i*tileSize - tileSize, y: appBB.bottom - tileSize - tileSize/2, layer: globalGuiLayer, drag: false });
-        s.tint = 0x55ff55;
-        bindClick(s, () => {
-          tileBrush = i;
+      if(devMode) {
+        tileNames.forEach((tileName, i) => {
+          const tex = res.textures[tileName];
+          const s = Sprite(tex, { x: appBB.right -i*tileSize - tileSize, y: appBB.bottom - tileSize - tileSize/2, layer: globalGuiLayer, drag: false });
+          s.tint = 0x55ff55;
+          bindClick(s, () => {
+            tileBrush = i;
+          });
         });
-      });
+      }
 
       function genMapSprite(x, y, layer = mapLayer, tile) {
         if(tile === undefined) {
@@ -305,7 +311,7 @@ export default function setup(app, level, devMode) {
       app.view.addEventListener('mousedown', (event) => {
         const { tileX, tileY } = mouseEventToTile(event);
         if(inBounds(tileX, tileY)) {
-          if(devMode && Keys.isKeyDown(KEY.F)) {
+          if(Keys.isKeyDown(KEY.F)) {
             setFire(tileX, tileY);
             return;
           }
@@ -328,7 +334,7 @@ export default function setup(app, level, devMode) {
             return;
           }
         }
-        if(Keys.isKeyDown(KEY.A)) {
+        if(Keys.isKeyDown(KEY.E)) {
           mapMouseDown = true;
           paintEvent(event);
         }
@@ -603,6 +609,19 @@ export default function setup(app, level, devMode) {
 
         for(let i = 0; i < agents.length; i++) {
           const agent = agents[i];
+
+          const tileX = Math.floor(agent.x/32);
+          const tileY = Math.floor(agent.y/32);
+
+          if(mapLiveData[tileY][tileX].onFire) {
+            agent.dead = true;
+            // agent.x = -100000000;
+            // agent.y = -100000000;
+            Matter.Composite.remove(world, agent.body);
+            agentLayer.removeChild(agent);
+            Sprite(SKELETON_TEXTURE, { x: agent.x, y: agent.y, layer: agentLayer, drag: false });
+          }
+
           let prevBB = getBB(agent);
           // traceAgent(agent);
           traceBB(prevBB);
@@ -660,7 +679,7 @@ export default function setup(app, level, devMode) {
 
         for(const agent of agents) {
           const agentBB = getBB(agent);
-          if(!agent.done) {
+          if(!agent.done && !agent.dead) {
             if(anyCollide(agentBB, colliders)) {
               agent.done = true;
               points += 1;
@@ -668,7 +687,7 @@ export default function setup(app, level, devMode) {
           }
         }
 
-        score.text = "Score: " + points;
+        score.text = "Score: " + ((points/totalAgents) * 100).toFixed(0) + "%";
 
         //#region Fire
         fireSpreadTimer += delta;
