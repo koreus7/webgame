@@ -16,7 +16,7 @@ window.addEventListener('resize', () => {
   app.resize(width, height);
 });
 
-let devMode = true;
+let devMode = false;
 
 app.view.style.margin = '20px';
 
@@ -24749,6 +24749,7 @@ Promise.all([
   let started = false;
 
   const devModeButton = new PIXI.Text('EDIT');
+  devModeButton.visible = false;
   devModeButton.x = document.body.clientWidth - devModeButton.width - 100;
   devModeButton.y = document.body.clientHeight - devModeButton.height - 100;
   devModeButton.interactive = true;
