@@ -7,6 +7,7 @@ mkdir ./dist/assets
 
 cd dist
 cp -r ../src ./src
+cp -r ../levels ./levels
 cp -r ../lib/dist ./lib
 cp -r ../assets ./
 cp ../index-release.html ./index.html
