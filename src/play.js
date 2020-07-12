@@ -9,6 +9,7 @@ import {
   FIRE_TEXTURE,
   DOOR_TEXTURE,
   SKELETON_TEXTURE,
+  CHAR_TEXTURE,
 } from './assets.js';
 import { Sprite, AnimatedSprite, bindClick, ID, between, magnitude } from './lib.js';
 import { HSV } from './color.js';
@@ -132,6 +133,7 @@ export default function setup(app, level, devMode) {
 
       const mapLayer = container(camera);
       const underDoorLayer = container(camera);
+      const charLayer = container(camera);
       const agentLayer = container(camera);
       const doorLayer = container(camera);
       const fireLayer = container(camera);
@@ -698,6 +700,13 @@ export default function setup(app, level, devMode) {
           const done = [];
           keys.forEach(k => {
             const { x, y } = fireIndex[k];
+            const absX = mapLiveData[y][x].fireSprite.x;
+            const absY = mapLiveData[y][x].fireSprite.y;
+            if(!mapLiveData[y][x].char) {
+                mapLiveData[y][x].char =  Sprite(CHAR_TEXTURE, { x: absX, y: absY, visible: true, anchorX: 0.5, anchorY: 0.5, layer: charLayer, drag: false });
+                mapLiveData[y][x].char.alpha = 0.0;
+            }
+            mapLiveData[y][x].char.alpha += 0.1;
             if(fireTicker % tileProps[mapData[y][x]].flameRetardation === 0) {
               const adjacent = [
                 { x: x - 1, y },
@@ -710,10 +719,20 @@ export default function setup(app, level, devMode) {
                   setFire(x, y);
                 }
               });
-              done.push(k)
+              if(!mapLiveData[y][x].burnTime) {
+                mapLiveData[y][x].burnTime = 1;
+              }
+              mapLiveData[y][x].burnTime += 1;
+              if(mapLiveData[y][x].burnTime > 5) {
+                done.push(k);
+              }
             }
           });
           done.forEach(k => {
+            const { x, y } = fireIndex[k];
+            mapLiveData[y][x].char.alpha = 1.0;
+            mapLiveData[y][x].onFire = false;
+            fireLayer.removeChild(mapLiveData[y][x].fireSprite);
             delete fireIndex[k];
           })
         }
