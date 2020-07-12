@@ -7,17 +7,20 @@ import {
   TARGET_TEXTURE,
   NODE_TEXTURE,
   FIRE_TEXTURE,
+  DOOR_TEXTURE,
 } from './assets.js';
 import { Sprite, AnimatedSprite, bindClick, ID, between, magnitude } from './lib.js';
 import { HSV } from './color.js';
 import Entity from './Entity.js';
+import Keys, { KEY } from './keys.js';
 
 const AGENT_RADIUS = 12;
 const TARGET_MET_DISTANCE = AGENT_RADIUS * 2;
 const AGENT_SPEED = 3;
 
 const traceConfig = {
-  collision: true,
+  aim: false,
+  collision: false
 }
 
 const cameraConfig = {
@@ -54,6 +57,7 @@ let fireSpreadRate = 20;
 export default function setup(app, level, devMode) {
     const dat = window.dat || null;
     GUI.init(dat);
+    Keys.init(document);
     showGUI('trace', traceConfig);
     showGUI('camera', cameraConfig);
 
@@ -81,6 +85,7 @@ export default function setup(app, level, devMode) {
 
       const mapLayer = container(camera);
       const agentLayer = container(camera);
+      const doorLayer = container(camera);
       const fireLayer = container(camera);
       const localGuiLayer = container(camera);
       const globalGuiLayer = container(app.stage);
@@ -91,14 +96,16 @@ export default function setup(app, level, devMode) {
 
       //#region Map
 
-      let mapData = level.mapStuff.mapData;
-      let mapMetaData = level.mapStuff.mapMetaData;
+      const mapData = level.mapStuff.mapData;
+      const mapMetaData = level.mapStuff.mapMetaData;
 
-      let mapLiveData = mapData.map(x => x.map(y => ({
+      const mapLiveData = mapData.map(x => x.map(y => ({
         sprite: null,
         fireSprite: null,
+        doorSprite: null,
         onFire: false,
       })));
+
 
       const res = app.loader.resources[TILES_TEXTURE];
       const tileNames = Object.keys(res.data.frames);
@@ -108,7 +115,7 @@ export default function setup(app, level, devMode) {
 
       tileNames.forEach((tileName, i) => {
         const tex = res.textures[tileName];
-        const s = Sprite(tex, { x: appBB.right -i*tileSize - tileSize, y: appBB.bottom - tileSize - tileSize/2, layer: globalGuiLayer, drag: false, anchorY: 0.5, anchorX: 0.5 });
+        const s = Sprite(tex, { x: appBB.right -i*tileSize - tileSize, y: appBB.bottom - tileSize - tileSize/2, layer: globalGuiLayer, drag: false });
         s.tint = 0x55ff55;
         bindClick(s, () => {
           tileBrush = i;
@@ -117,12 +124,12 @@ export default function setup(app, level, devMode) {
 
       function genMapSprite(x, y) {
         const tex = res.textures[tileNames[mapData[y][x]]];
-        const s = Sprite(tex, { x: x * tileSize + tileSize/2, y: y * tileSize + tileSize/2, layer: mapLayer, drag: false, anchorX: 0.5, anchorY: 0.5 });
+        const s = Sprite(tex, { x: x * tileSize + tileSize/2, y: y * tileSize, layer: mapLayer, drag: false });
         return s;
       }
 
       function genFireSprite(x, y) {
-        const s = AnimatedSprite(FIRE_TEXTURE, { x: x * tileSize + tileSize/2, y: y * tileSize + tileSize/2, layer: fireLayer, drag: false, speed: 0.12, anchorY: 0.5, anchorX: 0.5 });
+        const s = AnimatedSprite(FIRE_TEXTURE, { x: x * tileSize + tileSize/2, y: y * tileSize, layer: fireLayer, drag: false, speed: 0.12 });
         s.scale.x = 1;
         s.scale.y = 1;
         s.play();
@@ -140,6 +147,14 @@ export default function setup(app, level, devMode) {
           const { onFire } = mapMetaData[y][x];
           if(onFire) {
             setFire(x,y )
+          }
+          if(mapData[y][x] === 0) {
+            const s = AnimatedSprite(DOOR_TEXTURE, { anchorX: 0.5, anchorY: 0.5, x: x * tileSize + tileSize/2, y: y * tileSize + tileSize/2, layer: doorLayer, drag: false, speed: 0.12 });
+            s.angle = mapMetaData[y][x].rotation || 0;
+            s.scale.x = 1;
+            s.scale.y = 1;
+            s.loop = false;
+            mapLiveData[y][x].doorSprite = s;
           }
           mapLiveData[y][x].sprite = genMapSprite(x, y);
           if(tileProps[mapData[y][x]].collides) {
@@ -167,6 +182,10 @@ export default function setup(app, level, devMode) {
         const existingSprite = mapLiveData[tileY][tileX].sprite;
         if(existingSprite) {
           mapLayer.removeChild(existingSprite);
+        }
+        const existingDoorSprite = mapLiveData[tileY][tileX].doorSprite;
+        if(existingDoorSprite && brush !== 0) {
+          doorLayer.removeChild(existingDoorSprite);
         }
         mapData[tileY][tileX] = brush;
         mapLiveData[tileY][tileX].sprite = genMapSprite(tileX, tileY);
@@ -218,15 +237,19 @@ export default function setup(app, level, devMode) {
       }
 
       app.view.addEventListener('mousedown', (event) => {
-        if(event.altKey && event.shiftKey) {
+        if(Keys.isKeyDown(KEY.F)) {
           const { tileX, tileY } = mouseEventToTile(event);
           if(inBounds(tileX, tileY)) {
-            setFire(tileX, tileY);
+            if(mapData[tileY][tileX] === 0) {
+              mapMetaData[tileY][tileX].rotation += 90;
+              mapLiveData[tileY][tileX].doorSprite.angle += 90;
+            } else {
+              setFire(tileX, tileY);
+            }
           }
         } else if(!event.shiftKey) {
           mapMouseDown = true;
           paintEvent(event);
-
         }
       });
 
