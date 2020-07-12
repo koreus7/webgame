@@ -731,6 +731,7 @@ export default function setup(app, level, devMode) {
           done.forEach(k => {
             const { x, y } = fireIndex[k];
             mapLiveData[y][x].char.alpha = 1.0;
+            mapLiveData[y][x].onFire = false;
             fireLayer.removeChild(mapLiveData[y][x].fireSprite);
             delete fireIndex[k];
           })
