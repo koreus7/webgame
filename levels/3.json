@@ -15,12 +15,6 @@
     },
     {
       "type": "node",
-      "id": "lme95s2y2",
-      "x": 372,
-      "y": 626
-    },
-    {
-      "type": "node",
       "id": "t9p8uyudw",
       "x": 394,
       "y": 759
@@ -76,6 +70,24 @@
       "id": "bn4o13jpv",
       "x": 1408,
       "y": 136
+    },
+    {
+      "type": "node",
+      "id": "bsku353s2",
+      "x": 290,
+      "y": 479
+    },
+    {
+      "type": "node",
+      "id": "35iy48mk3",
+      "x": 383,
+      "y": 626
+    },
+    {
+      "type": "node",
+      "id": "7skdsui37",
+      "x": 497,
+      "y": 418
     }
   ],
   "mapStuff": {
@@ -6229,14 +6241,6 @@
       "to": "asdf"
     },
     {
-      "from": "asdf",
-      "to": "lme95s2y2"
-    },
-    {
-      "from": "lme95s2y2",
-      "to": "t9p8uyudw"
-    },
-    {
       "from": "t9p8uyudw",
       "to": "vim0ryiuj"
     },
@@ -6267,6 +6271,26 @@
     {
       "from": "1mmvf0oig",
       "to": "bn4o13jpv"
+    },
+    {
+      "from": "asdf",
+      "to": "bsku353s2"
+    },
+    {
+      "from": "bsku353s2",
+      "to": "35iy48mk3"
+    },
+    {
+      "from": "35iy48mk3",
+      "to": "t9p8uyudw"
+    },
+    {
+      "from": "bsku353s2",
+      "to": "7skdsui37"
+    },
+    {
+      "from": "7skdsui37",
+      "to": "85wmm2new"
     }
   ]
 }

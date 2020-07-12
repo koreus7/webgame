@@ -17,6 +17,7 @@ import Keys, { KEY } from './keys.js';
 const AGENT_RADIUS = 12;
 const TARGET_MET_DISTANCE = AGENT_RADIUS * 2;
 const AGENT_SPEED = 1;
+const SPOOK_DISTANCE = 150;
 
 const traceConfig = {
   aim: false,
@@ -176,6 +177,11 @@ export default function setup(app, level, devMode) {
         mapLiveData[y][x].onFire = true;
         mapLiveData[y][x].fireSprite = genFireSprite(x, y);
         fireIndex[y + '-' + x] = { x, y };
+        for(const agent of agents) {
+          if(!agent.spooked && magnitude(between({ x: x * 32 + 16, y: y * 32 + 16 }, agent)) < SPOOK_DISTANCE) {
+            agent.spooked = true;
+          }
+        }
       }
 
       for(let y = 0; y < mapData.length; y++) {
@@ -361,7 +367,7 @@ export default function setup(app, level, devMode) {
 
         const agent = Sprite(AGENT_TEXTURE, { x, y, layer: agentLayer, anchorX: 0.5, anchorY: 0.5, scale: 0.75 });
         agent.id = ID();
-        agent.spooked = true;
+        agent.spooked = false;
         const body = Matter.Bodies.circle(x, y, 10, { restitution: 0 });
         agent.body = body;
         Matter.World.add(world, [agent.body]);
@@ -567,8 +573,9 @@ export default function setup(app, level, devMode) {
             const theta = Math.atan2(v.y, v.x);
             if(mag < TARGET_MET_DISTANCE) {
               agent.currentNode = agent.target;
+              const tile = mapLiveData[Math.floor(agent.target.y / 32)][Math.floor(agent.target.x / 32)];
+              agent.spooked = !tile.doorSprite;
               agent.target = null;
-              // agent.spooked = false;
 
             } else {
               agent.angle = (theta * 180 / Math.PI) + 90;
