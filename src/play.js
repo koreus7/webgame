@@ -13,11 +13,13 @@ import { Sprite, AnimatedSprite, bindClick, ID, between, magnitude } from './lib
 import { HSV } from './color.js';
 import Entity from './Entity.js';
 import Keys, { KEY } from './keys.js';
+import Controls from './controls.js';
 
 const AGENT_RADIUS = 12;
 const TARGET_MET_DISTANCE = AGENT_RADIUS * 2;
 const AGENT_SPEED = 1;
 const SPOOK_DISTANCE = 150;
+const PAN_SPEED = 10;
 
 const traceConfig = {
   aim: false,
@@ -82,6 +84,7 @@ let fireSpreadRate = 20;
 let fireTicker = 0;
 
 export default function setup(app, level, devMode) {
+  const controls = new Controls();
     const dat = window.dat || null;
     GUI.init(dat);
     Keys.init(document);
@@ -105,7 +108,7 @@ export default function setup(app, level, devMode) {
         fc = 0;
         dfc = 0;
       }
-    })
+    });
 
     function beginLevel() {
       fc = 0;
@@ -211,8 +214,8 @@ export default function setup(app, level, devMode) {
 
       function mouseEventToTile(event) {
         const bb = app.view.getBoundingClientRect();
-        const x = event.clientX - bb.left;
-        const y = event.clientY - bb.top;
+        const x = event.clientX - bb.left - camera.position.x;
+        const y = event.clientY - bb.top - camera.position.y;
         const tileX = Math.floor(x/tileSize);
         const tileY = Math.floor(y/tileSize);
         return { tileX, tileY };
@@ -441,7 +444,7 @@ export default function setup(app, level, devMode) {
       //#endregion
 
       const draw = new PIXI.Graphics();
-      globalGuiLayer.addChild(draw);
+      localGuiLayer.addChild(draw);
 
       //#region Collision Tracers
       function traceBB(bb, color = 0xff0000) {
@@ -527,6 +530,9 @@ export default function setup(app, level, devMode) {
           }
         }
 
+        camera.position.x -= controls.getHori() * PAN_SPEED * delta;
+        camera.position.y -= controls.getVert() * PAN_SPEED * delta;
+
         camera.scale.set(cameraConfig.scale);
 
         draw.clear();
@@ -574,7 +580,7 @@ export default function setup(app, level, devMode) {
             if(mag < TARGET_MET_DISTANCE) {
               agent.currentNode = agent.target;
               const tile = mapLiveData[Math.floor(agent.target.y / 32)][Math.floor(agent.target.x / 32)];
-              agent.spooked = !!tile.doorSprite;
+              agent.spooked = true;
               agent.target = null;
 
             } else {
