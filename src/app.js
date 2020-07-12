@@ -1,4 +1,4 @@
-import { loadAssets } from './lib.js';
+import { loadAssets, Sprite } from './lib.js';
 import * as assets from './assets.js';
 import startGame from './play.js';
 
@@ -24745,7 +24745,7 @@ Promise.all([
 ]).then(([levels]) => {
   const menu = new PIXI.Container();
   app.stage.addChild(menu);
-  let y = 50;
+  let y = 250;
   let started = false;
 
   const devModeButton = new PIXI.Text('EDIT');
@@ -24758,6 +24758,8 @@ Promise.all([
     devMode = !devMode;
     devModeButton.style.fill = devMode ? 'red' : 'black';
   })
+
+  const logo = Sprite(assets.LOGO_TEXTURE, { x: 380, y: 150, layer: menu, scale: 4 })
 
   for(const level of levels) {
     const text = new PIXI.Text(level.name);

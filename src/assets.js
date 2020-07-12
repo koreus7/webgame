@@ -8,3 +8,4 @@ export const FIRE_TEXTURE = './assets/images/fire.json';
 export const DOOR_TEXTURE = './assets/images/door.json';
 export const SKELETON_TEXTURE = './assets/images/skel.png';
 export const CHAR_TEXTURE = './assets/images/char.png';
+export const LOGO_TEXTURE = './assets/images/logo.png';

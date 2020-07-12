@@ -145,7 +145,7 @@ export default function setup(app, level, devMode, exitGame) {
           }
         }
         if(event.which === 27) {
-          window.reload();
+          window.location.reload();
         }
       });
 
