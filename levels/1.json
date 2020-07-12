@@ -21,12 +21,6 @@
     },
     {
       "type": "node",
-      "id": "vim0ryiuj",
-      "x": 811,
-      "y": 871
-    },
-    {
-      "type": "node",
       "id": "ucv9ghh6y",
       "x": 769,
       "y": 832
@@ -204,6 +198,12 @@
       "type": "agent",
       "x": 432,
       "y": 331
+    },
+    {
+      "type": "node",
+      "id": "8y1h50wdl",
+      "x": 1408,
+      "y": 125
     }
   ],
   "mapStuff": {
@@ -522,8 +522,8 @@
         3,
         3,
         3,
-        3,
-        3,
+        7,
+        7,
         3,
         3,
         3,
@@ -576,8 +576,8 @@
         3,
         3,
         3,
-        3,
-        3,
+        7,
+        7,
         3,
         3,
         3,
@@ -919,8 +919,8 @@
         1,
         1,
         1,
-        4,
-        4,
+        2,
+        2,
         1,
         1,
         1,
@@ -3982,10 +3982,12 @@
           "onFire": false
         },
         {
-          "onFire": false
+          "onFire": false,
+          "underTile": 4
         },
         {
-          "onFire": false
+          "onFire": false,
+          "underTile": 4
         },
         {
           "onFire": false
@@ -6976,10 +6978,6 @@
     },
     {
       "from": "t9p8uyudw",
-      "to": "vim0ryiuj"
-    },
-    {
-      "from": "t9p8uyudw",
       "to": "ucv9ghh6y"
     },
     {
@@ -6988,10 +6986,6 @@
     },
     {
       "from": "ucv9ghh6y",
-      "to": "qb1msqu40"
-    },
-    {
-      "from": "vim0ryiuj",
       "to": "qb1msqu40"
     },
     {
@@ -7029,6 +7023,10 @@
     {
       "from": "nu7s3txra",
       "to": "qb1msqu40"
+    },
+    {
+      "from": "bn4o13jpv",
+      "to": "8y1h50wdl"
     }
   ]
 }

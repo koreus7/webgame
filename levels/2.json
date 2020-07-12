@@ -7364,7 +7364,7 @@
         },
         {
           "onFire": false,
-          "rotation": null
+          "rotation": 90
         },
         {
           "onFire": false
@@ -7374,7 +7374,7 @@
         },
         {
           "onFire": false,
-          "rotation": null
+          "rotation": 90
         },
         {
           "onFire": false
