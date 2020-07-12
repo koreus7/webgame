@@ -615,7 +615,7 @@ export default function setup(app, level, devMode) {
           const tileX = Math.floor(agent.x/32);
           const tileY = Math.floor(agent.y/32);
 
-          if(mapLiveData[tileY][tileX].onFire) {
+          if(inBounds(tileX, tileY) && mapLiveData[tileY][tileX].onFire) {
             agent.dead = true;
             // agent.x = -100000000;
             // agent.y = -100000000;
