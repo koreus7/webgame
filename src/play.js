@@ -33,18 +33,43 @@ function container(parent) {
   return layer;
 }
 
+const TILE_DOOR = 2;
+
 const tileProps = {
   0: {
-    flamable: false,
+  flamable: true,
     collides: true,
+    flameRetardation: 3,
   },
   1: {
     flamable: false,
+    flameRetardation: 3,
   },
   2: {
     flamable: true,
     collides: true,
+    flameRetardation: 3,
   },
+  3: {
+    flamable: true,
+    collides: false,
+    flameRetardation: 3,
+  },
+  4: {
+    flamable: true,
+    collides: false,
+    flameRetardation: 1,
+  },
+  5: {
+    flamable: true,
+    collides: false,
+    flameRetardation: 3,
+  },
+  6: {
+    flamable: true,
+    collides: false,
+    flameRetardation: 3,
+  }
 };
 
 let fireIndex = {};
@@ -53,6 +78,7 @@ let tileBrush = 0;
 
 let fireSpreadTimer = 0;
 let fireSpreadRate = 20;
+let fireTicker = 0;
 
 export default function setup(app, level, devMode) {
     const dat = window.dat || null;
@@ -63,7 +89,7 @@ export default function setup(app, level, devMode) {
 
     let fc = 0;
     let dfc = 0;
-    let paused = true;
+    let paused = false;
 
     document.addEventListener('keyup', (event) => {
       if(event.which === 32) {
@@ -85,6 +111,7 @@ export default function setup(app, level, devMode) {
 
       const mapLayer = container(camera);
       const agentLayer = container(camera);
+      const underDoorLayer = container(camera);
       const doorLayer = container(camera);
       const fireLayer = container(camera);
       const localGuiLayer = container(camera);
@@ -104,6 +131,7 @@ export default function setup(app, level, devMode) {
         fireSprite: null,
         doorSprite: null,
         onFire: false,
+        doorOpen: false,
       })));
 
 
@@ -122,14 +150,17 @@ export default function setup(app, level, devMode) {
         });
       });
 
-      function genMapSprite(x, y) {
-        const tex = res.textures[tileNames[mapData[y][x]]];
-        const s = Sprite(tex, { x: x * tileSize + tileSize/2, y: y * tileSize, layer: mapLayer, drag: false });
+      function genMapSprite(x, y, layer = mapLayer, tile) {
+        if(tile === undefined) {
+          tile = mapData[y][x];
+        }
+        const tex = res.textures[tileNames[tile]];
+        const s = Sprite(tex, { x: x * tileSize + tileSize/2, y: y * tileSize + tileSize/2, layer, drag: false });
         return s;
       }
 
       function genFireSprite(x, y) {
-        const s = AnimatedSprite(FIRE_TEXTURE, { x: x * tileSize + tileSize/2, y: y * tileSize, layer: fireLayer, drag: false, speed: 0.12 });
+        const s = AnimatedSprite(FIRE_TEXTURE, { x: x * tileSize + tileSize/2, y: y * tileSize + tileSize/2, layer: fireLayer, drag: false, speed: 0.12 });
         s.scale.x = 1;
         s.scale.y = 1;
         s.play();
@@ -148,13 +179,14 @@ export default function setup(app, level, devMode) {
           if(onFire) {
             setFire(x,y )
           }
-          if(mapData[y][x] === 0) {
+          if(mapData[y][x] === TILE_DOOR) {
             const s = AnimatedSprite(DOOR_TEXTURE, { anchorX: 0.5, anchorY: 0.5, x: x * tileSize + tileSize/2, y: y * tileSize + tileSize/2, layer: doorLayer, drag: false, speed: 0.12 });
             s.angle = mapMetaData[y][x].rotation || 0;
             s.scale.x = 1;
             s.scale.y = 1;
             s.loop = false;
             mapLiveData[y][x].doorSprite = s;
+            mapLiveData[y][x].underSprite = genMapSprite(x, y, underDoorLayer, mapMetaData[y][x].underTile || 0);
           }
           mapLiveData[y][x].sprite = genMapSprite(x, y);
           if(tileProps[mapData[y][x]].collides) {
@@ -175,7 +207,7 @@ export default function setup(app, level, devMode) {
       }
 
       function inBounds(tileX, tileY) {
-        return tileY < mapData.length && tileX < mapData[tileY].length;
+        return tileX > 0 && tileY > 0 && tileY < mapData.length && tileX < mapData[tileY].length;
       }
 
       function paintTile(tileX, tileY, brush = tileBrush) {
@@ -184,8 +216,15 @@ export default function setup(app, level, devMode) {
           mapLayer.removeChild(existingSprite);
         }
         const existingDoorSprite = mapLiveData[tileY][tileX].doorSprite;
-        if(existingDoorSprite && brush !== 0) {
+        if(existingDoorSprite && brush !== TILE_DOOR) {
           doorLayer.removeChild(existingDoorSprite);
+        }
+        const existingUnderDoorSprite = mapLiveData[tileY][tileX].underSprite;
+        if(existingUnderDoorSprite) {
+            underDoorLayer.removeChild(existingUnderDoorSprite);
+        }
+        if(brush === TILE_DOOR) {
+          mapLiveData[tileY][tileX].underSprite = genMapSprite(tileX, tileY, underDoorLayer, mapMetaData[tileY][tileX].underTile || 0)
         }
         mapData[tileY][tileX] = brush;
         mapLiveData[tileY][tileX].sprite = genMapSprite(tileX, tileY);
@@ -197,6 +236,7 @@ export default function setup(app, level, devMode) {
           sprite: null,
           fireSprite: null,
           onFire: false,
+          doorOpen: false,
         };
         const defaultMeta = {
           onFire: false,
@@ -204,7 +244,7 @@ export default function setup(app, level, devMode) {
         if(!inBounds(tileX, tileY)) {
           const yOff = tileY + 1 - mapData.length;
           for(let i = 0; i < yOff; i++) {
-            const row = new Array(mapData[0].length).fill(1);
+            const row = new Array(mapData[0].length).fill(3);
             const liveRow = new Array(mapData[0].length).fill(null).map(x => ({...defaultLive}));
             const metaRow = new Array(mapData[0].length).fill(null).map(x => ({...defaultMeta}));
             mapData.push(row);
@@ -215,7 +255,7 @@ export default function setup(app, level, devMode) {
           if(xOff > 0) {
             for(let y  = 0; y < mapData.length; y++) {
               for(let i = 0; i < xOff; i++) {
-                mapData[y].push(1);
+                mapData[y].push(3);
                 mapLiveData[y].push({...defaultLive});
                 mapMetaData[y].push({...defaultMeta});
               }
@@ -237,17 +277,32 @@ export default function setup(app, level, devMode) {
       }
 
       app.view.addEventListener('mousedown', (event) => {
-        if(Keys.isKeyDown(KEY.F)) {
-          const { tileX, tileY } = mouseEventToTile(event);
-          if(inBounds(tileX, tileY)) {
-            if(mapData[tileY][tileX] === 0) {
-              mapMetaData[tileY][tileX].rotation += 90;
-              mapLiveData[tileY][tileX].doorSprite.angle += 90;
-            } else {
-              setFire(tileX, tileY);
-            }
+        const { tileX, tileY } = mouseEventToTile(event);
+        if(inBounds(tileX, tileY)) {
+          if(Keys.isKeyDown(KEY.F)) {
+            setFire(tileX, tileY);
+            return;
           }
-        } else if(!event.shiftKey) {
+          if(Keys.isKeyDown(KEY.O) && mapData[tileY][tileX] === TILE_DOOR) {
+            mapLiveData[tileY][tileX].doorSprite.play();
+            mapLiveData[tileY][tileX].doorOpen = true;
+            return;
+          }
+          if(Keys.isKeyDown(KEY.R) && mapData[tileY][tileX] === TILE_DOOR) {
+            mapMetaData[tileY][tileX].rotation += 90;
+            mapLiveData[tileY][tileX].doorSprite.angle += 90;
+            return;
+          }
+          if(Keys.isKeyDown(KEY.T) && mapData[tileY][tileX] === TILE_DOOR) {
+            if(typeof mapMetaData[tileY][tileX].underTile !== 'number') {
+                mapMetaData[tileY][tileX].underTile = 0;
+            }
+            mapMetaData[tileY][tileX].underTile = (mapMetaData[tileY][tileX].underTile + 1)%Object.keys(tileProps).length;
+            paintTile(tileX, tileY, TILE_DOOR);
+            return;
+          }
+        }
+        if(Keys.isKeyDown(KEY.A)) {
           mapMouseDown = true;
           paintEvent(event);
         }
@@ -559,7 +614,7 @@ export default function setup(app, level, devMode) {
                 agent.x += d.x / distance * overlap;
                 agent.y += d.y / distance * overlap;
               }
-              
+
             } else {
               // come from above
               if(nextBB.bottom > collided.top && prevBB.bottom <= collided.top) {
@@ -597,23 +652,28 @@ export default function setup(app, level, devMode) {
         //#region Fire
         fireSpreadTimer += delta;
         if(fireSpreadTimer > fireSpreadRate) {
+          fireTicker += 1;
           fireSpreadTimer = 0;
           const keys = Object.keys(fireIndex);
+          const done = [];
           keys.forEach(k => {
             const { x, y } = fireIndex[k];
-            const adjacent = [
-              { x: x - 1, y },
-              { x: x + 1, y },
-              { x, y: y + 1 },
-              { x, y: y - 1 },
-            ];
-            adjacent.forEach(({x, y}) => {
-              if(inBounds(x,y) && !mapLiveData[y][x].onFire && tileProps[mapData[y][x]].flamable) {
-                setFire(x, y);
-              }
-            });
+            if(fireTicker % tileProps[mapData[y][x]].flameRetardation === 0) {
+              const adjacent = [
+                { x: x - 1, y },
+                { x: x + 1, y },
+                { x, y: y + 1 },
+                { x, y: y - 1 },
+              ];
+              adjacent.forEach(({x, y}) => {
+                if(inBounds(x,y) && !mapLiveData[y][x].onFire && tileProps[mapData[y][x]].flamable) {
+                  setFire(x, y);
+                }
+              });
+              done.push(k)
+            }
           });
-          keys.forEach(k => {
+          done.forEach(k => {
             delete fireIndex[k];
           })
         }
