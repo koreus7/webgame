@@ -16,7 +16,7 @@ import Keys, { KEY } from './keys.js';
 
 const AGENT_RADIUS = 12;
 const TARGET_MET_DISTANCE = AGENT_RADIUS * 2;
-const AGENT_SPEED = 3;
+const AGENT_SPEED = 1;
 
 const traceConfig = {
   aim: false,
@@ -86,6 +86,11 @@ export default function setup(app, level, devMode) {
     Keys.init(document);
     showGUI('trace', traceConfig);
     showGUI('camera', cameraConfig);
+    const engine = Matter.Engine.create();
+    const world = engine.world;
+    world.gravity.y = 0;
+    const runner = Matter.Runner.create();
+    Matter.Runner.run(runner, engine);
 
     let fc = 0;
     let dfc = 0;
@@ -190,7 +195,8 @@ export default function setup(app, level, devMode) {
           }
           mapLiveData[y][x].sprite = genMapSprite(x, y);
           if(tileProps[mapData[y][x]].collides) {
-            colliders.push(getBB(mapLiveData[y][x].sprite));
+            const { sprite } = mapLiveData[y][x];
+            Matter.World.add(world, [Matter.Bodies.rectangle(sprite.x, sprite.y, sprite.width, sprite.height, { isStatic: true })]);
           }
         }
       }
@@ -377,6 +383,9 @@ export default function setup(app, level, devMode) {
         const agent = Sprite(AGENT_TEXTURE, { x, y, layer: agentLayer, anchorX: 0.5, anchorY: 0.5, scale: 0.75 });
         agent.id = ID();
         agent.spooked = false;
+        const body = Matter.Bodies.circle(x, y, 10, { restitution: 0 });
+        agent.body = body;
+        Matter.World.add(world, [agent.body]);
         agents.push(agent);
       }
 
@@ -528,22 +537,14 @@ export default function setup(app, level, devMode) {
           }
         }
 
-
         camera.scale.set(cameraConfig.scale);
 
         draw.clear();
-
-        if(traceConfig.collision) {
-          for(const groundBB of colliders) {
-            traceBB(groundBB, 0x00FFFF);
-          }
-        }
 
         for(const edge of level.edges) {
           traceEdge(edge);
         }
       
-        console.log('||||||BEGIN AGENT ADVANCEMENT|||||');
         for(let i = 0; i < agents.length; i++) {
           const agent = agents[i];
           let prevBB = getBB(agent);
@@ -571,82 +572,26 @@ export default function setup(app, level, devMode) {
             v.x /= mag;
             v.y /= mag;
             const theta = Math.atan2(v.y, v.x);
-
-            agent.angle = (theta * 180 / Math.PI) + 90;
-            agent.x += v.x * delta * AGENT_SPEED;
-            agent.y += v.y * delta * AGENT_SPEED;
             if(mag < TARGET_MET_DISTANCE) {
               agent.currentNode = agent.target;
               agent.target = null;
               agent.spooked = false;
-            }
-          }
-          //#endregion
-
-          const circleBBs = agents.slice(0, i);
-          //#endregion
-
-          //#region Wall collision
-          let nextBB = getBB(agent);
-          console.log('agent is at', agent.x, agent.y);
-          let collided = entityCollides(agent, nextBB, colliders, circleBBs);
-          let c = 0;
-          console.log('======= COLLISION ======');
-          while(collided) {
-            c++;
-            if(c > 50) {
-              console.log('TOO MANY COLLISIONS');
-              paused = true;
-              break;
-            }
-
-            if(collided.type === 'circle') {
-              const { d } = collided;
-              const distance = magnitude(d);
-              console.log(`collided with a circle at [${collided.bb.x}, ${collided.bb.y}]`);
-              const overlap = AGENT_RADIUS * 2 - distance;
-              console.log(`d = [${d.x}, ${d.y}], m = ${distance}, overlap = ${overlap}`)
-              if(overlap > 0.2) {
-                agent.x += d.x / distance * overlap / 2;
-                agent.y += d.y / distance * overlap / 2;
-                collided.bb.x -= d.x / distance * overlap / 2;
-                collided.bb.y -= d.y / distance * overlap / 2;
-              }
 
             } else {
-              console.log('collided with square', collided);
-              console.log('nextBB', nextBB);
-              const v = betweenBBs(prevBB, nextBB);
-              agent.x += v.x / 2;
-              agent.y += v.y / 2;
-              // console.log('prevBB', prevBB);
-              // // come from above
-              // if(nextBB.bottom > collided.top && prevBB.bottom <= collided.top) {
-              //   console.log(`agent collided with a box from above`);
-              //   agent.y = collided.top - (agent.height * agent.scale.y) / 2;
-
-              // // come from below
-              // } else if(nextBB.top < collided.bottom && prevBB.top >= collided.bottom) {
-              //   console.log(`agent collided with a box from below`);
-              //   agent.y = collided.bottom + (agent.height * agent.scale.y) / 2;
-
-              // } else if(nextBB.right > collided.left && prevBB.right <= collided.left) {
-              //   console.log(`agent collided with a box from the left`);
-              //   agent.x = collided.left - (agent.width * agent.scale.x) / 2;
-
-              // } else if(nextBB.left < collided.right && prevBB.left >= collided.right) {
-              //   console.log(`agent collided with a box from the right`);
-              //   agent.x = collided.right + (agent.width * agent.scale.x) / 2;
-              // }
+              agent.angle = (theta * 180 / Math.PI) + 90;
+              Matter.Body.setVelocity(agent.body, { x: v.x * AGENT_SPEED, y: v.y * AGENT_SPEED });
             }
 
-            nextBB = getBB(agent);
-            collided = entityCollides(agent, nextBB, colliders, circleBBs);
+          } else {
+            Matter.Body.setVelocity(agent.body, { x: 0, y: 0 });
           }
-
-          console.log('======= END COLLISION ======');
         }
-        console.log('||||||||END AGENT ADVANCEMENT||||||||');
+
+        Matter.Engine.update(engine, 1000/60, 1);
+        for(const agent of agents) {
+          agent.x = agent.body.position.x;
+          agent.y = agent.body.position.y;
+        }
 
         if(agents.every(agent => !agent.spooked)) {
           for(const agent of agents) {
