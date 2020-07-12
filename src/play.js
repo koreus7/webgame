@@ -53,7 +53,7 @@ const tileProps = {
   },
   2: {
     flamable: true,
-    flameRetardation: 3,
+    flameRetardation: 25,
   },
   3: {
     flamable: true,
@@ -332,8 +332,13 @@ export default function setup(app, level, devMode) {
             return;
           }
           if(mapData[tileY][tileX] === TILE_DOOR && !Keys.isKeyDown(KEY.E)) {
-            mapLiveData[tileY][tileX].doorSprite.play();
-            mapLiveData[tileY][tileX].doorOpen = true;
+            if(mapLiveData[tileY][tileX].doorOpen) {
+              mapLiveData[tileY][tileX].doorOpen = false;
+              mapLiveData[tileY][tileX].doorSprite.gotoAndStop(0);
+            } else {
+              mapLiveData[tileY][tileX].doorSprite.play();
+              mapLiveData[tileY][tileX].doorOpen = true;
+            }
             return;
           }
         }
@@ -707,7 +712,11 @@ export default function setup(app, level, devMode) {
                 mapLiveData[y][x].char.alpha = 0.0;
             }
             mapLiveData[y][x].char.alpha += 0.1;
-            if(fireTicker % tileProps[mapData[y][x]].flameRetardation === 0) {
+            let flameR = tileProps[mapData[y][x]].flameRetardation;
+            if(mapData[y][x] == TILE_DOOR && mapLiveData[y][x].doorOpen) {
+              flameR = 3;
+            }
+            if(fireTicker % flameR === 0) {
               const adjacent = [
                 { x: x - 1, y },
                 { x: x + 1, y },
@@ -715,7 +724,7 @@ export default function setup(app, level, devMode) {
                 { x, y: y - 1 },
               ];
               adjacent.forEach(({x, y}) => {
-                if(inBounds(x,y) && !mapLiveData[y][x].onFire && tileProps[mapData[y][x]].flamable && !mapLiveData[y][x].burntOut && !(mapData[y][x] == TILE_DOOR && !mapLiveData[y][x].doorOpen) ) {
+                if(inBounds(x,y) && !mapLiveData[y][x].onFire && tileProps[mapData[y][x]].flamable && !mapLiveData[y][x].burntOut) {
                   setFire(x, y);
                 }
               });
