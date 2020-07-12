@@ -291,26 +291,26 @@ export default function setup(app, level, devMode) {
       app.view.addEventListener('mousedown', (event) => {
         const { tileX, tileY } = mouseEventToTile(event);
         if(inBounds(tileX, tileY)) {
-          if(Keys.isKeyDown(KEY.F)) {
+          if(devMode && Keys.isKeyDown(KEY.F)) {
             setFire(tileX, tileY);
             return;
           }
-          if(Keys.isKeyDown(KEY.O) && mapData[tileY][tileX] === TILE_DOOR) {
-            mapLiveData[tileY][tileX].doorSprite.play();
-            mapLiveData[tileY][tileX].doorOpen = true;
-            return;
-          }
-          if(Keys.isKeyDown(KEY.R) && mapData[tileY][tileX] === TILE_DOOR) {
+          if(devMode && Keys.isKeyDown(KEY.R) && mapData[tileY][tileX] === TILE_DOOR) {
             mapMetaData[tileY][tileX].rotation += 90;
             mapLiveData[tileY][tileX].doorSprite.angle += 90;
             return;
           }
-          if(Keys.isKeyDown(KEY.T) && mapData[tileY][tileX] === TILE_DOOR) {
+          if(devMode && Keys.isKeyDown(KEY.T) && mapData[tileY][tileX] === TILE_DOOR) {
             if(typeof mapMetaData[tileY][tileX].underTile !== 'number') {
                 mapMetaData[tileY][tileX].underTile = 0;
             }
             mapMetaData[tileY][tileX].underTile = (mapMetaData[tileY][tileX].underTile + 1)%Object.keys(tileProps).length;
             paintTile(tileX, tileY, TILE_DOOR);
+            return;
+          }
+          if(mapData[tileY][tileX] === TILE_DOOR) {
+            mapLiveData[tileY][tileX].doorSprite.play();
+            mapLiveData[tileY][tileX].doorOpen = true;
             return;
           }
         }
@@ -574,7 +574,7 @@ export default function setup(app, level, devMode) {
             if(mag < TARGET_MET_DISTANCE) {
               agent.currentNode = agent.target;
               const tile = mapLiveData[Math.floor(agent.target.y / 32)][Math.floor(agent.target.x / 32)];
-              agent.spooked = !tile.doorSprite;
+              agent.spooked = !!tile.doorSprite;
               agent.target = null;
 
             } else {
