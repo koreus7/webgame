@@ -19,7 +19,7 @@ import Controls from './controls.js';
 const AGENT_RADIUS = 12;
 const TARGET_MET_DISTANCE = AGENT_RADIUS * 2;
 const AGENT_SPEED = 1;
-const SPOOK_DISTANCE = 150;
+const SPOOK_DISTANCE = 200;
 const PAN_SPEED = 10;
 
 const traceConfig = {
@@ -329,7 +329,7 @@ export default function setup(app, level, devMode) {
             paintTile(tileX, tileY, TILE_DOOR);
             return;
           }
-          if(mapData[tileY][tileX] === TILE_DOOR) {
+          if(mapData[tileY][tileX] === TILE_DOOR && !Keys.isKeyDown(KEY.E)) {
             mapLiveData[tileY][tileX].doorSprite.play();
             mapLiveData[tileY][tileX].doorOpen = true;
             return;
