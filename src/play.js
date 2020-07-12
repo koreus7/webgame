@@ -374,9 +374,14 @@ export default function setup(app, level, devMode) {
         if(devMode) {
           const dupe = Sprite(NODE_TEXTURE, { x, y, layer: localGuiLayer, anchorY: 0.5, anchorX: 0.5 });
           dupe.on('click', (event) => {
-            console.log(event.data.originalEvent);
             if(event.data.originalEvent.altKey) {
               addEdge(item.id);
+
+            } else if(event.data.originalEvent.metaKey) {
+              delete nodes[item.id];
+              level.contents = level.contents.filter(i => !(i.type === 'node' && i.id === item.id));
+              level.edges = level.edges.filter(e => !(e.from === item.id || e.to === item.id));
+              dupe.visible = false;
             }
           });
 

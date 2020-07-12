@@ -55,18 +55,6 @@
     },
     {
       "type": "node",
-      "id": "ksunn54uw",
-      "x": 385,
-      "y": 427
-    },
-    {
-      "type": "node",
-      "id": "uj592j098",
-      "x": 488,
-      "y": 425
-    },
-    {
-      "type": "node",
       "id": "vp48c5zn1",
       "x": 398,
       "y": 626
@@ -6265,22 +6253,6 @@
     {
       "from": "i64iiqimd",
       "to": "asdf"
-    },
-    {
-      "from": "asdf",
-      "to": "uj592j098"
-    },
-    {
-      "from": "asdf",
-      "to": "ksunn54uw"
-    },
-    {
-      "from": "uj592j098",
-      "to": "85wmm2new"
-    },
-    {
-      "from": "ksunn54uw",
-      "to": "85wmm2new"
     },
     {
       "from": "85wmm2new",
