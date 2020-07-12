@@ -42,8 +42,18 @@ export function anyCollide(entityBB, wallBBs) {
   return false;
 };
 
+export function circleCollides(entity, circleBBs) {
+  for(let i = 0; i < circleBBs.length; i++) {
+    const d = between(entity, circleBBs[i]);
+    if(magnitude(d) < 23.8) {
+      return { type: 'circle', d, bb: circleBBs[i] };
+    }
+  }
 
-export function entityCollides(entity, entityBB, wallBBs, circleBBs) {
+  return null;
+}
+
+export function boxCollides(entityBB, wallBBs) {
   for(let i = 0; i < wallBBs.length; i++) {
     const wallBB = wallBBs[i];
     if(
@@ -55,17 +65,9 @@ export function entityCollides(entity, entityBB, wallBBs, circleBBs) {
       }
   }
 
-  for(let i = 0; i < circleBBs.length; i++) {
-    console.log('comparing', entity, circleBBs[i]);
-    const d = between(entity, circleBBs[i]);
-    console.log('ent', entity.x, entity.y);
-    console.log('bb', circleBBs[i].x, circleBBs[i].y);
-    console.log('d', d);
-    console.log('mag', magnitude(d));
-    if(magnitude(d) < 24) {
-      return { type: 'circle', d, bb: circleBBs[i] };
-    }
-  }
-
   return null;
+}
+
+export function entityCollides(entity, entityBB, wallBBs, circleBBs) {
+  return circleCollides(entity, circleBBs) || boxCollides(entityBB, wallBBs);
 };

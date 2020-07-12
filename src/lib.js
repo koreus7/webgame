@@ -63,6 +63,16 @@ export function bindClick(sprite, onClick) {
   });
 }
 
+export function avg(a, b) {
+  return a + b / 2;
+}
+
+export function betweenBBs(a, b) {
+  const dx = avg(a.left, a.right) - avg(b.left, b.right);
+  const dy = avg(a.top, a.bottom) - avg(b.top, b.bottom);
+  return { x: dx, y: dy };
+}
+
 export function between(v1, v2) {
   const dx = v1.x - v2.x;
   const dy = v1.y - v2.y;

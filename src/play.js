@@ -1,5 +1,5 @@
 import GUI, { showGUI } from './gui.js';
-import { loadAssets, getTexture, getSheet, getAnim, bindDrag } from './lib.js';
+import { loadAssets, getTexture, getSheet, getAnim, bindDrag, betweenBBs } from './lib.js';
 import { getBB, fakeBB, entityCollides, anyCollide } from './collision.js';
 import {
   AGENT_TEXTURE,
@@ -464,7 +464,8 @@ export default function setup(app, level, devMode) {
         for(const edge of level.edges) {
           traceEdge(edge);
         }
-
+      
+        console.log('||||||BEGIN AGENT ADVANCEMENT|||||');
         for(let i = 0; i < agents.length; i++) {
           const agent = agents[i];
           let prevBB = getBB(agent);
@@ -505,57 +506,60 @@ export default function setup(app, level, devMode) {
           //#endregion
 
           const circleBBs = agents.slice(0, i);
-          console.log('CBBS', circleBBs);
-          console.log('AGENT', agent);
-          console.log('AGENTS', agents);
           //#endregion
 
           //#region Wall collision
           let nextBB = getBB(agent);
-          console.log('agent', agent.x, agent.y);
+          console.log('agent is at', agent.x, agent.y);
           let collided = entityCollides(agent, nextBB, colliders, circleBBs);
           let c = 0;
           console.log('======= COLLISION ======');
           while(collided) {
-            console.log('bb', nextBB);
-            console.log('collided with', collided);
             c++;
-            if(c > 5) {
+            if(c > 50) {
               console.log('TOO MANY COLLISIONS');
+              paused = true;
               break;
             }
 
             if(collided.type === 'circle') {
-              console.log('collided with a circle');
               const { d } = collided;
               const distance = magnitude(d);
+              console.log(`collided with a circle at [${collided.bb.x}, ${collided.bb.y}]`);
               const overlap = AGENT_RADIUS * 2 - distance;
-              if(overlap > 0) {
-                // collided.bb.x -= d.x / distance * overlap / 2;
-                // collided.bb.y -= d.y / distance * overlap / 2;
-                agent.x += d.x / distance * overlap;
-                agent.y += d.y / distance * overlap;
+              console.log(`d = [${d.x}, ${d.y}], m = ${distance}, overlap = ${overlap}`)
+              if(overlap > 0.2) {
+                agent.x += d.x / distance * overlap / 2;
+                agent.y += d.y / distance * overlap / 2;
+                collided.bb.x -= d.x / distance * overlap / 2;
+                collided.bb.y -= d.y / distance * overlap / 2;
               }
               
             } else {
-              // come from above
-              if(nextBB.bottom > collided.top && prevBB.bottom <= collided.top) {
-                console.log(`agent collided with a box from above`);
-                agent.y = collided.top - (agent.height * agent.scale.y) / 2;
+              console.log('collided with square', collided);
+              console.log('nextBB', nextBB);
+              const v = betweenBBs(prevBB, nextBB);
+              agent.x += v.x / 2;
+              agent.y += v.y / 2;
+              // console.log('prevBB', prevBB);
+              // // come from above
+              // if(nextBB.bottom > collided.top && prevBB.bottom <= collided.top) {
+              //   console.log(`agent collided with a box from above`);
+              //   agent.y = collided.top - (agent.height * agent.scale.y) / 2;
 
-              // come from below
-              } else if(nextBB.top < collided.bottom && prevBB.top >= collided.bottom) {
-                console.log(`agent collided with a box from below`);
-                agent.y = collided.bottom + (agent.height * agent.scale.y) / 2;
+              // // come from below
+              // } else if(nextBB.top < collided.bottom && prevBB.top >= collided.bottom) {
+              //   console.log(`agent collided with a box from below`);
+              //   agent.y = collided.bottom + (agent.height * agent.scale.y) / 2;
 
-              } else if(nextBB.right > collided.left && prevBB.right <= collided.left) {
-                console.log(`agent collided with a box from the left`);
-                agent.x = collided.left - (agent.width * agent.scale.x) / 2;
+              // } else if(nextBB.right > collided.left && prevBB.right <= collided.left) {
+              //   console.log(`agent collided with a box from the left`);
+              //   agent.x = collided.left - (agent.width * agent.scale.x) / 2;
 
-              } else if(nextBB.left < collided.right && prevBB.left >= collided.right) {
-                console.log(`agent collided with a box from the right`);
-                agent.x = collided.right + (agent.width * agent.scale.x) / 2;
-              }
+              // } else if(nextBB.left < collided.right && prevBB.left >= collided.right) {
+              //   console.log(`agent collided with a box from the right`);
+              //   agent.x = collided.right + (agent.width * agent.scale.x) / 2;
+              // }
             }
 
             nextBB = getBB(agent);
@@ -564,6 +568,7 @@ export default function setup(app, level, devMode) {
 
           console.log('======= END COLLISION ======');
         }
+        console.log('||||||||END AGENT ADVANCEMENT||||||||');
 
         if(agents.every(agent => !agent.spooked)) {
           for(const agent of agents) {
