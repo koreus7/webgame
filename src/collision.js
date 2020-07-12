@@ -1,7 +1,6 @@
-import Entity from "./Entity.js";
+import { between, magnitude } from './lib.js';
 
 export function getBB(obj) {
-  console.log(obj.scale.x);
   const width = obj.width * obj.scale.x;
   const height = obj.height * obj.scale.y;
   const xOffs = obj.anchor.x * width;
@@ -44,8 +43,7 @@ export function anyCollide(entityBB, wallBBs) {
 };
 
 
-export function entityCollides(entityBB, wallBBs, circleBBs) {
-  const collisions = [];
+export function entityCollides(entity, entityBB, wallBBs, circleBBs) {
   for(let i = 0; i < wallBBs.length; i++) {
     const wallBB = wallBBs[i];
     if(
@@ -53,8 +51,20 @@ export function entityCollides(entityBB, wallBBs, circleBBs) {
       entityBB.right > wallBB.left &&
       entityBB.top < wallBB.bottom &&
       entityBB.bottom > wallBB.top) {
-        return wallBB;
+        return { type: 'square', ...wallBB };
       }
+  }
+
+  for(let i = 0; i < circleBBs.length; i++) {
+    console.log('comparing', entity, circleBBs[i]);
+    const d = between(entity, circleBBs[i]);
+    console.log('ent', entity.x, entity.y);
+    console.log('bb', circleBBs[i].x, circleBBs[i].y);
+    console.log('d', d);
+    console.log('mag', magnitude(d));
+    if(magnitude(d) < 24) {
+      return { type: 'circle', d, bb: circleBBs[i] };
+    }
   }
 
   return null;
