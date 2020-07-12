@@ -307,6 +307,7 @@ export default function setup(app, level, devMode) {
         if(inBounds(tileX, tileY)) {
           if(devMode && Keys.isKeyDown(KEY.F)) {
             setFire(tileX, tileY);
+            mapMetaData[tileY][tileX].onFire = !mapMetaData[tileY][tileX].onFire;
             return;
           }
           if(devMode && Keys.isKeyDown(KEY.R) && mapData[tileY][tileX] === TILE_DOOR) {
@@ -328,7 +329,7 @@ export default function setup(app, level, devMode) {
             return;
           }
         }
-        if(Keys.isKeyDown(KEY.A)) {
+        if(devMode && Keys.isKeyDown(KEY.E)) {
           mapMouseDown = true;
           paintEvent(event);
         }
@@ -457,7 +458,6 @@ export default function setup(app, level, devMode) {
         shiftRightBtn.x = 150;
         shiftRightBtn.y = document.body.clientHeight - 200;
         globalGuiLayer.addChild(shiftRightBtn);
-        console.log('map', level.mapStuff);
         shiftRightBtn.on('click', (event) => {
           for(const item of level.contents) {
             item.x += 32;
