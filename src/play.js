@@ -715,7 +715,7 @@ export default function setup(app, level, devMode) {
                 { x, y: y - 1 },
               ];
               adjacent.forEach(({x, y}) => {
-                if(inBounds(x,y) && !mapLiveData[y][x].onFire && tileProps[mapData[y][x]].flamable) {
+                if(inBounds(x,y) && !mapLiveData[y][x].onFire && tileProps[mapData[y][x]].flamable && !mapLiveData[y][x].burntOut) {
                   setFire(x, y);
                 }
               });
@@ -732,6 +732,7 @@ export default function setup(app, level, devMode) {
             const { x, y } = fireIndex[k];
             mapLiveData[y][x].char.alpha = 1.0;
             mapLiveData[y][x].onFire = false;
+            mapLiveData[y][x].burntOut = true;
             fireLayer.removeChild(mapLiveData[y][x].fireSprite);
             delete fireIndex[k];
           })
