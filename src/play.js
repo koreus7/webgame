@@ -715,7 +715,7 @@ export default function setup(app, level, devMode) {
                 { x, y: y - 1 },
               ];
               adjacent.forEach(({x, y}) => {
-                if(inBounds(x,y) && !mapLiveData[y][x].onFire && tileProps[mapData[y][x]].flamable && !mapLiveData[y][x].burntOut) {
+                if(inBounds(x,y) && !mapLiveData[y][x].onFire && tileProps[mapData[y][x]].flamable && !mapLiveData[y][x].burntOut && !(mapData[y][x] == TILE_DOOR && !mapLiveData[y][x].doorOpen) ) {
                   setFire(x, y);
                 }
               });
