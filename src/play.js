@@ -38,16 +38,16 @@ const TILE_DOOR = 2;
 const tileProps = {
   0: {
   flamable: true,
-    collides: true,
+    collides: false,
     flameRetardation: 3,
   },
   1: {
     flamable: false,
+    collides: true,
     flameRetardation: 3,
   },
   2: {
     flamable: true,
-    collides: true,
     flameRetardation: 3,
   },
   3: {
@@ -382,7 +382,7 @@ export default function setup(app, level, devMode) {
 
         const agent = Sprite(AGENT_TEXTURE, { x, y, layer: agentLayer, anchorX: 0.5, anchorY: 0.5, scale: 0.75 });
         agent.id = ID();
-        agent.spooked = false;
+        agent.spooked = true;
         const body = Matter.Bodies.circle(x, y, 10, { restitution: 0 });
         agent.body = body;
         Matter.World.add(world, [agent.body]);
@@ -575,7 +575,7 @@ export default function setup(app, level, devMode) {
             if(mag < TARGET_MET_DISTANCE) {
               agent.currentNode = agent.target;
               agent.target = null;
-              agent.spooked = false;
+              // agent.spooked = false;
 
             } else {
               agent.angle = (theta * 180 / Math.PI) + 90;
@@ -591,12 +591,6 @@ export default function setup(app, level, devMode) {
         for(const agent of agents) {
           agent.x = agent.body.position.x;
           agent.y = agent.body.position.y;
-        }
-
-        if(agents.every(agent => !agent.spooked)) {
-          for(const agent of agents) {
-            agent.spooked = true;
-          }
         }
 
         //#region Fire
