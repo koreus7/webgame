@@ -16,7 +16,7 @@ window.addEventListener('resize', () => {
   app.resize(width, height);
 });
 
-let devMode = true;
+let devMode = false;
 
 app.view.style.margin = '20px';
 

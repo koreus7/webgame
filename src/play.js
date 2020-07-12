@@ -444,6 +444,7 @@ export default function setup(app, level, devMode) {
       //#endregion
 
       const draw = new PIXI.Graphics();
+      draw.visible = devMode;
       localGuiLayer.addChild(draw);
 
       //#region Collision Tracers
@@ -580,7 +581,6 @@ export default function setup(app, level, devMode) {
             if(mag < TARGET_MET_DISTANCE) {
               agent.currentNode = agent.target;
               const tile = mapLiveData[Math.floor(agent.target.y / 32)][Math.floor(agent.target.x / 32)];
-              agent.spooked = true;
               agent.target = null;
 
             } else {
