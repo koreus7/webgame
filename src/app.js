@@ -24745,7 +24745,7 @@ Promise.all([
 ]).then(([levels]) => {
   const menu = new PIXI.Container();
   app.stage.addChild(menu);
-  let y = 250;
+  let y = 300;
   let started = false;
 
   const devModeButton = new PIXI.Text('EDIT');
@@ -24761,8 +24761,14 @@ Promise.all([
 
   const logo = Sprite(assets.LOGO_TEXTURE, { x: 380, y: 150, layer: menu, scale: 4 })
 
+  const instructions = `click doors to help your patrons escape the fire!`;
+  const instr = new PIXI.Text(instructions);
+  instr.x = 50;
+  instr.y = 250;
+  menu.addChild(instr);
+
   for(const level of levels) {
-    const text = new PIXI.Text(level.name);
+    const text = new PIXI.Text(level.name + ' >');
     text.interactive = true;
     text.x = 50;
     text.y = y;
