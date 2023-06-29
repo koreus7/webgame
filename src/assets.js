@@ -9,6 +9,7 @@ export const PLAYER_DRAG_SHEET  = './assets/images/player/drag.json';
 // items
 export const KNIFE_TEXTURE = './assets/images/knife.png';
 export const KNIFE_WOBBLE_SHEET = './assets/images/knife-wobble.json';
+export const KNIFE_GLOW_SHEET = './assets/images/knife-glow.json';
 
 // environment
 export const GROUND_TEXTURE = './assets/images/ground.png';

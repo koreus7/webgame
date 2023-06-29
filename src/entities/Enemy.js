@@ -11,7 +11,7 @@ export default class Enemy extends Entity {
       'enemy',
       {
         [EN_IDLE]: Sprite(ENEMY_IDLE_TEXTURE),
-        [EN_DEATH]: AnimatedSprite(ENEMY_DEATH_SHEET, { loop: false, speed: 0.4 }),
+        [EN_DEATH]: AnimatedSprite(ENEMY_DEATH_SHEET, { loop: false, speed: 0.3 }),
       },
       EN_IDLE,
       { x, y, layer }

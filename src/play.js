@@ -204,6 +204,18 @@ export default function setup(app, level, devMode) {
             enemy.onDie(() => {
               enemy.destroy();
               entities.delete(enemy);
+
+              const mask = new PIXI.Graphics();
+              mask.beginFill(0xFFFFFF);
+              mask.drawRect(enemy.state.x - 20, enemy.state.y, 40, enemy.state.height - 10);
+              knifeLayer.addChild(mask);
+              const knife = new Knife({ player, layer: knifeLayer, frozen: true, x: enemy.state.x + 3, y: enemy.state.y + enemy.state.height - 12 });
+              knife.setState('glow');
+              knife.state.angle = 180;
+              knife.state.scale.x *= -1;
+              knives.add(knife);
+              knife.state.mask = mask;
+
               const corpseStates = {
                 dead: Sprite(ENEMY_CORPSE_TEXTURE),
               }
@@ -281,6 +293,7 @@ export default function setup(app, level, devMode) {
                 bindDrag(dupe, levelItem);
                 level.contents.push(levelItem);
               });
+              break;
             }
           }
         }
@@ -373,7 +386,9 @@ export default function setup(app, level, devMode) {
           } else {
             pKnives--;
             pKnifeSprites[pKnives].alpha = 0.25;
-            const knife = new Knife({ player, layer: knifeLayer, vector: v });
+            const knife = new Knife({ layer: knifeLayer, x: player.charger.x, y: player.charger.y });
+            knife.velocity.x = (v.x * (player.charger.cone.currentFrame + 1) * 2);
+            knife.velocity.y = (v.y * (player.charger.cone.currentFrame + 1) * 2);
             knives.add(knife);
           }
 
@@ -388,7 +403,7 @@ export default function setup(app, level, devMode) {
       }
 
         for(const knife of knives) {
-          if(knife.frozen || knife.embedded) {
+          if(knife.frozen) {
             const pickupBB = fakeBB(knife.state, 30, 30);
             traceBB(pickupBB, 0xffff00);
 
@@ -426,17 +441,15 @@ export default function setup(app, level, devMode) {
           const hit = entityCollides(nextBB, enemyBBs);
           if(hit) {
             const deadFella = hit.entity;
-            knife.embedded = deadFella;
-            knife.hitPoint = { x: knife.state.x - deadFella.state.x, y: knife.state.y - deadFella.state.y };
-            const initialRotation = knife.state.angle;
             deadFella.setState(EN_DEATH);
             deadFella.velocity.x = -5;
-
+            knife.destroy();
+            knives.delete(knife);
             continue;
           }
 
           if(anyCollide(nextBB, groundBBs)) {
-            knife.frozen = true;
+            knife.freeze();
 
             while(anyCollide(nextBB, groundBBs)) {
               nextPos.x -= knife.velocity.x * delta / 5;
@@ -447,7 +460,6 @@ export default function setup(app, level, devMode) {
             nextPos.y += knife.velocity.y * delta / 3;
           }
 
-          knife.setState('wobble');
           knife.state.x = nextPos.x;
           knife.state.y = nextPos.y;
         }
