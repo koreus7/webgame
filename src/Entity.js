@@ -73,6 +73,7 @@ export default class Entity {
   destroy() {
     for(const key in this.states) {
       this.layer.removeChild(this.states[key]);
+      this.states[key].destroy();
     }
 
     delete this.states;

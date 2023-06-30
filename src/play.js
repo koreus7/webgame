@@ -406,9 +406,6 @@ export default function setup(app, level, devMode) {
             }
 
             deadFella.onDie(() => {
-              deadFella.destroy();
-              entities.delete(deadFella);
-
               const mask = new PIXI.Graphics();
               mask.beginFill(0xFFFFFF);
               mask.drawRect(deadFella.state.x - 20, deadFella.state.y, 40, deadFella.state.height - 10);
@@ -442,6 +439,9 @@ export default function setup(app, level, devMode) {
               });
               corpse.addTrigger(triggerZone);
               entities.add(corpse);
+
+              deadFella.destroy();
+              entities.delete(deadFella);
             });
             knife.destroy();
             knives.delete(knife);
