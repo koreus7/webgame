@@ -1,6 +1,6 @@
 
 // player
-export const PLAYER_GHOST_TEXTURE = './assets/images/player-ghost.png';
+export const PLAYER_GHOST_TEXTURE = './assets/images/player/ghost.png';
 export const PLAYER_IDLE_SHEET = './assets/images/player/idle.json';
 export const PLAYER_IDLE_UNARMED_SHEET = './assets/images/player/idle-unarmed.json';
 export const PLAYER_JUMP_TEXTURE = './assets/images/player/jump.png';
@@ -23,9 +23,9 @@ export const OVEN_TEXTURE = './assets/images/oven.png';
 export const OVEN_SHEET = './assets/images/oven.json';
 
 // entities
-export const ENEMY_IDLE_TEXTURE = './assets/images/enemy-idle.png';
-export const ENEMY_CORPSE_TEXTURE = './assets/images/corpse.png';
-export const ENEMY_DEATH_SHEET = './assets/images/enemy-death.json';
+export const ENEMY_IDLE_TEXTURE = './assets/images/enemy/idle.png';
+export const ENEMY_CORPSE_TEXTURE = './assets/images/enemy/corpse-left.png';
+export const ENEMY_DEATH_SHEET = './assets/images/enemy/death-left.json';
 export const MEAT_0 = './assets/images/meat0.png';
 export const MEAT_1 = './assets/images/meat1.png';
 export const MEAT_2 = './assets/images/meat2.png';
