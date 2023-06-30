@@ -1,33 +1,24 @@
 import GUI, { showGUI } from './gui.js';
-import { loadAssets, getTexture, getSheet, getAnim, bindDrag } from './lib.js';
+import { bindDrag } from './lib.js';
 import { getBB, fakeBB, entityCollides, anyCollide } from './collision.js';
 import Controls from './controls.js';
 import Trigger from './trigger.js';
 import {
   PLAYER_GHOST_TEXTURE,
-  GROUND_TEXTURE,
-  CABIN_TEXTURE,
-  CANDLE_SHEET,
-  CANDLE_LIGHT_TEXTURE,
-  BARREL_TEXTURE,
   ENEMY_IDLE_TEXTURE,
-  ENEMY_CORPSE_TEXTURE,
-  ENEMY_DEATH_SHEET,
   CHARGER_SHEET,
-  OVEN_TEXTURE,
   KNIFE_TEXTURE,
   OVEN_SHEET,
   INTERACT_TEXTURE,
-  KNIFE_WOBBLE_SHEET,
   MEAT_0,
   MEAT_1,
   MEAT_2,
 } from './assets.js';
-import * as assets from './assets.js';
 import { Sprite, AnimatedSprite } from './lib.js';
 import Entity from './Entity.js';
 import Player, { PS_DRAGGING, PS_IDLE, PS_JUMPING, PS_WALKING } from './entities/Player.js';
-import Enemy, { EN_DEATH } from './entities/Enemy.js';
+import Enemy, { EN_DEATH_LEFT, EN_DEATH_RIGHT } from './entities/Enemy.js';
+import Corpse, { COR_LEFT, COR_RIGHT } from './entities/Corpse.js';
 import Knife from './entities/Knife.js';
 import Candle from './Candle.js';
 
@@ -200,41 +191,6 @@ export default function setup(app, level, devMode) {
             devMode && bindDrag(ghost, item);
 
             const enemy = new Enemy({ x, y, layer: spriteLayer });
-            enemy.onDie(() => {
-              enemy.destroy();
-              entities.delete(enemy);
-
-              const mask = new PIXI.Graphics();
-              mask.beginFill(0xFFFFFF);
-              mask.drawRect(enemy.state.x - 20, enemy.state.y, 40, enemy.state.height - 10);
-              knifeLayer.addChild(mask);
-              const knife = new Knife({ player, layer: knifeLayer, frozen: true, x: enemy.state.x + 3, y: enemy.state.y + enemy.state.height - 12 });
-              knife.setState('glow');
-              knife.state.angle = 180;
-              knife.state.scale.x *= -1;
-              knives.add(knife);
-              knife.state.mask = mask;
-
-              const corpseStates = {
-                dead: Sprite(ENEMY_CORPSE_TEXTURE),
-              }
-              const corpse = new Entity('corpse', corpseStates, 'dead', { x: enemy.state.x, layer: spriteLayer });
-              corpse.state.y = enemy.state.y + enemy.state.height - corpse.state.height;
-              const triggerZone = new Trigger({ localX: -15, localY: 0, width: 20, height: 20 },
-                {
-                  onEnter: () => {
-                      draggableCorpse = corpse;
-                  },
-                  onExit: () => {
-                    if(!dragMode) {
-                      draggableCorpse = null;
-                    }
-                  },
-              });
-              corpse.addTrigger(triggerZone);
-
-              entities.add(corpse);
-            });
             entities.add(enemy);
             break;
           }
@@ -440,8 +396,53 @@ export default function setup(app, level, devMode) {
           const hit = entityCollides(nextBB, enemyBBs);
           if(hit) {
             const deadFella = hit.entity;
-            deadFella.setState(EN_DEATH);
-            deadFella.velocity.x = -5;
+            const knifeDir = knife.velocity.x > 0 ? 'right' : 'left';
+            if(knifeDir === 'right') {
+              deadFella.setState(EN_DEATH_RIGHT);
+              deadFella.velocity.x = 5;
+            } else {
+              deadFella.setState(EN_DEATH_LEFT);
+              deadFella.velocity.x = -5;
+            }
+
+            deadFella.onDie(() => {
+              deadFella.destroy();
+              entities.delete(deadFella);
+
+              const mask = new PIXI.Graphics();
+              mask.beginFill(0xFFFFFF);
+              mask.drawRect(deadFella.state.x - 20, deadFella.state.y, 40, deadFella.state.height - 10);
+              knifeLayer.addChild(mask);
+              const knife = new Knife({ player, layer: knifeLayer, frozen: true });
+              if(knifeDir === 'right') {
+                knife.state.x = deadFella.state.x + 5;
+                knife.state.y = deadFella.state.y + deadFella.state.height - 8;
+              } else {
+                knife.state.x = deadFella.state.x + 3;
+                knife.state.y = deadFella.state.y + deadFella.state.height - 12;
+              }
+              knife.setState('glow');
+              knife.state.angle = 180;
+              knife.state.scale.x *= -1;
+              knife.state.mask = mask;
+              knives.add(knife);
+
+              const corpse = new Corpse(knifeDir === 'right' ? COR_RIGHT : COR_LEFT, { x: deadFella.state.x, layer: spriteLayer });
+              corpse.state.y = deadFella.state.y + deadFella.state.height - corpse.state.height;
+              const triggerZone = new Trigger({ localX: -15, localY: 0, width: 20, height: 20 },
+                {
+                  onEnter: () => {
+                      draggableCorpse = corpse;
+                  },
+                  onExit: () => {
+                    if(!dragMode) {
+                      draggableCorpse = null;
+                    }
+                  },
+              });
+              corpse.addTrigger(triggerZone);
+              entities.add(corpse);
+            });
             knife.destroy();
             knives.delete(knife);
             continue;

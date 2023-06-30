@@ -24,8 +24,10 @@ export const OVEN_SHEET = './assets/images/oven.json';
 
 // entities
 export const ENEMY_IDLE_TEXTURE = './assets/images/enemy/idle.png';
-export const ENEMY_CORPSE_TEXTURE = './assets/images/enemy/corpse-left.png';
-export const ENEMY_DEATH_SHEET = './assets/images/enemy/death-left.json';
+export const ENEMY_CORPSE_LEFT_TEXTURE = './assets/images/enemy/corpse-left.png';
+export const ENEMY_CORPSE_RIGHT_TEXTURE = './assets/images/enemy/corpse-right.png';
+export const ENEMY_DEATH_LEFT_SHEET = './assets/images/enemy/death-left.json';
+export const ENEMY_DEATH_RIGHT_SHEET = './assets/images/enemy/death-right.json';
 export const MEAT_0 = './assets/images/meat0.png';
 export const MEAT_1 = './assets/images/meat1.png';
 export const MEAT_2 = './assets/images/meat2.png';

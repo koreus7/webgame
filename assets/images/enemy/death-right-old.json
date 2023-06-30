@@ -1,0 +1,112 @@
+{
+  "frames": {
+    "death0.png": {
+      "frame": { "x": 0, "y": 0, "w": 23, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 23, "h": 32 },
+      "sourceSize": { "w": 23, "h": 32 }
+    },
+    "death1.png": {
+      "frame": { "x": 23, "y": 0, "w": 23, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 23, "h": 32 },
+      "sourceSize": { "w": 23, "h": 32 }
+    },
+    "death2.png": {
+      "frame": { "x": 46, "y": 0, "w": 23, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 23, "h": 32 },
+      "sourceSize": { "w": 23, "h": 32 }
+    },
+    "death3.png": {
+      "frame": { "x": 69, "y": 0, "w": 23, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 23, "h": 32 },
+      "sourceSize": { "w": 23, "h": 32 }
+    },
+    "death4.png": {
+      "frame": { "x": 0, "y": 32, "w": 23, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 23, "h": 32 },
+      "sourceSize": { "w": 23, "h": 32 }
+    },
+    "death5.png": {
+      "frame": { "x": 23, "y": 32, "w": 23, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 23, "h": 32 },
+      "sourceSize": { "w": 23, "h": 32 }
+    },
+    "death6.png": {
+      "frame": { "x": 46, "y": 32, "w": 23, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 23, "h": 32 },
+      "sourceSize": { "w": 23, "h": 32 }
+    },
+    "death7.png": {
+      "frame": { "x": 69, "y": 32, "w": 23, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 23, "h": 32 },
+      "sourceSize": { "w": 23, "h": 32 }
+    },
+    "death8.png": {
+      "frame": { "x": 0, "y": 64, "w": 23, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 23, "h": 32 },
+      "sourceSize": { "w": 23, "h": 32 }
+    },
+    "death9.png": {
+      "frame": { "x": 23, "y": 64, "w": 23, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 23, "h": 32 },
+      "sourceSize": { "w": 23, "h": 32 }
+    },
+    "death10.png": {
+      "frame": { "x": 46, "y": 64, "w": 23, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 23, "h": 32 },
+      "sourceSize": { "w": 23, "h": 32 }
+    },
+    "death11.png": {
+      "frame": { "x": 69, "y": 64, "w": 23, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 23, "h": 32 },
+      "sourceSize": { "w": 23, "h": 32 }
+    },
+    "death12.png": {
+      "frame": { "x": 0, "y": 96, "w": 23, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 23, "h": 32 },
+      "sourceSize": { "w": 23, "h": 32 }
+    },
+    "death13.png": {
+      "frame": { "x": 23, "y": 96, "w": 23, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 23, "h": 32 },
+      "sourceSize": { "w": 23, "h": 32 }
+    }
+  },
+  "animations": {
+    "death-right": ["death0.png","death1.png","death2.png","death3.png","death4.png","death5.png","death6.png","death7.png","death8.png","death9.png","death10.png","death11.png","death12.png","death13.png"]
+  },
+  "meta": {
+    "app": "https://github.com/piskelapp/piskel/",
+    "version": "1.0",
+    "image": "death-right.png",
+    "format": "RGBA8888",
+    "size": { "w": 92, "h": 128 }
+  }
+}
