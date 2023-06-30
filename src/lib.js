@@ -76,6 +76,12 @@ export function AnimatedSprite(sheet, { x, y, visible = true, anchorX = 0.5, anc
   return sprite;
 }
 
+export function replaceSheet(sprite, sheet) {
+  const anim = sheet.match(/\/([a-z-]+)\.json$/)[1];
+  const textures = getAnim(getSheet(sheet), anim);
+  sprite.textures = textures;
+}
+
 export function getSheet(sheet) {
   return app.loader.resources[sheet].spritesheet;
 }

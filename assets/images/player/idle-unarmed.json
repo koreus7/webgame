@@ -1,0 +1,143 @@
+{
+  "frames": {
+    "idle0.png": {
+      "frame": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "idle1.png": {
+      "frame": { "x": 20, "y": 0, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "idle2.png": {
+      "frame": { "x": 40, "y": 0, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "idle3.png": {
+      "frame": { "x": 60, "y": 0, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "idle4.png": {
+      "frame": { "x": 80, "y": 0, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "idle5.png": {
+      "frame": { "x": 0, "y": 32, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "idle6.png": {
+      "frame": { "x": 20, "y": 32, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "idle7.png": {
+      "frame": { "x": 40, "y": 32, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "idle8.png": {
+      "frame": { "x": 60, "y": 32, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "idle9.png": {
+      "frame": { "x": 80, "y": 32, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "idle10.png": {
+      "frame": { "x": 0, "y": 64, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "idle11.png": {
+      "frame": { "x": 20, "y": 64, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "idle12.png": {
+      "frame": { "x": 40, "y": 64, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "idle13.png": {
+      "frame": { "x": 60, "y": 64, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "idle14.png": {
+      "frame": { "x": 80, "y": 64, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "idle15.png": {
+      "frame": { "x": 0, "y": 96, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    }
+  },
+  "animations": {
+    "idle-unarmed": [
+      "idle0.png",
+      "idle1.png",
+      "idle2.png",
+      "idle3.png",
+      "idle4.png",
+      "idle5.png",
+      "idle6.png",
+      "idle7.png",
+      "idle8.png",
+      "idle9.png",
+      "idle10.png",
+      "idle11.png",
+      "idle12.png",
+      "idle13.png",
+      "idle14.png",
+      "idle15.png"
+    ]
+  },
+  "meta": {
+    "app": "https://github.com/piskelapp/piskel/",
+    "version": "1.0",
+    "image": "idle-unarmed.png",
+    "format": "RGBA8888",
+    "size": { "w": 100, "h": 128 }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "frames": {
+    "run0.png": {
+      "frame": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "run1.png": {
+      "frame": { "x": 20, "y": 0, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "run2.png": {
+      "frame": { "x": 40, "y": 0, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    },
+    "run3.png": {
+      "frame": { "x": 60, "y": 0, "w": 20, "h": 32 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 20, "h": 32 },
+      "sourceSize": { "w": 20, "h": 32 }
+    }
+  },
+  "animations": {
+    "run-unarmed": ["run0.png", "run1.png", "run2.png", "run3.png"]
+  },
+  "meta": {
+    "app": "https://github.com/piskelapp/piskel/",
+    "version": "1.0",
+    "image": "run-unarmed.png",
+    "format": "RGBA8888",
+    "size": { "w": 80, "h": 32 }
+  }
+}

@@ -1,6 +1,6 @@
-import { AnimatedSprite, Sprite } from '../lib.js';
+import { AnimatedSprite, Sprite, replaceSheet } from '../lib.js';
 import Entity from '../Entity.js';
-import { PLAYER_IDLE_SHEET, PLAYER_JUMP_TEXTURE, PLAYER_RUN_SHEET, PLAYER_DRAG_SHEET } from '../assets.js';
+import { PLAYER_IDLE_SHEET, PLAYER_IDLE_UNARMED_SHEET, PLAYER_JUMP_TEXTURE, PLAYER_RUN_SHEET, PLAYER_DRAG_SHEET, PLAYER_RUN_UNARMED_SHEET } from '../assets.js';
 
 export const PS_IDLE = 'IDLE';
 export const PS_WALKING = 'WALKING';
@@ -20,5 +20,22 @@ export default class Player extends Entity {
       PS_IDLE,
       { x, y, layer }
     );
+
+    this._knives = 3;
+  }
+
+  get knives() {
+    return this._knives;
+  }
+
+  set knives(knives) {
+    this._knives = knives;
+    if(knives === 0) {
+      replaceSheet(this.states[PS_WALKING], PLAYER_RUN_UNARMED_SHEET);
+      replaceSheet(this.states[PS_IDLE], PLAYER_IDLE_UNARMED_SHEET);
+    } else {
+      replaceSheet(this.states[PS_WALKING], PLAYER_RUN_SHEET);
+      replaceSheet(this.states[PS_IDLE], PLAYER_IDLE_SHEET);
+    }
   }
 }

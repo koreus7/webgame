@@ -1,7 +1,7 @@
 import { getBB, anyCollide } from './collision.js';
 
 export default class Entity {
-  constructor(name, states, current, { x, y, layer }) {
+  constructor(name, states, current, { layer, ...stateProps }) {
     this.name = name;
     this.layer = layer;
     this.facing = 1;
@@ -15,9 +15,7 @@ export default class Entity {
 
     this.stateName = current;
     this.state = this.states[current];
-    this.state.visible = true;
-    this.state.x = x;
-    this.state.y = y;
+    Object.assign(this.state, { x: 0, y: 0, visible: true }, stateProps);
     this.velocity = { x: 0, y: 0 };
     this.isGrounded = false;
     this.triggers = [];

@@ -115,7 +115,6 @@ export default function setup(app, level, devMode) {
 
       let pDir = 1;
       let pFacing = 1;
-      let pKnives = 3;
 
       // app.stage.worldTransform.scale(2, 2);
       const entities = new Set();
@@ -300,7 +299,7 @@ export default function setup(app, level, devMode) {
       }
 
       const pKnifeSprites = [];
-      for(let i = 0; i < pKnives; i++) {
+      for(let i = 0; i < player.knives; i++) {
         const knifeTally = Sprite(KNIFE_TEXTURE);
         knifeTally.scale.set(4);
         globalGuiLayer.addChild(knifeTally);
@@ -368,7 +367,7 @@ export default function setup(app, level, devMode) {
         const theta = Math.atan2(v.y, v.x);
         charger.angle = theta * 180 / Math.PI;
 
-        if(controls.aiming && !aiming && pKnives > 0) {
+        if(controls.aiming && !aiming && player.knives > 0) {
           chargerAnim.gotoAndPlay(0);
           chargerAnim.loop = false;
           chargerAnim.visible = true;
@@ -384,8 +383,8 @@ export default function setup(app, level, devMode) {
             draggableCorpse = null;
 
           } else {
-            pKnives--;
-            pKnifeSprites[pKnives].alpha = 0.25;
+            player.knives = player.knives - 1;
+            pKnifeSprites[player.knives].alpha = 0.25;
             const knife = new Knife({ layer: knifeLayer, x: player.charger.x, y: player.charger.y });
             knife.velocity.x = (v.x * (player.charger.cone.currentFrame + 1) * 2);
             knife.velocity.y = (v.y * (player.charger.cone.currentFrame + 1) * 2);
@@ -408,8 +407,8 @@ export default function setup(app, level, devMode) {
             traceBB(pickupBB, 0xffff00);
 
             if(anyCollide(pickupBB, [getBB(player)])) {
-              pKnifeSprites[pKnives].alpha = 1;
-              pKnives++;
+              pKnifeSprites[player.knives].alpha = 1;
+              player.knives = player.knives + 1;
               knife.destroy();
               knives.delete(knife);
             }
