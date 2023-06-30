@@ -6,14 +6,7 @@ const app = window.app = new PIXI.Application({
   backgroundColor: 0x00ffff,
   width: document.body.clientWidth - 40,
   height: document.body.clientHeight - 40,
-});
-
-window.addEventListener('resize', () => {
-  const width = document.body.clientWidth - 40;
-  const height = document.body.clientHeight - 40;
-  app.view.style.width = width + 'px';
-  app.view.style.height = height + 'px';
-  app.resize(width, height);
+  resizeTo: window,
 });
 
 let devMode = false;
