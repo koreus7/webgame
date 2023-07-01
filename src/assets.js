@@ -4,6 +4,7 @@ export const PLAYER_GHOST_TEXTURE = './assets/images/player/ghost.png';
 export const PLAYER_IDLE_SHEET = './assets/images/player/idle.json';
 export const PLAYER_IDLE_UNARMED_SHEET = './assets/images/player/idle-unarmed.json';
 export const PLAYER_JUMP_TEXTURE = './assets/images/player/jump.png';
+export const PLAYER_JUMP_UNARMED_TEXTURE = './assets/images/player/jump-unarmed.png';
 export const PLAYER_RUN_SHEET = './assets/images/player/run.json';
 export const PLAYER_RUN_UNARMED_SHEET = './assets/images/player/run-unarmed.json';
 export const PLAYER_DRAG_SHEET  = './assets/images/player/drag.json';

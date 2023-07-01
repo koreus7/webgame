@@ -79,7 +79,14 @@ export function AnimatedSprite(sheet, { x, y, visible = true, anchorX = 0.5, anc
 export function replaceSheet(sprite, sheet) {
   const anim = sheet.match(/\/([a-z-]+)\.json$/)[1];
   const textures = getAnim(getSheet(sheet), anim);
+  const frame = sprite.currentFrame;
   sprite.textures = textures;
+  sprite.gotoAndPlay(frame);
+}
+
+export function replaceTexture(sprite, texture) {
+  const tex = texture instanceof PIXI.Texture ? texture : getTexture(texture);
+  sprite.texture = tex;
 }
 
 export function getSheet(sheet) {
